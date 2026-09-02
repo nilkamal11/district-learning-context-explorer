@@ -1,0 +1,80 @@
+seda_achievement:
+  title: Stanford Education Data Archive administrative district achievement, long CS scale
+  provider: Stanford Educational Opportunity Project
+  version: "2025.2"
+  official_url: https://stacks.stanford.edu/file/np279jm6134/seda_admindist_long_cs_2025.2.csv
+  landing_page: https://edopportunity.org/trends/data/downloads/
+  persistent_id: https://doi.org/10.25740/np279jm6134
+  required_filename: seda_admindist_long_cs_2025.2.csv
+  expected_min_bytes: 1000000000
+  sha256: 3e5a186402b79b75096b8d63cd2c9706d8d8af9bea61ba6aa35c2262a2775d4e
+  required_columns:
+    - sedaadmin
+    - sedaadminname
+    - subject
+    - grade
+    - year
+    - fips
+    - stateabb
+    - multi_comp_all
+    - tot_asmt_all
+    - flag_estasmt_all
+    - cs_mn_all
+    - cs_mn_se_all
+    - cs_mn_se_adj_all
+
+seda_context:
+  title: Stanford Education Data Archive administrative district annual covariates
+  provider: Stanford Educational Opportunity Project
+  version: "2025.2"
+  official_url: https://stacks.stanford.edu/file/np279jm6134/seda_cov_admindist_annual_2025.2.csv
+  landing_page: https://edopportunity.org/trends/data/downloads/
+  persistent_id: https://doi.org/10.25740/np279jm6134
+  required_filename: seda_cov_admindist_annual_2025.2.csv
+  expected_min_bytes: 140000000
+  sha256: e56bf3c69a6defe771272a74b54f31dcc5b1321d39d7f495220491bb4c953f2a
+  required_columns:
+    - sedaadmin
+    - year
+    - sedaadminname
+    - gslo
+    - gshi
+    - fips
+    - stateabb
+    - urban
+    - suburb
+    - town
+    - rural
+    - pernam
+    - perasn
+    - perhsp
+    - perblk
+    - perwht
+    - perell
+    - perspeced
+    - totenrl
+    - povertyall
+    - sesall
+    - urbanicity
+
+seda_crosswalk:
+  title: Stanford Education Data Archive geographic and administrative identifier crosswalk
+  provider: Stanford Educational Opportunity Project
+  version: "2025.2"
+  official_url: https://stacks.stanford.edu/file/np279jm6134/seda_crosswalk_2025.2.csv
+  landing_page: https://edopportunity.org/trends/data/downloads/
+  persistent_id: https://doi.org/10.25740/np279jm6134
+  required_filename: seda_crosswalk_2025.2.csv
+  expected_min_bytes: 30000000
+  sha256: f3f0f1684ebfd4b09f2a22f588ec9d7b334bb2a62dac60122a9558746d12be89
+  required_columns:
+    - geo
+    - id
+    - seda_id
+    - year
+    - name
+    - stateabb
+    - fips
+    - fips_op
+    - last_virtual
+    - imputed

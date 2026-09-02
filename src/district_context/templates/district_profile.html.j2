@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ district.district_name }} | {{ title }}</title>
+  <style>
+    :root {
+      --ink: #172433;
+      --muted: #5f6d78;
+      --paper: #f4f0e8;
+      --surface: #ffffff;
+      --blue: #2a6f97;
+      --blue-dark: #184d69;
+      --orange: #db6b32;
+      --green: #2f7d64;
+      --line: #dfe5e8;
+      --shadow: 0 12px 34px rgba(28, 45, 60, 0.09);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      background: linear-gradient(125deg, #173d52 0%, #286f88 68%, #3d8793 100%);
+      color: white;
+      padding: 52px 24px 44px;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #cfe8ed;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 0; max-width: 850px; font-size: clamp(2rem, 5vw, 3.8rem); line-height: 1.05; }
+    header p { max-width: 780px; margin: 18px 0 0; color: #e7f3f5; font-size: 1.08rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 24px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,.32);
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      padding: 6px 11px;
+      color: white;
+      font-size: .85rem;
+    }
+    main { padding: 30px 24px 64px; }
+    .notice {
+      margin: 0 0 24px;
+      border-left: 5px solid var(--orange);
+      border-radius: 10px;
+      background: #fffaf3;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+    }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+    .card {
+      grid-column: span 6;
+      border: 1px solid rgba(23, 36, 51, .08);
+      border-radius: 16px;
+      background: var(--surface);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .card.full { grid-column: 1 / -1; }
+    .card h2 { margin: 0 0 6px; font-size: 1.25rem; }
+    .card h3 { margin: 0 0 6px; font-size: 1rem; }
+    .small { color: var(--muted); font-size: .89rem; }
+    .metric { margin: 12px 0 2px; color: var(--orange); font-size: 2rem; font-weight: 800; }
+    .metric-detail { color: var(--muted); font-size: .9rem; }
+    .comparison { margin-top: 13px; font-weight: 750; color: var(--blue-dark); }
+    .section-title { margin: 40px 0 14px; font-size: 1.55rem; }
+    .section-intro { margin: -5px 0 18px; max-width: 850px; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: .91rem; }
+    th, td { border-bottom: 1px solid var(--line); padding: 11px 10px; text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .status {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: #e7f4ef;
+      color: var(--green);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+    .status.warn { background: #fff1df; color: #92521d; }
+    .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .callout { border-radius: 12px; background: #eef5f8; padding: 16px 18px; }
+    .callout.caution { background: #fff4e7; }
+    ul { margin: 8px 0 0; padding-left: 19px; }
+    li + li { margin-top: 6px; }
+    details { margin-top: 13px; }
+    summary { cursor: pointer; font-weight: 750; color: var(--blue-dark); }
+    code { padding: 2px 5px; border-radius: 5px; background: #eef1f3; font-size: .86em; }
+    footer { margin-top: 42px; color: var(--muted); font-size: .82rem; }
+    a { color: var(--blue-dark); }
+    @media (max-width: 760px) {
+      header { padding-top: 38px; }
+      .card { grid-column: 1 / -1; overflow-x: auto; }
+      .two-column { grid-template-columns: 1fr; }
+      table { min-width: 640px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <p class="eyebrow">{{ title }}</p>
+      <h1>{{ district.district_name }}</h1>
+      <p>How do this district’s grade {{ grade }} math and reading estimates compare with districts that are similar on selected public context measures?</p>
+      <div class="meta">
+        <span class="pill">SEDA district ID {{ district.district_id }}</span>
+        <span class="pill">{{ district.state_abbreviation }}</span>
+        <span class="pill">Context frozen at {{ context_year }}</span>
+        <span class="pill">{{ peer_label }}</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="notice">
+      <strong>Read this as context, not a district grade.</strong>
+      These are modeled, aggregate estimates for groups of students. They do not measure an individual child, school, teacher, or instructional program, and they do not establish cause and effect.
+    </div>
+
+    <section class="grid" aria-label="Latest estimates">
+      {% for panel in subjects %}
+      <article class="card">
+        <h2>{{ panel.label }}</h2>
+        {% if panel.latest %}
+          <div class="metric">{{ "%.2f"|format(panel.latest.target_estimate) }}</div>
+          <div class="metric-detail">
+            {{ panel.latest.year }} CS estimate; {{ confidence_percentage }}% interval {{ "%.2f"|format(panel.latest.target_ci_low) }} to {{ "%.2f"|format(panel.latest.target_ci_high) }}
+          </div>
+          <p class="comparison">{{ panel.latest.comparison }}</p>
+          <p class="small">Peer mean {{ "%.2f"|format(panel.latest.peer_mean) }} (the comparison benchmark); median {{ "%.2f"|format(panel.latest.peer_median) }}; middle 50% {{ "%.2f"|format(panel.latest.peer_q25) }} to {{ "%.2f"|format(panel.latest.peer_q75) }} across {{ panel.latest.peer_count }} of {{ primary_peer_count }} selected peers.</p>
+          {% if panel.latest.low_precision %}
+            <span class="status warn">Use extra caution: low-precision flag</span>
+          {% endif %}
+        {% else %}
+          <p>There are not enough overlapping results to summarize this subject.</p>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </section>
+
+    <h2 class="section-title">Achievement over time</h2>
+    <p class="section-intro">Math and reading remain separate because the CS scale supports comparisons across places and years only within the same grade and subject. The shaded region is the peer group’s middle 50%. Error bars show the district estimate’s {{ confidence_percentage }}% interval. Peers are selected using 2024 context and held fixed, so they may not have served equally similar communities in earlier years.</p>
+    <section class="grid">
+      {% for panel in subjects %}
+      <article class="card full">{{ panel.chart | safe }}</article>
+      {% endfor %}
+    </section>
+
+    <h2 class="section-title">Why these are comparable districts</h2>
+    <p class="section-intro">The algorithm uses enrollment, family economic context, student composition, locale, and grade span. It never uses achievement to choose peers. The peer IDs are then held fixed for every year in the chart.</p>
+    <section class="grid">
+      <article class="card full">
+        <table>
+          <thead><tr><th>Context measure</th><th>This district</th><th>Peer median</th><th>Peer middle 50%</th></tr></thead>
+          <tbody>
+            {% for row in context_comparison %}
+            <tr><td>{{ row.label }}</td><td>{{ row.target }}</td><td>{{ row.peer_median }}</td><td>{{ row.peer_range }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </article>
+      <article class="card full">
+        <h3>Peer-set diagnostic</h3>
+        <p>
+          <span class="status{% if selection_status != 'full_count_strict' %} warn{% endif %}">
+            {{ selection_status_label }}
+          </span>
+          {% if primary_pool == 'same_state' %}
+          {{ diagnostics.state_selected }} same-state peers selected from {{ diagnostics.eligible_state_candidates }} eligible candidates.
+          Relaxation stage: <code>{{ diagnostics.state_relaxation_stage }}</code>.
+          {% else %}
+          {{ diagnostics.national_selected }} cross-state peers selected from {{ diagnostics.eligible_national_candidates }} eligible candidates.
+          Relaxation stage: <code>{{ diagnostics.national_relaxation_stage }}</code>.
+          {% endif %}
+        </p>
+        <p class="small">A complete count is not proof of a good match. The table below exposes the median distance in each weighted domain; lower values indicate greater similarity.</p>
+        <table>
+          <thead><tr><th>Matching domain</th><th>Median distance</th></tr></thead>
+          <tbody>
+            {% for row in match_balance %}
+            <tr><td>{{ row.domain }}</td><td>{{ row.median_distance }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <details>
+          <summary>Show included {{ peer_label | lower }}</summary>
+          <table>
+            <thead><tr><th>District</th><th>State</th><th>Context distance</th><th>Locale</th><th>Grades 3–8 enrollment</th></tr></thead>
+            <tbody>
+              {% for peer in peers %}
+              <tr>
+                <td>{{ peer.district_name }}</td>
+                <td>{{ peer.state_abbreviation }}</td>
+                <td>{{ "%.3f"|format(peer.context_distance) }}</td>
+                <td>{{ peer.dominant_locale }}</td>
+                <td>{{ "{:,.0f}".format(peer.enrollment_grades_3_8) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </details>
+      </article>
+    </section>
+
+    <h2 class="section-title">Sensitivity check</h2>
+    <p class="section-intro">Same-state peers share more of the assessment and policy environment. National analogs exclude the target state, broaden the comparison, and use SEDA’s cross-state adjusted standard errors. Because linking uncertainty can be shared within states, national comparisons are descriptive and are not classified as statistically higher or lower.</p>
+    <article class="card full">
+      <table>
+        <thead><tr><th>Reference group</th><th>Subject</th><th>Latest year</th><th>Reporting peers</th><th>District estimate</th><th>Peer mean</th><th>Peer median</th><th>Interpretation</th></tr></thead>
+        <tbody>
+          {% for row in latest_by_pool %}
+          <tr>
+            <td>{{ row.pool_label }}{% if not row.reportable %} <span class="status warn">limited</span>{% endif %}</td>
+            <td>{{ row.subject }}</td>
+            {% if row.latest %}
+            <td>{{ row.latest.year }}</td>
+            <td>{{ row.latest.peer_count }} of {{ row.selected_peer_count }} ({{ "%.0f%%"|format(100 * row.latest.peer_reporting_fraction) }})</td>
+            <td>{{ "%.2f"|format(row.latest.target_estimate) }}</td>
+            <td>{{ "%.2f"|format(row.latest.peer_mean) }}</td>
+            <td>{{ "%.2f"|format(row.latest.peer_median) }}</td>
+            <td>{{ row.latest.comparison }}</td>
+            {% else %}
+            <td colspan="6">Not enough overlapping data</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </article>
+
+    <h2 class="section-title">What this evidence can and cannot support</h2>
+    <section class="two-column">
+      <div class="callout">
+        <h3>It can support</h3>
+        <ul>
+          <li>A transparent description of district-level achievement estimates.</li>
+          <li>Comparison with a fixed group of districts similar on the selected context measures.</li>
+          <li>Separate trends for grade {{ grade }} math and reading.</li>
+          <li>An uncertainty-aware discussion of whether apparent differences are precise.</li>
+        </ul>
+      </div>
+      <div class="callout caution">
+        <h3>It cannot support</h3>
+        <ul>
+          <li>A conclusion about an individual student or a child’s likely outcome.</li>
+          <li>A ranking of schools, teachers, curricula, or districts.</li>
+          <li>A claim that the same students were followed from year to year.</li>
+          <li>A causal claim about why achievement changed.</li>
+        </ul>
+      </div>
+    </section>
+
+    <h2 class="section-title">Technical record</h2>
+    <article class="card full">
+      <p><strong>Scale:</strong> Cohort Standardized (CS), measured in student-level standard deviations. Separate math and reading results are not directly comparable.</p>
+      <p><strong>Peer model:</strong> Domain-balanced Gower-style distance with Hellinger distance for composition vectors. Primary matching variables receive equal domain weights. Outcome variables used in matching: <code>[]</code>.</p>
+      <p><strong>Uncertainty:</strong> {{ confidence_percentage }}% intervals use the normal critical value configured for this build. Within-state comparisons use the unadjusted standard error. National comparisons use the NAEP-linking-adjusted standard error and remain descriptive because linking errors may be correlated within states. A comparison needs at least 10 reporting peers and 70% coverage of its selected peer set.</p>
+      <p><strong>Quality checks:</strong>
+        {% if qa_passed %}<span class="status">{{ qa_count }} checks completed without errors</span>
+          {% if qa_warning_count %}<span class="status warn">{{ qa_warning_count }} diagnostic warning{% if qa_warning_count != 1 %}s{% endif %}</span>{% endif %}
+        {% else %}<span class="status warn">No complete QA result attached</span>{% endif %}
+      </p>
+      <p><strong>Data version:</strong> SEDA 2025.2. Where 2025 results are present, they use estimated NAEP anchor values because official 2026 NAEP values were not available when the release was produced.</p>
+      {% for exclusion in exclusions %}
+      <p><strong>Documented exclusion:</strong> {{ "{:,}".format(exclusion.source_rows) }} multi-component unit rows across {{ exclusion.districts }} districts ({{ exclusion.first_year }}–{{ exclusion.last_year }}; {{ exclusion.state_abbreviations }}) are excluded because they do not support the within-state comparison design. See the methodology for the released-unit definition.</p>
+      {% endfor %}
+      <p><strong>Generated:</strong> {{ rendered_at }}</p>
+    </article>
+
+    <footer>
+      <p><strong>Dataset citation:</strong> Reardon, S. F., Fahle, E. M., Ho, A. D., Shear, B. R., Saliba, J., Min, J., Shim, J., &amp; Kalogrides, D. (2026). <em>Stanford Education Data Archive (Version SEDA 2025.2).</em> <a href="https://doi.org/10.25740/np279jm6134">https://doi.org/10.25740/np279jm6134</a>.</p>
+      <p>This independent portfolio analysis is not endorsed by Stanford University, the Educational Opportunity Project, HMH, or NWEA. Source files are not redistributed.</p>
+    </footer>
+  </main>
+</body>
+</html>

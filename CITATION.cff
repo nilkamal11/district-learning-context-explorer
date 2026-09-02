@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite this repository and the underlying SEDA release."
+title: "District Learning Context Explorer"
+type: software
+authors:
+  - family-names: Shah
+    given-names: Nilkamal
+version: 0.1.0
+date-released: 2026-09-02
+license: MIT
+preferred-citation:
+  type: software
+  title: "District Learning Context Explorer"
+  authors:
+    - family-names: Shah
+      given-names: Nilkamal
+  year: 2026

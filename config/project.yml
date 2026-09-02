@@ -1,0 +1,32 @@
+project:
+  title: District Learning Context Explorer
+  data_version: SEDA 2025.2
+  scale: CS
+
+analysis:
+  default_grade: 4
+  context_year: 2024
+  latest_result_year: 2025
+  confidence_level: 0.95
+  state_peer_count: 15
+  state_peer_minimum: 10
+  national_peer_count: 20
+  max_national_peers_per_state: 3
+  minimum_reporting_peers: 10
+  minimum_reporting_fraction: 0.70
+
+peer_model:
+  version: context-match-v1
+  domain_weights:
+    district_scale: 0.25
+    economic_context: 0.25
+    student_composition: 0.25
+    place: 0.25
+  strict_calipers:
+    enrollment_factor: 4
+    poverty_points: 0.15
+    same_locale: true
+  relaxed_calipers:
+    enrollment_factor: 8
+    poverty_points: 0.25
+    same_locale: false
