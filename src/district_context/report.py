@@ -232,6 +232,7 @@ def _trend_figure(
     subject_label: str,
     peer_label: str,
     confidence_percentage: int,
+    include_plotlyjs: bool,
 ) -> str:
     years = summary["year"]
     figure = go.Figure()
@@ -311,7 +312,11 @@ def _trend_figure(
         yaxis={"title": "Achievement estimate (CS standard deviations)", "zeroline": True},
         font={"family": "Inter, Arial, sans-serif", "color": "#172433"},
     )
-    return figure.to_html(full_html=False, include_plotlyjs="cdn", config={"displaylogo": False})
+    return figure.to_html(
+        full_html=False,
+        include_plotlyjs=include_plotlyjs,
+        config={"displaylogo": False, "responsive": True},
+    )
 
 
 def _context_comparison(target: dict[str, Any], peers: pd.DataFrame) -> list[dict[str, Any]]:
@@ -395,7 +400,7 @@ def build_profile(
     use_cross_state_error = primary_pool == "national_analogs"
     subject_specs = [("mth", "Mathematics"), ("rla", "Reading / language arts")]
     subject_panels: list[dict[str, Any]] = []
-    for subject, label in subject_specs:
+    for subject_index, (subject, label) in enumerate(subject_specs):
         trend = _trend_summary(
             achievement,
             target_id,
@@ -418,6 +423,7 @@ def build_profile(
                     label,
                     peer_label,
                     confidence_percentage,
+                    include_plotlyjs=subject_index == 0,
                 ),
                 "latest": _latest_summary(trend, int(analysis["latest_result_year"])),
             }

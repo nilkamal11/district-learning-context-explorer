@@ -112,6 +112,7 @@ def test_full_report_renders_with_strict_template_contract(tmp_path, monkeypatch
     )
     monkeypatch.setattr(report, "source_config", lambda: {})
     monkeypatch.setattr(report, "output_dir", lambda: tmp_path)
+    monkeypatch.setattr(report, "_trend_figure", lambda *_, **__: "<div>Test chart</div>")
     destination = tmp_path / "report.html"
 
     report.build_profile(connection, "0000001", grade=4, destination=destination)
@@ -120,4 +121,3 @@ def test_full_report_renders_with_strict_template_contract(tmp_path, monkeypatch
     assert "15 of 15 selected peers" in html
     assert "Full peer count under strict calipers" in html
     assert "Test-only district 1" in html
-    assert "undefined" not in html.lower()

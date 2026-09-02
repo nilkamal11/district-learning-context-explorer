@@ -171,6 +171,7 @@ def _staged_candidates(
     minimum_count: int,
     strict_calipers: dict[str, Any],
     relaxed_calipers: dict[str, Any],
+    max_per_state: int | None = None,
 ) -> tuple[pd.DataFrame, str]:
     stages = [
         (
@@ -202,6 +203,8 @@ def _staged_candidates(
             poverty_points=poverty_points,
             same_locale=same_locale,
         )
+        if max_per_state is not None:
+            latest = _cap_per_state(latest, max_per_state)
         latest_name = name
         if len(latest) >= desired_count or len(latest) >= minimum_count:
             break
@@ -317,9 +320,10 @@ def select_peer_sets(
         minimum_count=national_count,
         strict_calipers=strict_calipers,
         relaxed_calipers=relaxed_calipers,
+        max_per_state=max_national_per_state,
     )
-    national_selected = _cap_per_state(
-        national_candidates, max_per_state=max_national_per_state
+    national_selected = national_candidates.sort_values(
+        ["context_distance", "district_id"]
     ).head(national_count)
     national_selected = national_selected.assign(
         pool_type="national_analogs",

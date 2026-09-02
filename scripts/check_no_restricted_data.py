@@ -19,6 +19,7 @@ BLOCKED_SUFFIXES = {
     ".feather",
     ".gz",
     ".html",
+    ".json",
     ".jsonl",
     ".ndjson",
     ".parquet",
@@ -31,6 +32,15 @@ BLOCKED_SUFFIXES = {
     ".xlsx",
     ".zip",
 }
+BLOCKED_OUTPUT_NAME_PREFIXES = (
+    "build_manifest",
+    "district_profile_",
+    "peer_membership_",
+    "profile_summary_",
+    "qa_results",
+    "qa_summary",
+    "source_inventory",
+)
 
 
 def main() -> None:
@@ -43,7 +53,8 @@ def main() -> None:
         path = Path(relative)
         restricted_data_path = relative.startswith("data/") and relative not in ALLOWED_DATA_FILES
         row_level_artifact = path.suffix.lower() in BLOCKED_SUFFIXES
-        if restricted_data_path or row_level_artifact:
+        generated_output_name = path.name.lower().startswith(BLOCKED_OUTPUT_NAME_PREFIXES)
+        if restricted_data_path or row_level_artifact or generated_output_name:
             violations.append(relative)
     if violations:
         joined = "\n  - ".join(violations)

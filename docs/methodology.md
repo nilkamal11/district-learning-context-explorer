@@ -85,7 +85,7 @@ National matching excludes the target state, uses the same staged rules, selects
 
 ## Uncertainty
 
-The chart displays the target district's released estimate with the configured interval, alongside the peer mean, median, and interquartile range. A year-subject comparison requires at least 10 reporting peers and at least 70% coverage of the selected peer set.
+The profile displays the target district's released estimate with the configured interval, alongside the peer mean, median, and interquartile range. The chart uses the median and interquartile range; the cards and sensitivity table also expose the mean used as the same-state comparison benchmark. A year-subject comparison requires at least 10 reporting peers and at least 70% coverage of the selected peer set.
 
 For the same-state panel, the target-minus-equal-weight-peer-mean interval propagates the target variance and peer variances. National analogs use adjusted standard errors for displayed district uncertainty but remain descriptive: state-level NAEP-linking uncertainty may be shared, so the project does not use a naive independence formula to classify the national comparison as higher or lower.
 

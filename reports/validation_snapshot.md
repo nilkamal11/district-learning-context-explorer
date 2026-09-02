@@ -19,13 +19,14 @@ The fingerprints identify the exact retrieved files used for this run. They are 
 - 2 diagnostic warnings were retained rather than hidden:
   - 1,841 2024 administrative-district rows have a released urbanicity category different from the largest locale share. Matching preserves the released category and keeps the recomputation for audit.
   - 589 multi-component rows across 41 districts in AZ, NM, and UT from 2016–2019 are excluded from the within-state design and recorded in `mart_exclusion_audit`.
-- 18 software tests passed, including all SQL models, source-manifest behavior, clean-clone CLI routing, outcome allowlisting, sparse-peer gates, pool-specific precision, and a strict full-report render.
+- 19 software tests passed, including all SQL models, source-manifest behavior, clean-clone CLI routing, outcome allowlisting, state-cap-aware national relaxation, sparse-peer gates, pool-specific precision, and a strict full-report render.
 - Ruff completed with no findings.
 
 ## Rendered-report checks
 
 - Full desktop report inspected visually.
 - Phone-size layout inspected at 390 × 844.
+- The chart library is embedded once, so the local report does not depend on a CDN.
 - The peer-details control opened successfully and displayed all 15 selected in-state peers.
 - Browser console warnings and errors: 0.
 - National analogs were verified to exclude the target state.

@@ -72,7 +72,7 @@ For a neutral smoke test, the demo command chooses the eligible district nearest
 district-context demo --state IL --grade 4
 ```
 
-Local outputs are written to `data/output/` and are ignored by Git. Run `python scripts/check_no_restricted_data.py` before every commit. The public [validation snapshot](reports/validation_snapshot.md) records only aggregate build and QA evidence, never district rows or peer membership.
+Local outputs are written to `data/output/` and are ignored by Git. The HTML profile embeds its chart library once so the local demonstration works without an internet connection. Run `python scripts/check_no_restricted_data.py` before every commit. The public [validation snapshot](reports/validation_snapshot.md) records only aggregate build and QA evidence, never district rows or peer membership.
 
 The supported setup is a cloned repository with the editable install shown above. A standalone wheel is not currently a supported execution mode because the versioned SQL and configuration live at the repository root.
 
@@ -125,7 +125,7 @@ data/output/               Local reports and manifests, ignored by Git
 |---|---|
 | Work with large assessment data | Grade-by-district-by-subject-by-year SEDA fact table |
 | Extract, clean, and link data | Python source contracts, SQL staging, crosswalk audit mart and ID resolver |
-| Build reproducible pipelines | One CLI, pinned versions, hashes, ordered models, build manifest |
+| Build reproducible pipelines | One CLI, versioned model config, source hashes, ordered models, build manifest |
 | Validate and troubleshoot | Grain tests, range checks, suppression rules, QA result table |
 | Support research specifications | Versioned peer algorithm and explicit interpretation rules |
 | Communicate to varied audiences | Interactive profile plus plain-language evidence limits |

@@ -84,3 +84,31 @@ def test_context_allowlist_drops_outcome_columns():
     pd.testing.assert_series_equal(
         baseline["context_distance"], guarded["context_distance"], check_names=False
     )
+
+
+def test_national_relaxation_is_decided_after_state_caps():
+    context = make_context()
+    external_indexes = context.index[context["state_abbreviation"] != "IL"]
+    states = ["WI", "IN", "IA", "MO", "OH", "KY", "MI", "MN"]
+    for position, index in enumerate(external_indexes):
+        state_position = min(position // 5, len(states) - 1)
+        context.loc[index, "state_abbreviation"] = states[state_position]
+        context.loc[index, "dominant_locale"] = (
+            "Suburb" if state_position < 4 else "Rural"
+        )
+
+    selection = select_peer_sets(
+        context,
+        "0000001",
+        grade=4,
+        domain_weights=WEIGHTS,
+        state_count=15,
+        state_minimum=10,
+        national_count=20,
+        max_national_per_state=3,
+    )
+
+    national = selection.peers.loc[selection.peers["pool_type"] == "national_analogs"]
+    assert len(national) == 20
+    assert selection.diagnostics["national_relaxation_stage"] == "locale_relaxed"
+    assert national.groupby("state_abbreviation").size().max() <= 3
