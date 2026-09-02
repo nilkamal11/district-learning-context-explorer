@@ -588,7 +588,9 @@
       ["Coverage mart", `${formatNumber(technical.table_counts.mart_data_coverage)} state-year-grade-subject cells`],
       ["Persisted DuckDB", `${formatExactBytes(technical.database_bytes)} · ${technical.persisted_table_count} tables`],
       ["Offline single-profile HTML", formatExactBytes(technical.offline_profile_bytes)],
-      [`Public grade ${grade} bundle`, `${formatExactBytes(technical.public_bundle_bytes)} · ${formatNumber(technical.published_achievement_rows)} achievement rows`],
+      [`Initial grade ${grade} bundle`, `${formatExactBytes(technical.public_bundle_bytes)} · ${formatNumber(technical.published_achievement_rows)} grade-specific estimate rows`],
+      ["Public browser data", `${formatExactBytes(technical.workbench_public_data_bytes)} across six grade-partitioned files`],
+      ["Workbench estimate scope", `${formatNumber(technical.workbench_total_rows)} long-form district-grade-subject-year estimates across grades 3–8`],
       ["Browser catalog / context", `${formatNumber(technical.published_catalog_rows)} districts / ${formatNumber(technical.published_context_rows)} context rows`]
     ];
     elements["model-table-body"].innerHTML = modelRows.map(([label, value]) => `<tr><td>${label}</td><td>${value}</td></tr>`).join("");
@@ -597,8 +599,8 @@
     const qaCards = [
       [`${technical.qa_pass_count} passed`, "error-level data contracts"],
       [`${technical.qa_warning_count} surfaced`, "diagnostic warnings"],
-      [`${technical.software_test_count} passed`, "automated software tests"],
-      ["0 findings", "Ruff static analysis"]
+      [`${technical.software_test_count} discovered`, "automated tests executed by CI"],
+      ["Required", "Ruff, tests, and publication guards before deploy"]
     ];
     elements["qa-status-grid"].innerHTML = qaCards.map(([value, label]) => `<article><strong>${value}</strong><span>${label}</span></article>`).join("");
     const warningText = {
@@ -618,11 +620,12 @@
       button.setAttribute("aria-selected", String(active));
       button.tabIndex = active ? 0 : -1;
     }
-    document.getElementById("explore-panel").hidden = name !== "explore";
-    document.getElementById("technical-panel").hidden = name !== "technical";
+    for (const panelName of ["explore", "workbench", "technical"]) {
+      document.getElementById(`${panelName}-panel`).hidden = name !== panelName;
+    }
     if (updateHash) {
       const url = new URL(window.location.href);
-      url.hash = name === "technical" ? "technical" : "";
+      url.hash = name === "explore" ? "" : name;
       window.history.replaceState({}, "", url);
     }
     if (name === "explore") {
@@ -632,6 +635,9 @@
           if (chart?.data) window.Plotly.Plots.resize(chart);
         }
       }, 0);
+    }
+    if (name === "workbench") {
+      window.setTimeout(() => window.SEDA_WORKBENCH?.activate(), 0);
     }
   };
 
@@ -648,7 +654,8 @@
         activateTab(next.dataset.tab);
       });
     });
-    activateTab(window.location.hash === "#technical" ? "technical" : "explore", false);
+    const requested = window.location.hash.replace("#", "");
+    activateTab(["workbench", "technical"].includes(requested) ? requested : "explore", false);
   };
 
   renderTechnical();

@@ -8,9 +8,17 @@ The result is still descriptive. Context matching reduces obvious mismatch; it d
 
 ## Outcome
 
-The profile uses `cs_mn_all` from SEDA's long administrative district CS file. Each record is one administrative district, subject, grade, and spring assessment year. The CS unit is one student-level standard deviation relative to SEDA's national reference cohorts.
+The profile uses `cs_mn_all` from SEDA's long administrative district CS file. Each long-form row is one administrative district, grade, subject, and spring assessment year. The CS unit is one student-level standard deviation relative to SEDA's national reference cohorts.
 
 Valid comparisons are across places and years within the same subject and grade. Math and reading cannot be compared to one another, and grade 4 cannot be compared directly with grade 5 on this scale.
+
+## Browser workbench
+
+The public workbench uses the same long-form district-grade-subject-year estimates as the local profile but limits the browser payload to eight selected fields. Grade 4 travels with the main dashboard bundle; grades 3 and 5–8 are separate scripts loaded only when selected. This keeps each public file below GitHub's per-file limit and avoids making every visitor download all 1.83 million estimate rows.
+
+The workbench can compare up to four districts within a fixed grade and subject. It automatically uses the unadjusted standard error when all selected districts are in one state and the adjusted standard error when the selection crosses state lines. The reference distribution is descriptive and deliberately omits ordinal ranks. Each reporting district contributes one observation for the selected grade, subject, and year; the distribution is not weighted by district enrollment or test count. The coverage matrix represents an absent grade-subject-year row as missing, never zero. Downloaded CSV files contain only the current district selection and inherit the public bundle's six-decimal rounding.
+
+This interface complements Stanford's official Education Opportunity Trends Explorer rather than reproducing it. It exposes yearly grade-specific administrative-district estimates, uncertainty, and missingness. It does not calculate SEDA's pooled achievement or learning-rate parameters and does not expose the release's school, subgroup, geographic-district, or alternate-scale files.
 
 The long file supplies two standard errors:
 

@@ -9,6 +9,20 @@ ALLOWED_DATA_FILES = {
     "data/processed/.gitkeep",
     "data/output/.gitkeep",
 }
+APPROVED_SITE_FILES = {
+    "site/.nojekyll",
+    "site/index.html",
+    "site/assets/dashboard.js",
+    "site/assets/plotly-3.1.0.min.js",
+    "site/assets/styles.css",
+    "site/assets/workbench.js",
+    "site/data/dashboard-data.js",
+    "site/data/workbench-grade-3.js",
+    "site/data/workbench-grade-5.js",
+    "site/data/workbench-grade-6.js",
+    "site/data/workbench-grade-7.js",
+    "site/data/workbench-grade-8.js",
+}
 BLOCKED_SUFFIXES = {
     ".7z",
     ".arrow",
@@ -41,38 +55,54 @@ BLOCKED_OUTPUT_NAME_PREFIXES = (
     "qa_summary",
     "source_inventory",
 )
-PUBLIC_SITE_SUFFIXES = {".css", ".html", ".js"}
-PUBLIC_DERIVED_DATA = "site/data/dashboard-data.js"
+
+
+def _repository_files() -> list[str]:
+    result = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        cwd=ROOT,
+        capture_output=True,
+        check=True,
+    )
+    return sorted(
+        path.decode("utf-8", errors="surrogateescape").replace("\\", "/")
+        for path in result.stdout.split(b"\0")
+        if path
+    )
+
+
+def _violations(paths: list[str]) -> list[str]:
+    violations = []
+    for relative in paths:
+        path = Path(relative)
+        unapproved_site_file = relative.startswith("site/") and relative not in APPROVED_SITE_FILES
+        restricted_data_path = relative.startswith("data/") and relative not in ALLOWED_DATA_FILES
+        row_level_artifact = path.suffix.lower() in BLOCKED_SUFFIXES and not relative.startswith(
+            "site/"
+        )
+        generated_output_name = path.name.lower().startswith(BLOCKED_OUTPUT_NAME_PREFIXES)
+        if (
+            unapproved_site_file
+            or restricted_data_path
+            or row_level_artifact
+            or generated_output_name
+        ):
+            violations.append(relative)
+    return violations
 
 
 def main() -> None:
-    result = subprocess.run(
-        ["git", "ls-files"], cwd=ROOT, capture_output=True, text=True, check=True
-    )
-    tracked = [line.strip().replace("\\", "/") for line in result.stdout.splitlines()]
-    violations = []
-    for relative in tracked:
-        path = Path(relative)
-        public_site_asset = relative.startswith("site/") and path.suffix.lower() in (
-            PUBLIC_SITE_SUFFIXES
-        )
-        unapproved_site_data = relative.startswith("site/data/") and relative != (
-            PUBLIC_DERIVED_DATA
-        )
-        restricted_data_path = relative.startswith("data/") and relative not in ALLOWED_DATA_FILES
-        row_level_artifact = path.suffix.lower() in BLOCKED_SUFFIXES and not public_site_asset
-        generated_output_name = path.name.lower().startswith(BLOCKED_OUTPUT_NAME_PREFIXES)
-        if (
-            restricted_data_path
-            or row_level_artifact
-            or generated_output_name
-            or unapproved_site_data
-        ):
-            violations.append(relative)
+    violations = _violations(_repository_files())
     if violations:
         joined = "\n  - ".join(violations)
-        raise SystemExit(f"Restricted or row-level data are tracked:\n  - {joined}")
-    print("PASS: no restricted raw, processed, or unapproved output data are tracked")
+        raise SystemExit(
+            "Restricted, row-level, generated, or unapproved public-site files are tracked "
+            f"or untracked:\n  - {joined}"
+        )
+    print(
+        "PASS: tracked and untracked nonignored files contain no restricted data, "
+        "unapproved output, or unapproved public-site assets"
+    )
 
 
 if __name__ == "__main__":

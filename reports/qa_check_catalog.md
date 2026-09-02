@@ -5,7 +5,7 @@ The pipeline executes and stores checks for:
 - unique achievement and context grains;
 - seven-character normalized district IDs;
 - expected subjects, grades, and assessment years;
-- an explicit absence of 2020 and 2021 achievement rows;
+- an explicit absence of 2020 and 2021 long-form district-grade-subject-year achievement rows;
 - nonnegative within-state and cross-state standard errors;
 - released-row test-count and standard-error disclosure bounds;
 - locale, poverty, and race/ethnicity proportions within 0 to 1;
@@ -21,6 +21,6 @@ The pipeline executes and stores checks for:
 - achievement leakage into the peer model;
 - deterministic peer selection and exclusion of the target from its own peers;
 - a Git-level guard against committing raw files, the local database, or unapproved output data;
-- a public-dashboard contract check for schema, counts, source verification, size, and local-path leakage.
+- a public-site contract check for the initial dashboard bundle and all five lazy workbench slices, including inert wrappers, schema and field consistency, complete grade coverage, exact row and byte totals, per-file size limits, source verification, raw-filename leakage, and local-path leakage.
 
-Full run artifacts remain local. The published dashboard uses the separately checked, permission-approved, grade-4 derived bundle.
+Full run artifacts remain local. The published site uses separately checked, permission-approved, selected derived fields. Grade 4 travels with the initial dashboard bundle; grade 3 and grades 5 through 8 load only when selected. Across the six grade slices, the workbench covers all 1,827,384 long-form district-grade-subject-year estimate rows in the analytical achievement mart without publishing the original source files or their full schema.

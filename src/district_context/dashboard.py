@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from statistics import NormalDist
 from typing import Any
 
 import duckdb
@@ -62,6 +64,15 @@ ACHIEVEMENT_FIELDS = [
     "tested_count_estimated",
 ]
 
+WORKBENCH_GRADES = tuple(range(3, 9))
+VERSIONED_SITE_ASSETS = (
+    "assets/styles.css",
+    "data/dashboard-data.js",
+    "assets/plotly-3.1.0.min.js",
+    "assets/dashboard.js",
+    "assets/workbench.js",
+)
+
 
 def _compact_number(value: Any) -> Any:
     if value is None:
@@ -91,6 +102,63 @@ def _safe_javascript_assignment(payload: dict[str, Any]) -> str:
     return f"window.DISTRICT_DASHBOARD_DATA={serialized};\n"
 
 
+def _safe_workbench_assignment(grade: int, payload: dict[str, Any]) -> str:
+    serialized = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    serialized = (
+        serialized.replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+    return (
+        "window.SEDA_WORKBENCH_GRADES=window.SEDA_WORKBENCH_GRADES||{};"
+        f"window.SEDA_WORKBENCH_GRADES[{grade}]={serialized};\n"
+    )
+
+
+def _achievement_rows_for_grade(
+    connection: duckdb.DuckDBPyConnection,
+    grade: int,
+) -> list[tuple[Any, ...]]:
+    return connection.execute(
+        """
+        SELECT
+            district_id,
+            subject,
+            year,
+            achievement_cs,
+            standard_error_within_state,
+            standard_error_cross_state,
+            tested_count,
+            tested_count_estimated_flag
+        FROM mart_achievement
+        WHERE grade = ?
+        ORDER BY district_id, subject, year
+        """,
+        [grade],
+    ).fetchall()
+
+
+def _build_workbench_grade_payload(
+    connection: duckdb.DuckDBPyConnection,
+    grade: int,
+    scope: dict[str, Any],
+) -> dict[str, Any]:
+    rows = _compact_rows(_achievement_rows_for_grade(connection, grade))
+    return {
+        "schema_version": 1,
+        "release": scope["release"],
+        "geography": scope["geography"],
+        "subgroup": scope["subgroup"],
+        "scale": scope["scale"],
+        "grade": grade,
+        "achievement_fields": ACHIEVEMENT_FIELDS,
+        "row_count": len(rows),
+        "achievement": rows,
+    }
+
+
 def _software_test_count() -> int:
     fallback = sum(
         line.lstrip().startswith("def test_")
@@ -117,6 +185,28 @@ def _software_test_count() -> int:
 def _file_size(relative_path: str) -> int | None:
     path = PROJECT_ROOT / relative_path
     return path.stat().st_size if path.is_file() else None
+
+
+def _version_site_assets(destination: Path) -> None:
+    index_path = destination / "index.html"
+    html = index_path.read_text(encoding="utf-8")
+    for relative_path in VERSIONED_SITE_ASSETS:
+        asset_path = destination / relative_path
+        digest = hashlib.sha256(asset_path.read_bytes()).hexdigest()[:16]
+        pattern = re.compile(
+            rf'(?P<prefix>(?:src|href)="{re.escape(relative_path)})(?:\?v=[^"]*)?(?P<suffix>")'
+        )
+        html, replacements = pattern.subn(
+            lambda match, asset_digest=digest: (
+                f'{match.group("prefix")}?v={asset_digest}{match.group("suffix")}'
+            ),
+            html,
+        )
+        if replacements != 1:
+            raise ValueError(
+                f"Expected one versionable reference to {relative_path}; found {replacements}."
+            )
+    index_path.write_text(html, encoding="utf-8", newline="\n")
 
 
 def _build_payload(
@@ -194,23 +284,40 @@ def _build_payload(
         [context_year],
     ).fetchall()
 
-    achievement_rows = connection.execute(
-        """
-        SELECT
-            district_id,
-            subject,
-            year,
-            achievement_cs,
-            standard_error_within_state,
-            standard_error_cross_state,
-            tested_count,
-            tested_count_estimated_flag
-        FROM mart_achievement
-        WHERE grade = ?
-        ORDER BY district_id, subject, year
-        """,
-        [grade],
-    ).fetchall()
+    achievement_rows = _achievement_rows_for_grade(connection, grade)
+
+    workbench_grade_rows = dict(
+        connection.execute(
+            """
+            SELECT grade, count(*)
+            FROM mart_achievement
+            WHERE grade BETWEEN 3 AND 8
+            GROUP BY grade
+            ORDER BY grade
+            """
+        ).fetchall()
+    )
+    workbench_years = [
+        int(row[0])
+        for row in connection.execute(
+            """
+            SELECT DISTINCT year
+            FROM mart_achievement
+            WHERE grade BETWEEN 3 AND 8
+            ORDER BY year
+            """
+        ).fetchall()
+    ]
+    confidence_level = float(cfg["analysis"]["confidence_level"])
+    workbench_scope = {
+        "release": cfg["project"]["data_version"],
+        "geography": "administrative district",
+        "subgroup": "all students",
+        "scale": f"Cohort Standardized ({cfg['project']['scale']})",
+        "years": workbench_years,
+        "confidence_level": confidence_level,
+        "confidence_critical_value": NormalDist().inv_cdf(0.5 + confidence_level / 2),
+    }
 
     robust_ranges = connection.execute(
         """
@@ -318,6 +425,7 @@ def _build_payload(
         "schema_version": 1,
         "generated_at_utc": datetime.now(UTC).isoformat(),
         "project": cfg["project"],
+        "workbench": workbench_scope,
         "grade": grade,
         "default_district_id": default_district_id,
         "catalog_fields": CATALOG_FIELDS,
@@ -354,6 +462,11 @@ def _build_payload(
             "published_catalog_rows": len(catalog_rows),
             "published_context_rows": len(context_rows),
             "published_achievement_rows": len(achievement_rows),
+            "workbench_grade_rows": {
+                str(row_grade): int(workbench_grade_rows.get(row_grade, 0))
+                for row_grade in WORKBENCH_GRADES
+            },
+            "workbench_total_rows": int(sum(workbench_grade_rows.values())),
             "database_bytes": _file_size("data/processed/district_context.duckdb"),
             "offline_profile_bytes": _file_size(
                 f"data/output/district_profile_{default_district_id}_grade_{grade}.html"
@@ -376,6 +489,12 @@ def build_dashboard(
     default_district_id: str,
     destination: Path | None = None,
 ) -> Path:
+    if grade != 4:
+        raise ValueError(
+            "The public dashboard embeds grade 4 as its initial bundle; "
+            "grades 3 and 5 through 8 are generated as lazy workbench bundles."
+        )
+
     destination = destination or PROJECT_ROOT / "site"
     data_path = destination / "data" / "dashboard-data.js"
     vendor_path = destination / "assets" / "plotly-3.1.0.min.js"
@@ -387,12 +506,43 @@ def build_dashboard(
         grade=grade,
         default_district_id=default_district_id,
     )
-    for _ in range(3):
+
+    workbench_bundle_bytes: dict[str, int] = {}
+    for workbench_grade in WORKBENCH_GRADES:
+        if workbench_grade == grade:
+            continue
+        workbench_payload = _build_workbench_grade_payload(
+            connection,
+            workbench_grade,
+            payload["workbench"],
+        )
+        workbench_path = destination / "data" / f"workbench-grade-{workbench_grade}.js"
+        workbench_path.write_text(
+            _safe_workbench_assignment(workbench_grade, workbench_payload),
+            encoding="utf-8",
+            newline="\n",
+        )
+        workbench_bundle_bytes[str(workbench_grade)] = workbench_path.stat().st_size
+
+    payload["technical"]["workbench_bundle_bytes"] = workbench_bundle_bytes
+    payload["technical"]["workbench_public_data_bytes"] = sum(
+        workbench_bundle_bytes.values()
+    )
+    for _ in range(5):
         script = _safe_javascript_assignment(payload)
         size = len(script.encode("utf-8"))
-        if payload["technical"]["public_bundle_bytes"] == size:
-            break
         payload["technical"]["public_bundle_bytes"] = size
+        payload["technical"]["workbench_bundle_bytes"][str(grade)] = size
+        payload["technical"]["workbench_bundle_bytes"] = {
+            str(bundle_grade): payload["technical"]["workbench_bundle_bytes"][
+                str(bundle_grade)
+            ]
+            for bundle_grade in WORKBENCH_GRADES
+        }
+        payload["technical"]["workbench_public_data_bytes"] = sum(
+            payload["technical"]["workbench_bundle_bytes"].values()
+        )
     data_path.write_text(_safe_javascript_assignment(payload), encoding="utf-8", newline="\n")
     vendor_path.write_text(get_plotlyjs(), encoding="utf-8", newline="\n")
+    _version_site_assets(destination)
     return destination / "index.html"

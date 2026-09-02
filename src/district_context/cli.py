@@ -189,10 +189,16 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument("--grade", type=int, default=default_grade, choices=range(3, 9))
 
     dashboard = subparsers.add_parser(
-        "dashboard", help="Build the static multi-district portfolio dashboard"
+        "dashboard", help="Build the static district dashboard and SEDA workbench"
     )
     dashboard.add_argument("--district-id", default="1700044")
-    dashboard.add_argument("--grade", type=int, default=default_grade, choices=range(3, 9))
+    dashboard.add_argument(
+        "--grade",
+        type=int,
+        default=4,
+        choices=(4,),
+        help="Initial embedded grade; the public site currently uses grade 4",
+    )
     dashboard.add_argument("--output-dir", default="site")
 
     run_all = subparsers.add_parser("run-all", help="Build, test, and render a profile")

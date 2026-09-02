@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A reproducible, uncertainty-aware comparison of grade 4 district achievement estimates using Stanford SEDA 2025.2.">
+  <meta name="description" content="Explore yearly grade-specific district achievement estimates, uncertainty, and context-matched comparisons using Stanford SEDA 2025.2.">
   <title>District Learning Context Explorer</title>
-  <link rel="stylesheet" href="assets/styles.css">
-  <script src="data/dashboard-data.js" defer></script>
-  <script src="assets/plotly-3.1.0.min.js" defer></script>
-  <script src="assets/dashboard.js" defer></script>
+  <link rel="stylesheet" href="assets/styles.css?v=6f3d30c042cdc9c4">
+  <script src="data/dashboard-data.js?v=27364a739919418a" defer></script>
+  <script src="assets/plotly-3.1.0.min.js?v=8ef4c6ab1369f001" defer></script>
+  <script src="assets/dashboard.js?v=639b817d0439c5c2" defer></script>
+  <script src="assets/workbench.js?v=593e6f5ebc6c6e3c" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -22,8 +23,9 @@
         </span>
       </a>
       <nav class="tabs" role="tablist" aria-label="Dashboard sections">
-        <button id="explore-tab" class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="explore-panel" data-tab="explore">Explore districts</button>
-        <button id="technical-tab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="technical-panel" data-tab="technical">Technical process</button>
+        <button id="explore-tab" class="tab is-active" type="button" role="tab" aria-label="Explore districts" aria-selected="true" aria-controls="explore-panel" data-tab="explore"><span class="tab-wide">Explore districts</span><span class="tab-short" aria-hidden="true">Explore</span></button>
+        <button id="workbench-tab" class="tab" type="button" role="tab" aria-label="SEDA workbench" aria-selected="false" aria-controls="workbench-panel" data-tab="workbench"><span class="tab-wide">SEDA workbench</span><span class="tab-short" aria-hidden="true">Workbench</span></button>
+        <button id="technical-tab" class="tab" type="button" role="tab" aria-label="Technical process" aria-selected="false" aria-controls="technical-panel" data-tab="technical"><span class="tab-wide">Technical process</span><span class="tab-short" aria-hidden="true">Process</span></button>
       </nav>
     </div>
   </header>
@@ -189,6 +191,189 @@
       </div>
     </section>
 
+    <section id="workbench-panel" class="tab-panel workbench-panel" role="tabpanel" aria-labelledby="workbench-tab" hidden>
+      <div class="workbench-hero">
+        <div class="shell workbench-hero-grid">
+          <div>
+            <p class="eyebrow">SEDA 2025.2 · analyst view</p>
+            <h1>Explore the estimates behind the summary</h1>
+            <p class="hero-copy">Compare yearly grade-specific district estimates, inspect uncertainty and missingness, and export only the evidence in your current view.</p>
+            <div class="scope-list" aria-label="Workbench data scope">
+              <span>Administrative districts</span><span>All students</span><span>Cohort Standardized (CS) scale</span><span>Grades 3–8</span><span>Math and reading</span><span>2009–2019 · 2022–2025</span>
+            </div>
+            <a class="mobile-official-link" href="https://edopportunity.org/trends/explorer/">Stanford also provides the official national Explorer <span aria-hidden="true">↗</span></a>
+          </div>
+          <aside class="scope-card">
+            <p class="eyebrow dark">Designed to complement, not replace</p>
+            <h2>Stanford already has a national explorer</h2>
+            <p>Use Stanford’s tool for maps, subgroup gaps, and modeled 2022–2025 learning-rate summaries. This workbench stays closer to the downloadable long-form district-grade-subject-year estimates and their precision.</p>
+            <a class="text-link" href="https://edopportunity.org/trends/explorer/">Open Stanford’s official Explorer <span aria-hidden="true">↗</span></a>
+          </aside>
+        </div>
+      </div>
+
+      <div class="shell content-shell workbench-content">
+        <section class="workbench-controls" aria-labelledby="workbench-controls-heading">
+          <div class="workbench-controls-heading">
+            <div>
+              <p class="eyebrow dark">Build a view</p>
+              <h2 id="workbench-controls-heading">Choose a grade-subject slice and up to four districts</h2>
+            </div>
+            <div class="workbench-actions">
+              <button id="wb-download" class="secondary-button" type="button">Download current view</button>
+              <button id="wb-share" class="secondary-button" type="button">Copy share link</button>
+            </div>
+          </div>
+          <div class="workbench-control-grid">
+            <label>
+              <span>Grade</span>
+              <select id="wb-grade" aria-label="Select grade">
+                <option value="3">Grade 3</option><option value="4" selected>Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option>
+              </select>
+            </label>
+            <label>
+              <span>Subject</span>
+              <select id="wb-subject" aria-label="Select subject">
+                <option value="mth">Mathematics</option><option value="rla">Reading / language arts</option>
+              </select>
+            </label>
+            <label>
+              <span>Display year</span>
+              <select id="wb-year" aria-label="Select display year"></select>
+            </label>
+            <label>
+              <span>Reference distribution</span>
+              <select id="wb-state" aria-label="Select state reference distribution"></select>
+            </label>
+          </div>
+          <div class="workbench-district-row">
+            <label>
+              <span>District state</span>
+              <select id="wb-district-state" aria-label="Filter the district picker by state"></select>
+            </label>
+            <label class="district-picker">
+              <span>District to add</span>
+              <select id="wb-district" aria-label="Select a district to add"></select>
+            </label>
+            <button id="wb-add-district" class="primary-button" type="button">Add district</button>
+          </div>
+          <div class="workbench-selection-row">
+            <div>
+              <span class="control-label">Selected districts</span>
+              <div id="wb-selected-districts" class="district-chips" aria-live="polite"></div>
+            </div>
+            <label class="toggle-control">
+              <input id="wb-end-2024" type="checkbox">
+              <span>End at 2024 sensitivity view</span>
+            </label>
+          </div>
+          <p id="wb-status" class="workbench-status" role="status" aria-live="polite">Preparing grade 4 estimates…</p>
+        </section>
+
+        <div id="wb-results" hidden>
+          <div class="interpretation-note workbench-note">
+            <strong>These are modeled group estimates, not student records.</strong>
+            Yearly grade-specific estimates are repeated district cross-sections. Missing or suppressed evidence remains missing, comparisons are descriptive rather than causal, and 2025 availability varies by state.
+          </div>
+
+          <section aria-labelledby="wb-summary-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow dark">Current evidence window</p>
+                <h2 id="wb-summary-heading">Coverage and precision at a glance</h2>
+              </div>
+              <span id="wb-se-basis" class="quiet-label">Within-state standard errors</span>
+            </div>
+            <div class="workbench-metric-grid">
+              <article><strong id="wb-record-count">—</strong><span>selected grade-subject-year estimates</span></article>
+              <article><strong id="wb-universe-count">—</strong><span>reporting districts in reference year</span></article>
+              <article><strong id="wb-low-precision-count">—</strong><span>low-precision selected estimates</span></article>
+              <article><strong id="wb-estimated-count">—</strong><span>estimates with estimated test counts</span></article>
+            </div>
+          </section>
+
+          <section aria-labelledby="wb-trend-heading">
+            <div class="section-heading text-only">
+              <div>
+                <p class="eyebrow dark">Yearly trajectory</p>
+                <h2 id="wb-trend-heading">One grade and subject, with 95% intervals</h2>
+                <p id="wb-trend-caption">The gap preserves the absence of 2020 and 2021 results. Hover a point for detail; the estimate table provides the same values for keyboard and screen-reader users.</p>
+              </div>
+            </div>
+            <article class="chart-card workbench-chart-card">
+              <div id="wb-trend-chart" class="chart workbench-chart" aria-label="Selected district achievement trends"></div>
+            </article>
+          </section>
+
+          <section aria-labelledby="wb-distribution-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow dark">Reference distribution</p>
+                <h2 id="wb-distribution-heading">Distribution without a leaderboard</h2>
+                <p id="wb-distribution-caption">This is a broad reporting universe, not a matched peer set. Selected districts are highlighted without assigning ordinal ranks.</p>
+                <p class="small"><strong>Weighting:</strong> Each reporting district contributes one observation for the selected grade, subject, and year. The reference distribution is not weighted by district enrollment or the number of tests represented.</p>
+              </div>
+              <span id="wb-distribution-summary" class="quiet-label">—</span>
+            </div>
+            <article class="chart-card workbench-chart-card">
+              <div id="wb-distribution-chart" class="chart workbench-chart" aria-label="Distribution of district estimates"></div>
+            </article>
+          </section>
+
+          <section aria-labelledby="wb-coverage-heading">
+            <div class="section-heading text-only">
+              <div>
+                <p class="eyebrow dark">Reporting pattern</p>
+                <h2 id="wb-coverage-heading">Coverage and precision by year</h2>
+                <p>Reported cells are separated from low-precision cells and missing years. Missing is never treated as zero.</p>
+              </div>
+            </div>
+            <article class="panel-card coverage-card">
+              <div class="coverage-legend" aria-label="Coverage legend"><span class="reported">✓ Reported</span><span class="caution">! Low precision</span><span class="missing">— Missing</span></div>
+              <div class="table-scroll">
+                <table class="coverage-table">
+                  <thead id="wb-coverage-head"></thead>
+                  <tbody id="wb-coverage-body"></tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <section aria-labelledby="wb-records-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow dark">Long-form estimates</p>
+                <h2 id="wb-records-heading">Estimates in the current view</h2>
+                <p>Intervals automatically use within-state errors for a one-state selection and adjusted cross-state errors when selected districts span states.</p>
+              </div>
+              <span id="wb-table-count" class="quiet-label">—</span>
+            </div>
+            <article class="panel-card">
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>District</th><th>School year</th><th>Estimate</th><th>95% interval</th><th>SE basis</th><th>Tests represented</th><th>Precision</th></tr></thead>
+                  <tbody id="wb-records-body"></tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <section class="method-comparison" aria-labelledby="wb-difference-heading">
+            <div>
+              <p class="eyebrow dark">Why build another view?</p>
+              <h2 id="wb-difference-heading">A workbench for the layer Stanford’s Explorer abstracts away</h2>
+              <p>Stanford’s official product is the stronger national discovery experience. This independent view is intentionally narrower and more inspectable.</p>
+            </div>
+            <div class="comparison-columns">
+              <article><span>Official Explorer</span><h3>Discover national patterns</h3><p>Maps, subgroup gaps, socioeconomic relationships, similar places, and modeled achievement and learning-rate summaries.</p></article>
+              <article><span>This workbench</span><h3>Inspect yearly grade-specific evidence</h3><p>District-grade-subject-year estimates, two standard-error bases, precision flags, visible missingness, multi-district trajectories, and filtered export.</p></article>
+            </div>
+            <p class="small">Scope: administrative districts, all students, Cohort Standardized scale only. This is not the complete SEDA 2025.2 file library.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
     <section id="technical-panel" class="tab-panel technical-panel" role="tabpanel" aria-labelledby="technical-tab" hidden>
       <div class="technical-hero">
         <div class="shell">
@@ -197,7 +382,7 @@
           <p>Python and SQL verify the inputs, construct a stable district model, select peers without using outcomes, carry uncertainty forward, and publish a portable browser experience.</p>
           <div class="technical-kpis" aria-label="Pipeline summary">
             <div><strong id="source-size-kpi">—</strong><span>verified source files</span></div>
-            <div><strong id="staged-rows-kpi">—</strong><span>achievement rows staged</span></div>
+            <div><strong id="staged-rows-kpi">—</strong><span>long-form achievement rows staged</span></div>
             <div><strong id="districts-kpi">—</strong><span>stable district records</span></div>
             <div><strong id="qa-kpi">—</strong><span>QA checks, no blocking failures</span></div>
           </div>
@@ -219,7 +404,7 @@
             <li><span>03</span><strong>Model</strong><p>Stable district dimension, analytical marts, coverage, and audit tables</p></li>
             <li><span>04</span><strong>Match</strong><p>Deterministic context-only peer selection with recorded relaxation</p></li>
             <li><span>05</span><strong>Quantify</strong><p>Pool-specific errors, coverage gates, precision flags, and intervals</p></li>
-            <li><span>06</span><strong>Publish</strong><p>Compact derived bundle, offline charting, and browser-side interaction</p></li>
+            <li><span>06</span><strong>Publish</strong><p>Grade-partitioned derived bundles, offline charting, and browser-side interaction</p></li>
           </ol>
           <div class="stack-list" aria-label="Technology stack">
             <span>Python 3.11+</span><span>SQL</span><span>DuckDB</span><span>pandas</span><span>NumPy</span><span>Plotly</span><span>Jinja2</span><span>PyYAML</span><span>pytest</span><span>Ruff</span><span>GitHub Actions</span><span>GitHub Pages</span>
@@ -351,7 +536,7 @@
             <article>
               <span class="boundary-label public">Public repository</span>
               <h3>Reproducible code and selected derived evidence</h3>
-              <p>Configuration, SQL models, Python, tests, methods, aggregate validation, and the compact grade-4 dashboard bundle.</p>
+              <p>Configuration, SQL models, Python, tests, methods, aggregate validation, and approved derived grade-subject-year estimate fields for the browser workbench.</p>
             </article>
             <article>
               <span class="boundary-label local">Local governed workspace</span>

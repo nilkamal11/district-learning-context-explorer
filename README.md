@@ -6,7 +6,7 @@ A reproducible, uncertainty-aware way to ask a practical education question:
 
 The first view focuses on grade 4 because that is where the question became personally meaningful to me as the parent of a fourth-grade daughter. The analytical design covers grades 3 through 8 and keeps the selected district configurable. No family, child, school, or home-district information is stored in the repository.
 
-**[Open the interactive dashboard](https://nilkamal11.github.io/district-learning-context-explorer/)** to choose a state and district or inspect the full technical process behind the display.
+**[Open the interactive dashboard](https://nilkamal11.github.io/district-learning-context-explorer/)** to build a grade-4 peer profile, compare yearly grade-specific estimates in the SEDA workbench, or inspect the full technical process.
 
 ## What this project demonstrates
 
@@ -17,6 +17,7 @@ The first view focuses on grade 4 because that is where the question became pers
 - Reproducible source manifests, SHA-256 checks, deterministic peer selection, and Git-based CI
 - Clear translation from statistical estimates to a district and parent-facing explanation
 - Responsible handling of suppression, missingness, measurement error, and limits on causal inference
+- Lazy browser loading of six grade slices, multi-district comparison, URL state, and filtered CSV export
 
 The project is intentionally not a district ranking. Peers are selected from community context only. Achievement never enters the matching algorithm.
 
@@ -44,9 +45,21 @@ Version 0.1 uses three files from the [Stanford Education Data Archive 2025.2 re
 2. Annual administrative district covariates, with 2024 frozen as the peer-context snapshot
 3. The SEDA administrative district identifier crosswalk, used to audit ID changes and resolve external year-specific IDs to the already-stable `sedaadmin` identifier used in the analytical files
 
-The achievement file covers spring 2009 through 2019 and 2022 through 2025. There are no 2020 or 2021 achievement records, so the report shows a visible break instead of drawing a continuous line across those years.
+The achievement file covers spring 2009 through 2019 and 2022 through 2025. There are no yearly grade-specific estimates for 2020 or 2021, so the report shows a visible break instead of drawing a continuous line across those years.
 
-Source files are governed by Stanford's [Data Use Agreement](https://edopportunity.org/trends/data/). Stanford confirmed to the project owner that this Git portfolio use is permitted. The repository publishes a compact, derived grade-4 dashboard bundle for the interactive demonstration; it does not include the raw source files, local DuckDB database, or unrestricted working outputs. That confirmation applies to this project owner's use and does not grant downstream users independent rights to Stanford data.
+Source files are governed by Stanford's [Data Use Agreement](https://edopportunity.org/trends/data/). Stanford confirmed to the project owner that this Git portfolio use is permitted. The repository publishes selected derived columns for the all-student, administrative-district CS estimates used by the grade 3–8 browser workbench; it does not include the raw source files, local DuckDB database, or unrestricted working outputs. That confirmation applies to this project owner's use and does not grant downstream users independent rights to Stanford data.
+
+## Two analytical views
+
+The district profile asks a focused question about one fourth-grade district and context-matched peers. The **SEDA 2025.2 District Data Workbench** exposes the more detailed yearly grade-specific evidence behind that kind of summary:
+
+- Grades 3–8, mathematics and reading, and the 15 released years from 2009–2019 and 2022–2025
+- Up to four administrative districts in one view, including districts with missing grade-subject-year estimates
+- Automatic within-state or adjusted cross-state uncertainty intervals
+- A state or national distribution without rankings
+- A coverage and precision matrix, long-form estimate table, persistent share link, and current-view CSV export
+
+Stanford already offers the official [Education Opportunity Trends Explorer](https://edopportunity.org/trends/explorer/) for national maps, subgroup gaps, similar places, and modeled 2022–2025 achievement and learning-rate summaries. This project does not attempt to replace it. The workbench is intentionally narrower: administrative districts, all students, and the Cohort Standardized scale.
 
 ## Quick start
 
@@ -75,7 +88,7 @@ For a neutral smoke test, the demo command chooses the eligible district nearest
 district-context demo --state IL --grade 4
 ```
 
-Local outputs are written to `data/output/` and are ignored by Git. The single-profile HTML embeds its chart library once so it works without an internet connection. The `dashboard` command builds the public static site from a compact grade-specific slice; the browser then performs the same deterministic matching and uncertainty calculations when a district is selected. Run both publication guards before every commit:
+Local outputs are written to `data/output/` and are ignored by Git. The single-profile HTML embeds its chart library once so it works without an internet connection. The `dashboard` command builds the public static site, its initial grade-4 slice, and lazy grade slices for grades 3 and 5–8. The browser performs deterministic matching and uncertainty calculations when a district is selected. Run both publication guards before every commit:
 
 ```powershell
 python scripts/check_no_restricted_data.py
@@ -105,7 +118,7 @@ See [methodology.md](docs/methodology.md) for the full specification.
 
 - Math and reading are always separate.
 - CS values are comparable across places and years only within a fixed grade and subject.
-- Annual grade 4 results are repeated district cross-sections, not growth for the same students.
+- Yearly grade-specific results are repeated district cross-sections, not growth for the same students.
 - Missing and suppressed values never become zero.
 - Same-state comparisons use SEDA's unadjusted standard error. Cross-state comparisons use its adjusted standard error.
 - A comparison requires at least 10 reporting peers and at least 70% coverage of the selected set in that year and subject.
