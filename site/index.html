@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A reproducible, uncertainty-aware comparison of grade 4 district achievement estimates using Stanford SEDA 2025.2.">
+  <title>District Learning Context Explorer</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="data/dashboard-data.js" defer></script>
+  <script src="assets/plotly-3.1.0.min.js" defer></script>
+  <script src="assets/dashboard.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header">
+    <div class="shell header-row">
+      <a class="brand" href="./" aria-label="District Learning Context Explorer home">
+        <span class="brand-mark" aria-hidden="true">DL</span>
+        <span>
+          <strong>District Learning Context Explorer</strong>
+          <small>Independent public-data portfolio</small>
+        </span>
+      </a>
+      <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+        <button id="explore-tab" class="tab is-active" type="button" role="tab" aria-selected="true" aria-controls="explore-panel" data-tab="explore">Explore districts</button>
+        <button id="technical-tab" class="tab" type="button" role="tab" aria-selected="false" aria-controls="technical-panel" data-tab="technical">Technical process</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section id="explore-panel" class="tab-panel" role="tabpanel" aria-labelledby="explore-tab">
+      <div class="analysis-hero">
+        <div class="shell hero-grid">
+          <div>
+            <p class="eyebrow">Grade 4 · SEDA 2025.2</p>
+            <h1 id="district-heading">Loading district data…</h1>
+            <p id="district-subtitle" class="hero-copy">Preparing an uncertainty-aware comparison with districts serving similar communities.</p>
+            <div class="hero-meta" aria-label="Selected district details">
+              <span id="district-id-meta">SEDA district</span>
+              <span id="district-state-meta">State</span>
+              <span>2024 context snapshot</span>
+            </div>
+          </div>
+          <aside class="selector-card" aria-labelledby="selector-title">
+            <div class="selector-heading">
+              <div>
+                <p class="eyebrow dark">Choose a district</p>
+                <h2 id="selector-title">Explore the national catalog</h2>
+              </div>
+              <span id="availability-indicator" class="status-dot">Loading</span>
+            </div>
+            <div class="field-grid">
+              <label>
+                <span>State</span>
+                <select id="state-select" aria-label="Select a state"></select>
+              </label>
+              <label>
+                <span>District</span>
+                <select id="district-select" aria-label="Select a district"></select>
+              </label>
+            </div>
+            <p class="selector-note">The selector includes all <strong id="catalog-count">—</strong> districts in the SEDA catalog. Availability varies by grade, year, and source coverage.</p>
+          </aside>
+        </div>
+      </div>
+
+      <div class="shell content-shell">
+        <div class="interpretation-note">
+          <strong>Read this as context, not a district grade.</strong>
+          These are modeled, aggregate estimates for groups of students. They do not evaluate an individual child, school, teacher, curriculum, or cause.
+        </div>
+
+        <section id="unavailable-panel" class="unavailable-card" hidden aria-live="polite">
+          <p class="eyebrow dark">Why a profile is not shown</p>
+          <h2 id="unavailable-title">Grade 4 comparison unavailable</h2>
+          <p id="unavailable-copy"></p>
+          <p class="small">The district remains selectable so missing coverage is visible rather than silently dropped. Try another district or open the Technical Process tab to see the coverage rules.</p>
+        </section>
+
+        <div id="analysis-content" hidden>
+          <section aria-labelledby="latest-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow dark">Latest reported evidence</p>
+                <h2 id="latest-heading">District estimate and matched-peer benchmark</h2>
+              </div>
+              <div id="primary-pool-label" class="quiet-label">—</div>
+            </div>
+            <div class="metric-grid">
+              <article id="math-card" class="metric-card"></article>
+              <article id="reading-card" class="metric-card"></article>
+            </div>
+          </section>
+
+          <section aria-labelledby="trend-heading">
+            <div class="section-heading text-only">
+              <div>
+                <p class="eyebrow dark">Achievement over time</p>
+                <h2 id="trend-heading">Math and reading remain separate</h2>
+                <p>Values use the Cohort Standardized scale within a fixed grade and subject. The band is the peer group’s middle 50%; district error bars show 95% intervals. The visible gap preserves the absence of 2020 and 2021 results.</p>
+              </div>
+            </div>
+            <div class="chart-grid">
+              <article class="chart-card">
+                <div id="math-chart" class="chart" aria-label="Grade 4 mathematics trend chart"></div>
+              </article>
+              <article class="chart-card">
+                <div id="reading-chart" class="chart" aria-label="Grade 4 reading trend chart"></div>
+              </article>
+            </div>
+          </section>
+
+          <section aria-labelledby="match-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow dark">Comparison design</p>
+                <h2 id="match-heading">Why these districts are comparable</h2>
+                <p>Peers are selected from 2024 community context only. Achievement never enters the match.</p>
+              </div>
+              <span class="outcome-badge">0 outcome variables used</span>
+            </div>
+            <div class="two-column-grid">
+              <article class="panel-card">
+                <h3>Context balance</h3>
+                <div class="table-scroll">
+                  <table>
+                    <thead><tr><th>Measure</th><th>This district</th><th>Peer median</th><th>Peer middle 50%</th></tr></thead>
+                    <tbody id="context-table-body"></tbody>
+                  </table>
+                </div>
+              </article>
+              <article class="panel-card">
+                <h3>Match diagnostic</h3>
+                <p id="selection-status-copy"></p>
+                <div id="distance-bars" class="distance-bars"></div>
+                <details>
+                  <summary>Show selected peers</summary>
+                  <div class="table-scroll">
+                    <table>
+                      <thead><tr><th>District</th><th>State</th><th>Distance</th><th>Locale</th><th>Gr. 3–8 enrollment</th></tr></thead>
+                      <tbody id="peer-table-body"></tbody>
+                    </table>
+                  </div>
+                </details>
+              </article>
+            </div>
+          </section>
+
+          <section aria-labelledby="sensitivity-heading">
+            <div class="section-heading text-only">
+              <div>
+                <p class="eyebrow dark">Sensitivity check</p>
+                <h2 id="sensitivity-heading">Same-state and national reference groups</h2>
+                <p>Same-state peers share more policy and assessment context. National analogs exclude the target state and are descriptive because linking errors may be correlated within states.</p>
+              </div>
+            </div>
+            <article class="panel-card">
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>Reference group</th><th>Subject</th><th>Latest</th><th>Reporting peers</th><th>District</th><th>Peer mean</th><th>Interpretation</th></tr></thead>
+                  <tbody id="sensitivity-table-body"></tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <section class="evidence-grid" aria-label="Interpretation limits">
+            <article class="evidence-card can">
+              <p class="eyebrow dark">This can support</p>
+              <h2>A careful comparison</h2>
+              <ul>
+                <li>District-level trends within grade and subject</li>
+                <li>A fixed, contextually similar peer benchmark</li>
+                <li>An uncertainty-aware discussion of apparent differences</li>
+              </ul>
+            </article>
+            <article class="evidence-card cannot">
+              <p class="eyebrow dark">This cannot support</p>
+              <h2>A causal or individual claim</h2>
+              <ul>
+                <li>A ranking of districts, schools, teachers, or curricula</li>
+                <li>A conclusion about one child’s likely outcome</li>
+                <li>A claim about why an estimate changed</li>
+              </ul>
+            </article>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="technical-panel" class="tab-panel technical-panel" role="tabpanel" aria-labelledby="technical-tab" hidden>
+      <div class="technical-hero">
+        <div class="shell">
+          <p class="eyebrow">Under the dashboard</p>
+          <h1>From 1.21 GB of source data to an auditable decision surface</h1>
+          <p>Python and SQL verify the inputs, construct a stable district model, select peers without using outcomes, carry uncertainty forward, and publish a portable browser experience.</p>
+          <div class="technical-kpis" aria-label="Pipeline summary">
+            <div><strong id="source-size-kpi">—</strong><span>verified source files</span></div>
+            <div><strong id="staged-rows-kpi">—</strong><span>achievement rows staged</span></div>
+            <div><strong id="districts-kpi">—</strong><span>stable district records</span></div>
+            <div><strong id="qa-kpi">—</strong><span>QA checks, no blocking failures</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shell content-shell technical-content">
+        <section aria-labelledby="architecture-heading">
+          <div class="section-heading text-only">
+            <div>
+              <p class="eyebrow dark">Architecture</p>
+              <h2 id="architecture-heading">One controlled path from download to interpretation</h2>
+              <p>The database is rebuilt atomically: a refresh writes a temporary <code>.building.duckdb</code>, runs quality checks, and replaces the prior database only after the checks succeed.</p>
+            </div>
+          </div>
+          <ol class="pipeline" aria-label="Analytical pipeline">
+            <li><span>01</span><strong>Verify</strong><p>Names, sizes, headers, required columns, and SHA-256 fingerprints</p></li>
+            <li><span>02</span><strong>Stage</strong><p>Explicit CSV parsing, all-string intake, and controlled type conversion</p></li>
+            <li><span>03</span><strong>Model</strong><p>Stable district dimension, analytical marts, coverage, and audit tables</p></li>
+            <li><span>04</span><strong>Match</strong><p>Deterministic context-only peer selection with recorded relaxation</p></li>
+            <li><span>05</span><strong>Quantify</strong><p>Pool-specific errors, coverage gates, precision flags, and intervals</p></li>
+            <li><span>06</span><strong>Publish</strong><p>Compact derived bundle, offline charting, and browser-side interaction</p></li>
+          </ol>
+          <div class="stack-list" aria-label="Technology stack">
+            <span>Python 3.11+</span><span>SQL</span><span>DuckDB</span><span>pandas</span><span>NumPy</span><span>Plotly</span><span>Jinja2</span><span>PyYAML</span><span>pytest</span><span>Ruff</span><span>GitHub Actions</span><span>GitHub Pages</span>
+          </div>
+        </section>
+
+        <section aria-labelledby="volume-heading">
+          <div class="section-heading text-only">
+            <div>
+              <p class="eyebrow dark">Data volume</p>
+              <h2 id="volume-heading">Exact scale, without double-counting layers</h2>
+              <p>Staging and marts deliberately represent some records more than once, so the dashboard reports each layer separately instead of claiming an inflated “records processed” total.</p>
+            </div>
+          </div>
+          <div class="two-column-grid technical-grid">
+            <article class="panel-card">
+              <h3>Source contracts</h3>
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>Source</th><th>Size</th><th>Columns</th><th>Fingerprint</th></tr></thead>
+                  <tbody id="source-table-body"></tbody>
+                </table>
+              </div>
+              <details>
+                <summary>Show full SHA-256 fingerprints</summary>
+                <div id="hash-list" class="hash-list"></div>
+              </details>
+            </article>
+            <article class="panel-card">
+              <h3>Warehouse and publication artifacts</h3>
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>Layer or artifact</th><th>Exact scale</th></tr></thead>
+                  <tbody id="model-table-body"></tbody>
+                </table>
+              </div>
+              <details>
+                <summary>Show the nine ordered SQL models</summary>
+                <ol id="sql-model-list" class="mono-list"></ol>
+              </details>
+            </article>
+          </div>
+        </section>
+
+        <section aria-labelledby="matching-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow dark">Analytical specification</p>
+              <h2 id="matching-heading">Similarity first; outcomes later</h2>
+              <p>An explicit feature allowlist makes circular matching mechanically harder: no achievement estimate can enter peer selection.</p>
+            </div>
+            <span class="outcome-badge">Outcome fields used: []</span>
+          </div>
+          <div class="domain-grid">
+            <article><strong>District scale</strong><span>25%</span><p>Log enrollment in grades 3–8</p></article>
+            <article><strong>Economic context</strong><span>25%</span><p>Family poverty and socioeconomic composite</p></article>
+            <article><strong>Student composition</strong><span>25%</span><p>Six race and ethnicity shares</p></article>
+            <article><strong>Place</strong><span>25%</span><p>City, suburb, town, and rural shares</p></article>
+          </div>
+          <article class="method-card">
+            <ol>
+              <li>Freeze context at 2024 and require the selected grade in the district span.</li>
+              <li>Begin with the same grade-span bucket and dominant locale, enrollment within 4×, and poverty within 15 percentage points.</li>
+              <li>Scale numeric differences on national 5th-to-95th percentile ranges; compare composition vectors with Hellinger distance.</li>
+              <li>Select up to 15 same-state peers. Require at least 10 before that pool becomes the primary benchmark.</li>
+              <li>Select 20 national analogs outside the target state, with no more than three from any state.</li>
+              <li>If a stage must relax, expose the stage in the dashboard rather than hiding it.</li>
+            </ol>
+          </article>
+        </section>
+
+        <section aria-labelledby="uncertainty-heading">
+          <div class="section-heading text-only">
+            <div>
+              <p class="eyebrow dark">Uncertainty and interpretation</p>
+              <h2 id="uncertainty-heading">The display can refuse to overstate a result</h2>
+            </div>
+          </div>
+          <div class="two-column-grid">
+            <article class="rule-card">
+              <h3>Same-state peers</h3>
+              <p>Use within-state standard errors. “Higher” or “lower” language requires 10 reporting peers, at least 70% peer coverage, and a target estimate that is not low precision.</p>
+            </article>
+            <article class="rule-card">
+              <h3>National analogs</h3>
+              <p>Use NAEP-linking-adjusted standard errors and remain descriptive. Shared state-level linking uncertainty makes a simple cross-state significance label too strong.</p>
+            </article>
+          </div>
+          <div class="precision-rule">
+            <strong>Low-precision flag</strong>
+            <span>tested count below 50</span><span>estimated test count</span><span>95% margin above 0.50 CS SD</span>
+          </div>
+        </section>
+
+        <section aria-labelledby="qa-heading">
+          <div class="section-heading text-only">
+            <div>
+              <p class="eyebrow dark">Quality and observability</p>
+              <h2 id="qa-heading">Warnings are surfaced, not converted into false success</h2>
+            </div>
+          </div>
+          <div id="qa-status-grid" class="qa-status-grid"></div>
+          <div id="qa-warning-list" class="warning-list"></div>
+        </section>
+
+        <section class="debug-story" aria-labelledby="debug-heading">
+          <div>
+            <p class="eyebrow">Debugging story</p>
+            <h2 id="debug-heading">The sample passed. Row 1.24 million did not.</h2>
+            <p>A quoted district name containing a comma exposed why production-scale validation matters.</p>
+          </div>
+          <ol>
+            <li><strong>Autodetection looked healthy.</strong><span>The initial sample contained mostly unquoted district names.</span></li>
+            <li><strong>The full extraction failed.</strong><span>The first observed pattern appeared at physical line <span id="failure-line">1,236,002</span>.</span></li>
+            <li><strong>The parser contract became explicit.</strong><span>Delimiter, quote, escape, and all-string ingestion were specified before controlled <code>TRY_CAST</code> typing.</span></li>
+            <li><strong>The lesson became a test.</strong><span>Validate the complete path, not merely a convenient sample.</span></li>
+          </ol>
+        </section>
+
+        <section aria-labelledby="governance-heading">
+          <div class="section-heading text-only">
+            <div>
+              <p class="eyebrow dark">Git and data governance</p>
+              <h2 id="governance-heading">Public demonstration, deliberate boundary</h2>
+              <p id="publication-note"></p>
+            </div>
+          </div>
+          <div class="boundary-grid">
+            <article>
+              <span class="boundary-label public">Public repository</span>
+              <h3>Reproducible code and selected derived evidence</h3>
+              <p>Configuration, SQL models, Python, tests, methods, aggregate validation, and the compact grade-4 dashboard bundle.</p>
+            </article>
+            <article>
+              <span class="boundary-label local">Local governed workspace</span>
+              <h3>Inputs and full analytical workspace</h3>
+              <p>The 1.21 GB source files, DuckDB database, unrestricted local outputs, and transient build artifacts remain outside Git.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <p><strong>Dataset:</strong> Reardon et al. (2026), <em>Stanford Education Data Archive, Version 2025.2</em>. <a href="https://doi.org/10.25740/np279jm6134">DOI 10.25740/np279jm6134</a>.</p>
+      <p><a href="https://github.com/nilkamal11/district-learning-context-explorer">Source and methodology</a> · Independent work by Nilkamal Shah. Not endorsed by Stanford, EOP, HMH, or NWEA.</p>
+    </div>
+  </footer>
+
+  <noscript>This dashboard requires JavaScript to select districts and render charts.</noscript>
+</body>
+</html>

@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from district_context.config import database_path, project_config
+from district_context.dashboard import build_dashboard
 from district_context.database import build_database, connect
 from district_context.qa import has_failures, run_qa
 from district_context.report import build_profile
@@ -187,6 +188,13 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument("--state", default="IL")
     demo.add_argument("--grade", type=int, default=default_grade, choices=range(3, 9))
 
+    dashboard = subparsers.add_parser(
+        "dashboard", help="Build the static multi-district portfolio dashboard"
+    )
+    dashboard.add_argument("--district-id", default="1700044")
+    dashboard.add_argument("--grade", type=int, default=default_grade, choices=range(3, 9))
+    dashboard.add_argument("--output-dir", default="site")
+
     run_all = subparsers.add_parser("run-all", help="Build, test, and render a profile")
     run_all.add_argument("--district-id")
     run_all.add_argument("--demo-state", default="IL")
@@ -237,6 +245,17 @@ def main(argv: list[str] | None = None) -> None:
         target_id = _choose_demo_district(args.state, args.grade)
         print(f"Selected demonstration district {target_id} by the documented median-size rule.")
         _run_profile(target_id, args.grade, None)
+        return
+    if args.command == "dashboard":
+        destination = Path(args.output_dir).resolve()
+        with connect(read_only=True) as connection:
+            page = build_dashboard(
+                connection,
+                grade=args.grade,
+                default_district_id=normalize_district_id(args.district_id),
+                destination=destination,
+            )
+        print(f"Dashboard data written for {page}")
         return
     raise SystemExit(f"Unknown command: {args.command}")
 

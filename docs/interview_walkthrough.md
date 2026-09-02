@@ -38,7 +38,7 @@ SEDA recommends CS or YS for research. CS avoids extra vertical-linking assumpti
 
 **What would you add first in production?**
 
-CCD agency type and status, SAIPE poverty as a sensitivity measure, stronger crosswalk quarantine rules, access controls, incremental builds, monitoring, and review with a quantitative researcher. I would also obtain written guidance from the data provider before using any real-data output in an employment portfolio.
+CCD agency type and status, SAIPE poverty as a sensitivity measure, stronger crosswalk quarantine rules, access controls, incremental builds, monitoring, and review with a quantitative researcher. I would retain the provider's portfolio-use confirmation with the project record and seek updated guidance before materially expanding the published data scope.
 
 **What does this not demonstrate?**
 

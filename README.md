@@ -6,6 +6,8 @@ A reproducible, uncertainty-aware way to ask a practical education question:
 
 The first view focuses on grade 4 because that is where the question became personally meaningful to me as the parent of a fourth-grade daughter. The analytical design covers grades 3 through 8 and keeps the selected district configurable. No family, child, school, or home-district information is stored in the repository.
 
+**[Open the interactive dashboard](https://nilkamal11.github.io/district-learning-context-explorer/)** to choose a state and district or inspect the full technical process behind the display.
+
 ## What this project demonstrates
 
 - Python orchestration, feature engineering, peer selection, uncertainty calculations, and report generation
@@ -44,7 +46,7 @@ Version 0.1 uses three files from the [Stanford Education Data Archive 2025.2 re
 
 The achievement file covers spring 2009 through 2019 and 2022 through 2025. There are no 2020 or 2021 achievement records, so the report shows a visible break instead of drawing a continuous line across those years.
 
-Source files are governed by Stanford's [Data Use Agreement](https://edopportunity.org/trends/data/). They are not included in this repository. The current agreement limits the datasets to permitted noncommercial use and says data files may not be published in full or in part without explicit permission. Because an employment portfolio may implicate those terms, keep all real-data reports and extracts local unless Stanford confirms the intended use in writing. This code-only repository does not grant data rights.
+Source files are governed by Stanford's [Data Use Agreement](https://edopportunity.org/trends/data/). Stanford confirmed to the project owner that this Git portfolio use is permitted. The repository publishes a compact, derived grade-4 dashboard bundle for the interactive demonstration; it does not include the raw source files, local DuckDB database, or unrestricted working outputs. That confirmation applies to this project owner's use and does not grant downstream users independent rights to Stanford data.
 
 ## Quick start
 
@@ -62,6 +64,7 @@ district-context qa
 district-context find "district name"
 district-context resolve --source-id 0123456 --year 2024
 district-context profile --district-id 0123456 --grade 4
+district-context dashboard --district-id 1700044 --grade 4
 ```
 
 The administrative crosswalk in this release covers 2022 through 2025, so `resolve` does not imply historical source-ID coverage for 2009 through 2019.
@@ -72,7 +75,12 @@ For a neutral smoke test, the demo command chooses the eligible district nearest
 district-context demo --state IL --grade 4
 ```
 
-Local outputs are written to `data/output/` and are ignored by Git. The HTML profile embeds its chart library once so the local demonstration works without an internet connection. Run `python scripts/check_no_restricted_data.py` before every commit. The public [validation snapshot](reports/validation_snapshot.md) records only aggregate build and QA evidence, never district rows or peer membership.
+Local outputs are written to `data/output/` and are ignored by Git. The single-profile HTML embeds its chart library once so it works without an internet connection. The `dashboard` command builds the public static site from a compact grade-specific slice; the browser then performs the same deterministic matching and uncertainty calculations when a district is selected. Run both publication guards before every commit:
+
+```powershell
+python scripts/check_no_restricted_data.py
+python scripts/check_public_dashboard.py
+```
 
 The supported setup is a cloned repository with the editable install shown above. A standalone wheel is not currently a supported execution mode because the versioned SQL and configuration live at the repository root.
 
@@ -114,6 +122,7 @@ src/district_context/      Pipeline, matching, QA, CLI, and reporting code
 tests/                     Test-only software fixtures and contract tests
 docs/                      Research specification, methods, lineage, and limits
 reports/                   Public documentation and QA catalog, never raw rows
+site/                      GitHub Pages dashboard and approved derived bundle
 data/raw/                  Local source files, ignored by Git
 data/processed/            Local DuckDB database, ignored by Git
 data/output/               Local reports and manifests, ignored by Git

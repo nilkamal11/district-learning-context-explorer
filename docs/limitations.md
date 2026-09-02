@@ -10,4 +10,4 @@
 8. The profile does not evaluate instructional quality, curricula, teachers, schools, or individual students.
 9. A good district-level comparison should begin a question, not end one. Local evidence and qualitative context still matter.
 10. The fixed 2024 peers may not have been equally similar to the target in earlier years.
-11. Real-data outputs remain local. Employment-related display or publication should wait for written clarification under Stanford's Data Use Agreement.
+11. Stanford confirmed that this project owner's Git portfolio use is permitted. Raw inputs, the local DuckDB database, and unrestricted working outputs remain local; only the compact dashboard bundle is published.

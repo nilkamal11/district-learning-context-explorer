@@ -20,6 +20,7 @@ The pipeline executes and stores checks for:
 - explicit CSV delimiter, quote, and escape behavior for names containing commas;
 - achievement leakage into the peer model;
 - deterministic peer selection and exclusion of the target from its own peers;
-- a Git-level guard against committing restricted raw or row-level data.
+- a Git-level guard against committing raw files, the local database, or unapproved output data;
+- a public-dashboard contract check for schema, counts, source verification, size, and local-path leakage.
 
-Actual run results remain local because they are tied to licensed source files that the repository does not redistribute.
+Full run artifacts remain local. The published dashboard uses the separately checked, permission-approved, grade-4 derived bundle.

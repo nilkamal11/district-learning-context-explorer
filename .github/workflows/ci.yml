@@ -17,3 +17,4 @@ jobs:
       - run: ruff check .
       - run: pytest
       - run: python scripts/check_no_restricted_data.py
+      - run: python scripts/check_public_dashboard.py

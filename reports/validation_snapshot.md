@@ -19,7 +19,7 @@ The fingerprints identify the exact retrieved files used for this run. They are 
 - 2 diagnostic warnings were retained rather than hidden:
   - 1,841 2024 administrative-district rows have a released urbanicity category different from the largest locale share. Matching preserves the released category and keeps the recomputation for audit.
   - 589 multi-component rows across 41 districts in AZ, NM, and UT from 2016–2019 are excluded from the within-state design and recorded in `mart_exclusion_audit`.
-- 19 software tests passed, including all SQL models, source-manifest behavior, clean-clone CLI routing, outcome allowlisting, state-cap-aware national relaxation, sparse-peer gates, pool-specific precision, and a strict full-report render.
+- 21 software test cases passed, including all SQL models, source-manifest behavior, clean-clone CLI routing, outcome allowlisting, state-cap-aware national relaxation, sparse-peer gates, pool-specific precision, dashboard serialization, and a strict full-report render.
 - Ruff completed with no findings.
 
 ## Rendered-report checks
@@ -31,6 +31,15 @@ The fingerprints identify the exact retrieved files used for this run. They are 
 - Browser console warnings and errors: 0.
 - National analogs were verified to exclude the target state.
 
+## Interactive-dashboard checks
+
+- The public bundle contains 19,461 catalog districts, 17,852 context rows, and 311,427 grade-4 achievement rows in 21.90 MB.
+- Browser calculations for the neutral Illinois demonstration district reproduced the Python peer IDs, context distances, latest estimates, peer summaries, uncertainty intervals, and national sensitivity results.
+- State and district selection was exercised for Illinois and Pennsylvania, including both same-state and national-fallback primary pools.
+- Argo CHSD 217 remains selectable and correctly displays a grade-4-unavailable explanation instead of substituting another district.
+- The Technical Process tab, desktop layout, and 390 × 844 phone layout were inspected visually.
+- Browser console warnings and errors: 0.
+
 ## Publication boundary
 
-The real-data HTML profile, peer CSV, JSON summary, source files, and DuckDB database remain local and ignored by Git. Stanford's Data Use Agreement should be clarified in writing before any real-data output is used as public employment-portfolio evidence.
+Stanford confirmed to the project owner that this Git portfolio use is permitted. The public dashboard contains a checked, compact grade-4 derived bundle. Raw source files, the DuckDB database, single-district working reports, peer CSV files, and unrestricted JSON outputs remain local and ignored by Git.

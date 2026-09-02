@@ -41,6 +41,8 @@ BLOCKED_OUTPUT_NAME_PREFIXES = (
     "qa_summary",
     "source_inventory",
 )
+PUBLIC_SITE_SUFFIXES = {".css", ".html", ".js"}
+PUBLIC_DERIVED_DATA = "site/data/dashboard-data.js"
 
 
 def main() -> None:
@@ -51,15 +53,26 @@ def main() -> None:
     violations = []
     for relative in tracked:
         path = Path(relative)
+        public_site_asset = relative.startswith("site/") and path.suffix.lower() in (
+            PUBLIC_SITE_SUFFIXES
+        )
+        unapproved_site_data = relative.startswith("site/data/") and relative != (
+            PUBLIC_DERIVED_DATA
+        )
         restricted_data_path = relative.startswith("data/") and relative not in ALLOWED_DATA_FILES
-        row_level_artifact = path.suffix.lower() in BLOCKED_SUFFIXES
+        row_level_artifact = path.suffix.lower() in BLOCKED_SUFFIXES and not public_site_asset
         generated_output_name = path.name.lower().startswith(BLOCKED_OUTPUT_NAME_PREFIXES)
-        if restricted_data_path or row_level_artifact or generated_output_name:
+        if (
+            restricted_data_path
+            or row_level_artifact
+            or generated_output_name
+            or unapproved_site_data
+        ):
             violations.append(relative)
     if violations:
         joined = "\n  - ".join(violations)
         raise SystemExit(f"Restricted or row-level data are tracked:\n  - {joined}")
-    print("PASS: no restricted raw, processed, or row-level data are tracked")
+    print("PASS: no restricted raw, processed, or unapproved output data are tracked")
 
 
 if __name__ == "__main__":
