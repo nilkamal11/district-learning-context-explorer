@@ -187,12 +187,17 @@ def _file_size(relative_path: str) -> int | None:
     return path.stat().st_size if path.is_file() else None
 
 
+def _canonical_asset_digest(path: Path) -> str:
+    canonical_bytes = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(canonical_bytes).hexdigest()[:16]
+
+
 def _version_site_assets(destination: Path) -> None:
     index_path = destination / "index.html"
     html = index_path.read_text(encoding="utf-8")
     for relative_path in VERSIONED_SITE_ASSETS:
         asset_path = destination / relative_path
-        digest = hashlib.sha256(asset_path.read_bytes()).hexdigest()[:16]
+        digest = _canonical_asset_digest(asset_path)
         pattern = re.compile(
             rf'(?P<prefix>(?:src|href)="{re.escape(relative_path)})(?:\?v=[^"]*)?(?P<suffix>")'
         )

@@ -251,6 +251,11 @@ def _fail(message: str) -> None:
     raise SystemExit(message)
 
 
+def _canonical_asset_digest(path: Path) -> str:
+    canonical_bytes = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(canonical_bytes).hexdigest()[:16]
+
+
 def _exact_keys(value: Any, expected: set[str], label: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         _fail(f"{label} must be an object")
@@ -557,7 +562,7 @@ def main() -> None:
 
     index_html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
     for relative_path in VERSIONED_SITE_ASSETS:
-        digest = hashlib.sha256((ROOT / "site" / relative_path).read_bytes()).hexdigest()[:16]
+        digest = _canonical_asset_digest(ROOT / "site" / relative_path)
         expected_reference = f'{relative_path}?v={digest}'
         if index_html.count(expected_reference) != 1:
             _fail(
