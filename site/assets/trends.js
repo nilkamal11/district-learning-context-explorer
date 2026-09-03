@@ -197,6 +197,11 @@
     return `${Math.abs(value).toFixed(2)} standard deviations ${value > 0 ? "above" : "below"} Stanford’s fixed national reference`;
   };
 
+  const referenceSide = (value) => {
+    if (Math.abs(value) < 0.005) return "at the national reference";
+    return `${value > 0 ? "above" : "below"} the national reference`;
+  };
+
   const changeCopy = (change, baselineYear) => {
     if (Math.abs(change) < 0.005) return `Essentially unchanged from ${schoolYear(baselineYear)} at two decimal places.`;
     return `${Math.abs(change).toFixed(2)} standard deviations ${change > 0 ? "higher" : "lower"} than ${schoolYear(baselineYear)}.`;
@@ -242,9 +247,9 @@
     const latest = rows.at(-1);
     const latestYear = latest[fields.year];
     const latestEstimate = latest[fields.estimate];
-    elements["trend-record-count"].textContent = `${formatCount(rows.length)} reported years · latest ${schoolYear(latestYear)}`;
+    elements["trend-record-count"].textContent = `${formatCount(rows.length)} years · latest ${schoolYear(latestYear)}`;
     elements["trend-latest-value"].textContent = formatSigned(latestEstimate);
-    elements["trend-latest-detail"].textContent = `${schoolYear(latestYear)} · ${directionCopy(latestEstimate)}.`;
+    elements["trend-latest-detail"].textContent = `${schoolYear(latestYear)} · ${referenceSide(latestEstimate)}.`;
 
     for (const baselineYear of BASELINE_YEARS) {
       const comparison = baselineComparison(latestEstimate, latestYear, baselineYear);
@@ -265,7 +270,7 @@
       return [
         schoolYear(year),
         row ? formatCount(row[fields.tested_count]) : "Not available",
-        row?.[fields.tested_count_estimated] === 1 ? "estimated count" : "reported count",
+        row?.[fields.tested_count_estimated] === 1 ? "estimated by SEDA" : "reported",
         margins[index]
       ];
     });
@@ -276,7 +281,7 @@
       mode: "lines+markers",
       name: districtName(state.districtId),
       line: { color: "#dc7139", width: 3 },
-      marker: { color: "#dc7139", size: 7, line: { color: "#fffefa", width: 1 } },
+      marker: { color: "#dc7139", size: 7, line: { color: "#ffffff", width: 1 } },
       fill: "tozeroy",
       fillcolor: "rgba(220,113,57,.09)",
       error_y: {
@@ -293,8 +298,8 @@
     const layout = {
       margin: { l: 90, r: 24, t: 36, b: 72 },
       height: 430,
-      paper_bgcolor: "#fffefa",
-      plot_bgcolor: "#fffefa",
+      paper_bgcolor: "#ffffff",
+      plot_bgcolor: "#ffffff",
       font: { family: "Inter, Arial, sans-serif", color: "#344852", size: 11 },
       hovermode: "closest",
       showlegend: false,
@@ -373,7 +378,7 @@
         <td>${formatScore(estimate, 3)}</td>
         <td>${formatScore(estimate - margin, 3)} to ${formatScore(estimate + margin, 3)}</td>
         <td>${formatCount(row[fields.tested_count])}</td>
-        <td>${estimatedCount ? '<span class="status-tag warn">Estimated count</span>' : "Reported count"}</td>
+        <td>${estimatedCount ? '<span class="status-tag warn">Estimated by SEDA</span>' : "Reported"}</td>
       </tr>`;
     }).join("");
   };
@@ -399,15 +404,15 @@
     const latestYear = latest[state.indexed.fields.year];
     elements["trend-data-note"].hidden = latestYear >= YEARS.at(-1);
     elements["trend-data-note"].textContent = latestYear < YEARS.at(-1)
-      ? `The public file has no released spring ${YEARS.at(-1)} result for this district, grade, and subject. The latest available result is ${schoolYear(latestYear)} (spring ${latestYear}).`
+      ? `No spring ${YEARS.at(-1)} result is available for this selection. Latest: ${schoolYear(latestYear)} (spring ${latestYear}).`
       : "";
     renderHero(latest);
     renderSummary(rows);
-    elements["simple-trend-heading"].textContent = `${name}’s ${gradeSubject()} estimates by year`;
+    elements["simple-trend-heading"].textContent = `${name}: ${gradeSubject()} by year`;
     elements["trend-chart-caption"].textContent = "Each dot is one spring district estimate. No annual estimates are available for 2020 or 2021.";
     renderRecords(rows);
     renderChart(rows);
-    elements["trend-status"].textContent = `${formatCount(rows.length)} reported school years · latest ${schoolYear(latestYear)} · ${name} (${state.districtId}).`;
+    elements["trend-status"].textContent = `${formatCount(rows.length)} years loaded · latest ${schoolYear(latestYear)}`;
     elements["trend-status"].classList.remove("is-error");
     updateUrl();
   };
@@ -456,7 +461,7 @@
       document.execCommand("copy");
       input.remove();
     }
-    elements["trend-status"].textContent = "Link copied. It will reopen this district, grade, and subject.";
+    elements["trend-status"].textContent = "Link copied.";
   };
 
   const initialize = () => {

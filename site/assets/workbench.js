@@ -248,8 +248,8 @@
 
   const chartBase = () => ({
     margin: { l: 60, r: 24, t: 58, b: 72 },
-    paper_bgcolor: "#fffefa",
-    plot_bgcolor: "#fffefa",
+    paper_bgcolor: "#ffffff",
+    plot_bgcolor: "#ffffff",
     font: { family: "Inter, Arial, sans-serif", color: "#344852", size: 11 },
     hovermode: "closest",
     legend: { orientation: "h", y: -0.22, x: 0, font: { size: 10 } },
@@ -269,9 +269,9 @@
         if (!row) return [schoolYear(CHART_YEARS[rowIndex]), "Missing", "Not available", "Not available"];
         return [
           schoolYear(CHART_YEARS[rowIndex]),
-          isLowPrecision(row) ? "Low precision" : "Reported",
+          isLowPrecision(row) ? "Low precision" : "No precision flag",
           formatNumber(row[fields.tested_count]),
-          row[fields.tested_count_estimated] === 1 ? "Estimated count" : "Reported count",
+          row[fields.tested_count_estimated] === 1 ? "Estimated by SEDA" : "Reported",
           margins[rowIndex]
         ];
       });
@@ -285,7 +285,7 @@
         marker: { color: COLORS[index], size: 6 },
         error_y: { type: "data", array: margins, visible: true, color: COLORS[index], thickness: 0.8, width: 2 },
         connectgaps: false,
-        hovertemplate: `%{customdata[0]}<br>Estimate %{y:.3f}<br>${CONFIDENCE_PERCENT}% margin ±%{customdata[4]:.3f}<br>Tests represented %{customdata[2]} (%{customdata[3]})<br>%{customdata[1]}<extra>%{fullData.name}</extra>`
+        hovertemplate: `%{customdata[0]}<br>Average score %{y:.3f}<br>${CONFIDENCE_PERCENT}% margin ±%{customdata[4]:.3f}<br>Tests represented %{customdata[2]} (%{customdata[3]})<br>%{customdata[1]}<extra>%{fullData.name}</extra>`
       };
     });
     const hasTrendData = traces.some((trace) => trace.y.some((value) => value !== null));
@@ -294,7 +294,7 @@
       title: { text: `${SUBJECT_LABELS[state.subject]}, grade ${state.grade}`, x: 0.02, xanchor: "left", font: { size: 17, color: "#152632" } },
       height: 440,
       xaxis: { ...chartBase().xaxis, title: "Spring assessment year", dtick: 2, range: [2008.6, lastYear + 0.4] },
-      yaxis: { ...chartBase().yaxis, title: "CS standard deviations" },
+      yaxis: { ...chartBase().yaxis, title: "Average score vs. national reference" },
       shapes: [{ type: "rect", x0: 2019.5, x1: 2021.5, y0: 0, y1: 1, yref: "paper", fillcolor: "rgba(100,114,124,.10)", line: { width: 0 } }],
       annotations: [
         { x: 2020.5, y: 1, yref: "paper", text: "No 2020–21 results", showarrow: false, yshift: 10, font: { size: 9, color: "#64727c" } },
@@ -302,7 +302,7 @@
       ]
     };
     window.Plotly.react("wb-trend-chart", traces, layout, { displaylogo: false, responsive: true, displayModeBar: false });
-    elements["wb-trend-caption"].innerHTML = `The gap preserves the absence of 2020 and 2021 results. Intervals use <strong>${basis} standard errors</strong>. ${state.endAt2024 ? `The ${YEARS.at(-1)} estimate is hidden for this sensitivity view.` : `SEDA’s ${YEARS.at(-1)} scale uses modeled state NAEP values because ${YEARS.at(-1) + 1} NAEP was not yet available.`} Hover a point for detail; the records table provides the same values for keyboard and screen-reader users.`;
+    elements["wb-trend-caption"].innerHTML = `SEDA does not report annual results for 2020 or 2021, so the lines stop in 2019 and restart in 2022. The ranges use <strong>${basis} standard errors</strong>. ${state.endAt2024 ? `${YEARS.at(-1)} is hidden in this view.` : `SEDA uses modeled state NAEP values for the ${YEARS.at(-1)} scale because ${YEARS.at(-1) + 1} NAEP was not yet available.`}`;
   };
 
   const renderDistribution = () => {
@@ -338,7 +338,7 @@
       height: 400,
       barmode: "overlay",
       bargap: 0.05,
-      xaxis: { ...chartBase().xaxis, title: "CS estimate" },
+      xaxis: { ...chartBase().xaxis, title: "Average score vs. national reference" },
       yaxis: { ...chartBase().yaxis, title: "District records" },
       shapes: estimates.length ? [
         { type: "rect", x0: q25, x1: q75, y0: 0, y1: 1, yref: "paper", fillcolor: "rgba(220,113,57,.08)", line: { width: 0 }, layer: "below" },
@@ -351,7 +351,7 @@
     elements["wb-distribution-summary"].textContent = estimates.length
       ? `${formatNumber(estimates.length)} districts · median ${formatNumber(median, 2)} · middle 50% ${formatNumber(q25, 2)} to ${formatNumber(q75, 2)}`
       : "No released records";
-    elements["wb-distribution-caption"].textContent = `The ${universeLabel} distribution includes every district with a released ${schoolYear(state.year)} result. It is a broad reference distribution rather than the matched comparison used on Explore.`;
+    elements["wb-distribution-caption"].textContent = `Every ${universeLabel} district with a released ${schoolYear(state.year)} result counts once. Selected districts are highlighted; this is separate from the matched group on Compare.`;
   };
 
   const renderMetrics = () => {
@@ -403,8 +403,8 @@
         <td>${formatNumber(estimate, 3)}</td>
         <td>${formatNumber(estimate - margin, 3)} to ${formatNumber(estimate + margin, 3)}<br><span class="small">SE ${formatNumber(error, 3)}</span></td>
         <td>${crossState ? "Cross-state adjusted" : "Within-state"}</td>
-        <td>${formatNumber(row[fields.tested_count])}${estimated ? '<br><span class="status-tag warn">estimated count</span>' : ""}</td>
-        <td><span class="status-tag ${lowPrecision ? "warn" : "pass"}">${lowPrecision ? "Use caution" : "Reported"}</span></td>
+        <td>${formatNumber(row[fields.tested_count])}${estimated ? '<br><span class="status-tag warn">Estimated by SEDA</span>' : ""}</td>
+        <td><span class="status-tag ${lowPrecision ? "warn" : "pass"}">${lowPrecision ? "Low precision" : "No precision flag"}</span></td>
       </tr>`;
     }).join("") : '<tr><td colspan="7">No released records match the selected districts, grade, subject, and evidence window.</td></tr>';
   };
@@ -433,7 +433,7 @@
     const unavailableNote = unavailable
       ? ` ${unavailable} selected district${unavailable === 1 ? " has" : "s have"} no released grade ${state.grade} ${state.subject === "mth" ? "math" : "reading"} records.`
       : "";
-    elements["wb-status"].textContent = `Grade ${state.grade} is ready: ${formatNumber(rowCount)} released math and reading records in the public workbench slice.${unavailableNote}`;
+    elements["wb-status"].textContent = `${formatNumber(rowCount)} grade ${state.grade} records loaded.${unavailableNote}`;
     updateUrl();
   };
 
@@ -508,7 +508,7 @@
     updateUrl();
     try {
       await navigator.clipboard.writeText(window.location.href);
-      elements["wb-status"].textContent = "Share link copied. It preserves the workbench controls and selected districts.";
+      elements["wb-status"].textContent = "Link copied.";
     } catch (_) {
       const input = document.createElement("textarea");
       input.value = window.location.href;
@@ -518,7 +518,7 @@
       input.select();
       document.execCommand("copy");
       input.remove();
-      elements["wb-status"].textContent = "Share link copied. It preserves the workbench controls and selected districts.";
+      elements["wb-status"].textContent = "Link copied.";
     }
   };
 
@@ -530,7 +530,7 @@
       return;
     }
     if (state.selectedDistricts.length >= 4) {
-      elements["wb-status"].textContent = "Remove a district before adding another. The comparison is limited to four.";
+      elements["wb-status"].textContent = "Four districts are already selected. Remove one to add another.";
       return;
     }
     state.selectedDistricts.push(districtId);

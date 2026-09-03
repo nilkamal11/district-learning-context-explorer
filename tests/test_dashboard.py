@@ -98,7 +98,7 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert 'id="trend-data-note"' in html
     assert 'id="trend-records-body"' in html
     assert 'src="assets/trends.js' in html
-    assert "Annual estimates for one district, grade, and subject" in html
+    assert "Compare district results" in html
     assert 'const DEFAULT_DISTRICT_ID = "1728890"' in trends_javascript
     assert "const BASELINE_YEARS = [2019, 2022]" in trends_javascript
     assert "loader.loadAchievementState" in trends_javascript
@@ -124,6 +124,8 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert "A score of +0.89 means" in html
     assert "It is not 89%" in html
     assert "SEDA 2025.2 technical documentation (PDF)" in html
+    assert "Estimated by SEDA" in html
+    assert "No precision flag" in workbench_javascript
 
     assert re.search(
         r'<section aria-labelledby="trend-heading">.*?<h2 id="trend-heading"', html, re.S

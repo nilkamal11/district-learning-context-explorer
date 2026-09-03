@@ -334,10 +334,10 @@
     if (!row) return "Not enough overlapping data";
     if (!row.hasCoverage) return "Not enough comparison districts reported data";
     if (crossState) return "Nationwide comparison shown for context only";
-    if (row.lowPrecision) return "The estimate is too uncertain for a clear comparison";
+    if (row.lowPrecision) return "Too uncertain to call higher or lower";
     if (row.differenceLow > 0) return "Higher than the comparison-group average";
     if (row.differenceHigh < 0) return "Lower than the comparison-group average";
-    return "Not clearly different from the comparison-group average";
+    return "No clear difference from the comparison-group average";
   };
 
   const latestSummary = (summary) => [...summary]
@@ -352,10 +352,10 @@
     element.innerHTML = `
       <h3>${escapeHtml(label)}</h3>
       <div class="metric-value">${formatNumber(latest.targetEstimate, 2)}</div>
-      <div class="metric-detail">${latest.year} estimated average · ${confidencePercent}% uncertainty interval ${formatNumber(latest.targetLow, 2)} to ${formatNumber(latest.targetHigh, 2)}</div>
+      <div class="metric-detail">${latest.year} score · ${confidencePercent}% range ${formatNumber(latest.targetLow, 2)} to ${formatNumber(latest.targetHigh, 2)}</div>
       <p class="comparison-copy">${escapeHtml(interpretation(latest, crossState))}</p>
-      <p class="metric-detail">Comparison-group average ${formatNumber(latest.peerMean, 2)}; typical result ${formatNumber(latest.peerMedian, 2)}; middle half ${formatNumber(latest.peerQ25, 2)} to ${formatNumber(latest.peerQ75, 2)}. ${latest.peerCount} of ${selectedCount} selected districts reported a result.</p>
-      ${latest.lowPrecision ? '<span class="precision-tag">Use extra caution: this estimate is less certain</span>' : ""}
+      <p class="metric-detail">Group average ${formatNumber(latest.peerMean, 2)} · median ${formatNumber(latest.peerMedian, 2)} · middle 50% ${formatNumber(latest.peerQ25, 2)} to ${formatNumber(latest.peerQ75, 2)} · ${latest.peerCount} of ${selectedCount} districts reported</p>
+      ${latest.lowPrecision ? '<span class="precision-tag">Low precision</span>' : ""}
     `;
   };
 
@@ -363,8 +363,8 @@
     title: { text: title, x: 0.02, xanchor: "left", font: { size: 17, color: "#152632" } },
     height: 420,
     margin: { l: 84, r: 20, t: 54, b: 82 },
-    paper_bgcolor: "#fffefa",
-    plot_bgcolor: "#fffefa",
+    paper_bgcolor: "#ffffff",
+    plot_bgcolor: "#ffffff",
     font: { family: "Inter, Arial, sans-serif", color: "#344852", size: 11 },
     legend: { orientation: "h", y: -0.28, x: 0, font: { size: 10 } },
     hovermode: "x unified",
@@ -430,15 +430,15 @@
 
   const renderMatchDiagnostics = (pool, poolLabel) => {
     const statusLabels = {
-      full_count_strict: "Close match on all four factors",
-      full_count_relaxed: "Match found after widening the search",
-      minimum_count_only: "Smaller comparison group",
-      insufficient: "Not enough similar districts"
+      full_count_strict: "Matched on all four factors",
+      full_count_relaxed: "Search widened to complete the group",
+      minimum_count_only: "Smaller group available",
+      insufficient: "Too few similar districts"
     };
     const statusClass = pool.status === "full_count_strict" ? "pass" : "warn";
     elements["selection-status-copy"].innerHTML = `
       <span class="status-tag ${statusClass}">${statusLabels[pool.status]}</span><br>
-      <span class="small">${pool.selected.length} ${poolLabel.toLowerCase()} selected from ${formatNumber(pool.universe)} available candidates. Shorter bars below mean a closer match.</span>
+      <span class="small">${pool.selected.length} ${poolLabel.toLowerCase()} selected from ${formatNumber(pool.universe)} candidates. Shorter bars mean a closer match.</span>
     `;
     const labels = {
       district_scale: "District size",
@@ -526,7 +526,7 @@
     const districtName = catalogRow[CATALOG.district_name];
     const state = catalogRow[CATALOG.state];
     elements["district-heading"].textContent = districtName;
-    elements["district-subtitle"].textContent = `How do this district’s grade ${grade} math and reading results compare with districts serving similar communities?`;
+    elements["district-subtitle"].textContent = `Grade ${grade} math and reading results alongside districts serving similar communities.`;
     elements["district-id-meta"].textContent = `SEDA district ${districtId}`;
     elements["district-state-meta"].textContent = state;
 
@@ -570,7 +570,7 @@
       return;
     }
 
-    elements["availability-indicator"].textContent = "Profile available";
+    elements["availability-indicator"].textContent = "Ready";
     elements["availability-indicator"].className = "status-dot available";
     elements["analysis-content"].hidden = false;
     elements["primary-pool-label"].textContent = `${primary.selected.length} ${peerLabel}`;

@@ -3,32 +3,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore annual district results, comparison groups, a public-data study plan, and the SQL and Python pipeline behind Stanford SEDA 2025.2.">
+  <meta name="description" content="A district-level view of Stanford SEDA 2025.2 results, comparisons, and methods.">
   <title>District Learning Context Explorer</title>
-  <link rel="stylesheet" href="assets/styles.css?v=0c34141f0e9334de">
-  <script src="data/dashboard-data.js?v=ce870af7643685df" defer></script>
+  <link rel="stylesheet" href="assets/styles.css?v=c1c7db0d9975f37b">
+  <script src="data/dashboard-data.js?v=f6e3a845bd906a9e" defer></script>
   <script src="assets/data-loader.js?v=afe022d8ac618143" defer></script>
-  <script src="assets/dashboard.js?v=711fca05bd130c04" defer></script>
-  <script src="assets/workbench.js?v=e8b8a858ed4766c8" defer></script>
-  <script src="assets/trends.js?v=18e946f127c330c4" defer></script>
+  <script src="assets/dashboard.js?v=ba37c0e82d312d40" defer></script>
+  <script src="assets/workbench.js?v=8bf105cbca7a103c" defer></script>
+  <script src="assets/trends.js?v=fdc43dabb6af0057" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">
     <div class="shell header-row">
       <a class="brand" href="./" aria-label="District Learning Context Explorer home">
-        <span class="brand-mark" aria-hidden="true">DL</span>
         <span>
           <strong>District Learning Context Explorer</strong>
-          <small>District trends from Stanford SEDA 2025.2</small>
+          <small>Stanford SEDA 2025.2</small>
         </span>
       </a>
       <nav class="tabs" role="tablist" aria-label="Dashboard sections">
-        <button id="explore-tab" class="tab is-active" type="button" role="tab" aria-label="Explore districts" aria-selected="true" aria-controls="explore-panel" data-tab="explore"><span class="tab-wide">Explore districts</span><span class="tab-short" aria-hidden="true">Explore</span></button>
-        <button id="trends-tab" class="tab" type="button" role="tab" aria-label="Simple district trends" aria-selected="false" aria-controls="trends-panel" data-tab="trends"><span class="tab-wide">Simple trends</span><span class="tab-short" aria-hidden="true">Trends</span></button>
-        <button id="workbench-tab" class="tab" type="button" role="tab" aria-label="SEDA workbench" aria-selected="false" aria-controls="workbench-panel" data-tab="workbench"><span class="tab-wide">SEDA workbench</span><span class="tab-short" aria-hidden="true">Data</span></button>
-        <button id="research-tab" class="tab" type="button" role="tab" aria-label="Study design" aria-selected="false" aria-controls="research-panel" data-tab="research"><span class="tab-wide">Study design</span><span class="tab-short" aria-hidden="true">Study</span></button>
-        <button id="technical-tab" class="tab" type="button" role="tab" aria-label="Technical process" aria-selected="false" aria-controls="technical-panel" data-tab="technical"><span class="tab-wide">Technical process</span><span class="tab-short" aria-hidden="true">Process</span></button>
+        <button id="explore-tab" class="tab is-active" type="button" role="tab" aria-label="Compare districts" aria-selected="true" aria-controls="explore-panel" data-tab="explore"><span class="tab-wide">Compare</span><span class="tab-short" aria-hidden="true">Compare</span></button>
+        <button id="trends-tab" class="tab" type="button" role="tab" aria-label="District trends" aria-selected="false" aria-controls="trends-panel" data-tab="trends"><span class="tab-wide">Trends</span><span class="tab-short" aria-hidden="true">Trends</span></button>
+        <button id="workbench-tab" class="tab" type="button" role="tab" aria-label="Explore SEDA data" aria-selected="false" aria-controls="workbench-panel" data-tab="workbench"><span class="tab-wide">Data</span><span class="tab-short" aria-hidden="true">Data</span></button>
+        <button id="research-tab" class="tab" type="button" role="tab" aria-label="Study idea" aria-selected="false" aria-controls="research-panel" data-tab="research"><span class="tab-wide">Study idea</span><span class="tab-short" aria-hidden="true">Study</span></button>
+        <button id="technical-tab" class="tab" type="button" role="tab" aria-label="Methods and technical process" aria-selected="false" aria-controls="technical-panel" data-tab="technical"><span class="tab-wide">Methods</span><span class="tab-short" aria-hidden="true">Methods</span></button>
       </nav>
     </div>
   </header>
@@ -38,9 +37,9 @@
       <div class="analysis-hero">
         <div class="shell hero-grid">
           <div>
-            <p class="eyebrow">Grade 4 · SEDA 2025.2</p>
+            <p class="eyebrow">Grade 4 comparison</p>
             <h1 id="district-heading">Loading district data…</h1>
-            <p id="district-subtitle" class="hero-copy">Preparing a grade 4 comparison with districts serving similar communities.</p>
+            <p id="district-subtitle" class="hero-copy">Math and reading results alongside districts serving similar communities.</p>
             <div class="hero-meta" aria-label="Selected district details">
               <span id="district-id-meta">SEDA district</span>
               <span id="district-state-meta">State</span>
@@ -50,8 +49,7 @@
           <aside class="selector-card" aria-labelledby="selector-title">
             <div class="selector-heading">
               <div>
-                <p class="eyebrow dark">Choose a district</p>
-                <h2 id="selector-title">Explore the national catalog</h2>
+                <h2 id="selector-title">Choose a district</h2>
               </div>
               <span id="availability-indicator" class="status-dot">Loading</span>
             </div>
@@ -65,7 +63,7 @@
                 <select id="district-select" aria-label="Select a district"></select>
               </label>
             </div>
-            <p class="selector-note">The selector includes all <strong id="catalog-count">—</strong> districts in the SEDA catalog. Availability varies by grade, year, and source coverage.</p>
+            <p class="selector-note"><strong id="catalog-count">—</strong> districts are listed. Some do not have every grade or year.</p>
           </aside>
         </div>
       </div>
@@ -82,8 +80,7 @@
           <section aria-labelledby="latest-heading">
             <div class="section-heading">
               <div>
-                <p class="eyebrow dark">Latest grade 4 results</p>
-                <h2 id="latest-heading">How the district compares now</h2>
+                <h2 id="latest-heading">Latest grade 4 comparison</h2>
               </div>
               <div id="primary-pool-label" class="quiet-label">—</div>
             </div>
@@ -98,10 +95,9 @@
               <div>
                 <h2 id="trend-heading">Average test score over time</h2>
                 <div id="score-chart-guide" class="chart-reading-guide">
-                  <strong>How to read these numbers</strong>
-                  <p>This page uses SEDA’s Cohort Standardized scale. The number measures the distance between a district’s estimated average and SEDA’s fixed national reference for the same grade and subject. Zero matches the reference. Positive numbers are above it and negative numbers are below it. The unit is a standard deviation, which lets Stanford place results from different state tests on one common scale.</p>
-                  <p><b>A score of +0.89 means the district’s estimated average is about 0.89 standard deviations above the reference.</b> It is not 89% and it is not an individual student score. The smaller range below each score shows uncertainty. For example, if the estimate is +1.03 and the range is +0.89 to +1.16, +1.03 is the best estimate and the other two numbers are the lower and upper ends of the range.</p>
-                  <p>Orange is the selected district. The dotted blue line is the typical result among comparison districts, the shaded area contains the middle 50%, and thin orange bars show uncertainty. Each point is the estimated district average for students tested that year. SEDA has no annual estimates for 2020 or 2021. Read <a href="https://edopportunity.org/trends/methods/">Stanford’s methods <span aria-hidden="true">↗</span></a> or the <a href="https://stacks.stanford.edu/file/np279jm6134/SEDA_documentation_2025.2.pdf">SEDA 2025.2 technical documentation (PDF) <span aria-hidden="true">↗</span></a>.</p>
+                  <strong>Reading the score</strong>
+                  <p>SEDA puts state tests on a common scale. Zero is its fixed national reference. A score of +0.89 means the district’s estimated average is 0.89 standard deviations above that reference. It is not 89% or an individual student score.</p>
+                  <p>Orange shows the selected district. Blue shows the comparison group, and the thin orange bars show uncertainty. There are no annual estimates for 2020 or 2021. See <a href="https://edopportunity.org/trends/methods/">Stanford’s explanation <span aria-hidden="true">↗</span></a> or the <a href="https://stacks.stanford.edu/file/np279jm6134/SEDA_documentation_2025.2.pdf">SEDA 2025.2 technical documentation (PDF) <span aria-hidden="true">↗</span></a>.</p>
                 </div>
               </div>
             </div>
@@ -118,13 +114,13 @@
           <section aria-labelledby="match-heading">
             <div class="section-heading text-only">
               <div>
-                <h2 id="match-heading">Why these districts are comparable</h2>
-                <p>The group is selected using four measures of community context. The full calculation is in Technical Process.</p>
+                <h2 id="match-heading">Comparison group</h2>
+                <p>These districts are the closest matches on size, economic context, student composition, and locale. The calculation is under Methods.</p>
               </div>
             </div>
             <div class="two-column-grid">
               <article class="panel-card">
-                <h3>Context balance</h3>
+                <h3>District context</h3>
                 <div class="table-scroll">
                   <table>
                     <thead><tr><th>Measure</th><th>This district</th><th>Typical comparison district</th><th>Middle half of group</th></tr></thead>
@@ -133,7 +129,7 @@
                 </div>
               </article>
               <article class="panel-card">
-                <h3>How closely the group matches</h3>
+                <h3>Match quality</h3>
                 <p id="selection-status-copy"></p>
                 <div id="distance-bars" class="distance-bars"></div>
                 <details>
@@ -152,7 +148,6 @@
           <section aria-labelledby="sensitivity-heading">
             <div class="section-heading text-only">
               <div>
-                <p class="eyebrow dark">Check the comparison</p>
                 <h2 id="sensitivity-heading">Same-state and nationwide results</h2>
                 <p>The same-state group is the main comparison because those districts share more of the same testing and policy environment. The nationwide group provides additional context.</p>
               </div>
@@ -174,9 +169,9 @@
       <div class="trends-hero">
         <div class="shell trends-hero-grid">
           <div>
-            <p class="eyebrow">Annual district results</p>
-            <h1>District results by grade and subject</h1>
-            <p class="hero-copy">Choose one district, grade, and subject. The starting view shows fourth-grade math in North Palos School District 117.</p>
+            <p class="eyebrow">District trend</p>
+            <h1>One district, grade, and subject</h1>
+            <p class="hero-copy">Choose a district to see its released annual results. The page opens with fourth-grade math in North Palos School District 117.</p>
           </div>
           <aside class="trend-hero-result">
             <p class="eyebrow dark">Starting view</p>
@@ -192,7 +187,7 @@
         <section class="trends-controls" aria-labelledby="trend-controls-heading">
           <div class="trends-controls-heading">
             <div>
-              <h2 id="trend-controls-heading">What do you want to see?</h2>
+              <h2 id="trend-controls-heading">Choose a district, grade, and subject</h2>
             </div>
             <button id="trend-copy" class="secondary-button" type="button">Copy this view link</button>
           </div>
@@ -228,7 +223,6 @@
         </section>
 
         <section id="trend-unavailable" class="unavailable-card trend-unavailable" hidden aria-live="polite">
-          <p class="eyebrow dark">Unavailable selection</p>
           <h2>No SEDA estimate is available for this selection</h2>
           <p id="trend-unavailable-copy"></p>
           <p class="small">Try another grade, subject, or district.</p>
@@ -239,13 +233,13 @@
           <section aria-labelledby="trend-summary-heading">
             <div class="section-heading">
               <div>
-                <h2 id="trend-summary-heading">Latest result and changes since 2018–19 and 2021–22</h2>
+                <h2 id="trend-summary-heading">Latest result and change over time</h2>
               </div>
               <span id="trend-record-count" class="quiet-label">—</span>
             </div>
             <div class="trend-metric-grid">
               <article>
-                <span>Latest estimated average</span>
+                <span>Latest score</span>
                 <strong id="trend-latest-value">—</strong>
                 <p id="trend-latest-detail">—</p>
               </article>
@@ -274,20 +268,11 @@
             </article>
           </section>
 
-          <section class="trend-difference single-column" aria-labelledby="trend-difference-heading">
-            <div class="trend-difference-intro">
-              <p class="eyebrow dark">Use of the SEDA data</p>
-              <h2 id="trend-difference-heading">Annual estimates for one district, grade, and subject</h2>
-              <p>Stanford’s Explorer summarizes national patterns using modeled 2022–2025 measures. This page displays released annual estimates, exact years, missingness, test counts, and uncertainty for a selected district, grade, and subject.</p>
-              <a class="primary-button trend-official-link" href="https://edopportunity.org/trends/explorer/">Open Stanford’s Explorer <span aria-hidden="true">↗</span></a>
-            </div>
-          </section>
-
           <section class="trend-explain-grid" aria-label="How to interpret this view">
             <article class="panel-card">
-              <h2>How to read the chart</h2>
-              <p><strong>Zero is the national reference.</strong> A value of +1.00 is approximately one student-level standard deviation above SEDA’s fixed reference for the selected grade and subject.</p>
-              <p><strong>Each year includes a different group of students.</strong> Comparing points shows district-level change among the students tested each year. Same-student growth and causes require a separate analysis.</p>
+              <h2>Reading this view</h2>
+              <p>Zero is SEDA’s national reference. A value of +1.00 is about one standard deviation above it for the selected grade and subject.</p>
+              <p>Each year includes a different group of students, so the line shows district results over time rather than growth for the same children.</p>
             </article>
           </section>
 
@@ -295,7 +280,7 @@
             <div class="section-heading text-only">
               <div>
                 <h2 id="trend-records-heading">Year-by-year detail</h2>
-                <p>The 95% range shows the uncertainty around each estimate. Test counts are aggregate counts supplied in the public district file.</p>
+                <p>The range shows uncertainty around each score. A test count marked “Estimated by SEDA” was derived in the SEDA release rather than reported directly.</p>
               </div>
             </div>
             <article class="panel-card">
@@ -317,20 +302,12 @@
       <div class="workbench-hero">
         <div class="shell workbench-hero-grid">
           <div>
-            <p class="eyebrow">SEDA 2025.2 · analyst view</p>
-            <h1>Explore the estimates behind the summary</h1>
-            <p class="hero-copy">Compare yearly grade-specific district estimates, inspect uncertainty and missingness, and export only the evidence in your current view.</p>
-            <div class="scope-list" aria-label="Workbench data scope">
-              <span>Administrative districts</span><span>All students</span><span>Cohort Standardized (CS) scale</span><span>Grades 3–8</span><span>Math and reading</span><span>2009–2019 · 2022–2025</span>
-            </div>
-            <a class="mobile-official-link" href="https://edopportunity.org/trends/explorer/">Stanford also provides the official national Explorer <span aria-hidden="true">↗</span></a>
+            <p class="eyebrow">SEDA 2025.2</p>
+            <h1>Compare district results</h1>
+            <p class="hero-copy">Choose a grade and subject, add up to four districts, and download the records shown.</p>
+            <p class="scope-line">Administrative districts · all students · grades 3–8 · math and reading · 2009–2019 and 2022–2025</p>
+            <a class="mobile-official-link" href="https://edopportunity.org/trends/explorer/">Open Stanford’s national Explorer <span aria-hidden="true">↗</span></a>
           </div>
-          <aside class="scope-card">
-            <p class="eyebrow dark">Related Stanford resource</p>
-            <h2>Official Education Opportunity Trends Explorer</h2>
-            <p>Stanford’s Explorer provides national maps, subgroup views, and modeled 2022–2025 summaries. This workbench displays annual district-grade-subject estimates and their uncertainty.</p>
-            <a class="text-link" href="https://edopportunity.org/trends/explorer/">Open Stanford’s official Explorer <span aria-hidden="true">↗</span></a>
-          </aside>
         </div>
       </div>
 
@@ -338,7 +315,7 @@
         <section class="workbench-controls" aria-labelledby="workbench-controls-heading">
           <div class="workbench-controls-heading">
             <div>
-              <h2 id="workbench-controls-heading">Choose a grade-subject slice and up to four districts</h2>
+              <h2 id="workbench-controls-heading">Set up the comparison</h2>
             </div>
             <div class="workbench-actions">
               <button id="wb-download" class="secondary-button" type="button">Download current view</button>
@@ -392,31 +369,26 @@
         </section>
 
         <div id="wb-results" hidden>
-          <div class="interpretation-note workbench-note">
-            <strong>About the workbench data.</strong>
-            Each value is a modeled district-level estimate for one grade, subject, and year. Missing values remain missing, and 2025 coverage varies by state.
-          </div>
-
           <section aria-labelledby="wb-summary-heading">
             <div class="section-heading">
               <div>
-                <h2 id="wb-summary-heading">Coverage and precision at a glance</h2>
+                <h2 id="wb-summary-heading">Current selection</h2>
               </div>
               <span id="wb-se-basis" class="quiet-label">Within-state standard errors</span>
             </div>
             <div class="workbench-metric-grid">
-              <article><strong id="wb-record-count">—</strong><span>selected grade-subject-year estimates</span></article>
-              <article><strong id="wb-universe-count">—</strong><span>reporting districts in reference year</span></article>
-              <article><strong id="wb-low-precision-count">—</strong><span>low-precision selected estimates</span></article>
-              <article><strong id="wb-estimated-count">—</strong><span>estimates with estimated test counts</span></article>
+              <article><strong id="wb-record-count">—</strong><span>records selected</span></article>
+              <article><strong id="wb-universe-count">—</strong><span>districts in the reference</span></article>
+              <article><strong id="wb-low-precision-count">—</strong><span>low-precision records</span></article>
+              <article><strong id="wb-estimated-count">—</strong><span>test counts estimated by SEDA</span></article>
             </div>
           </section>
 
           <section aria-labelledby="wb-trend-heading">
             <div class="section-heading text-only">
               <div>
-                <h2 id="wb-trend-heading">One grade and subject, with 95% intervals</h2>
-                <p id="wb-trend-caption">The gap preserves the absence of 2020 and 2021 results. Hover a point for detail; the estimate table provides the same values for keyboard and screen-reader users.</p>
+                <h2 id="wb-trend-heading">Scores over time</h2>
+                <p id="wb-trend-caption">SEDA does not report annual results for 2020 or 2021. The lines stop in 2019 and restart in 2022.</p>
               </div>
             </div>
             <article class="chart-card workbench-chart-card">
@@ -427,10 +399,8 @@
           <section aria-labelledby="wb-distribution-heading">
             <div class="section-heading">
               <div>
-                <p class="eyebrow dark">All reporting districts</p>
                 <h2 id="wb-distribution-heading">Distribution of district results</h2>
-                <p id="wb-distribution-caption">Each reporting district contributes one observation. Selected districts are highlighted. This distribution is separate from the similar-district comparison on the Explore page.</p>
-                <p class="small"><strong>Weighting:</strong> Each reporting district contributes one observation for the selected grade, subject, and year. The reference distribution is not weighted by district enrollment or the number of tests represented.</p>
+                <p id="wb-distribution-caption">Each reporting district counts once. Selected districts are highlighted; enrollment and test counts do not change the weighting.</p>
               </div>
               <span id="wb-distribution-summary" class="quiet-label">—</span>
             </div>
@@ -442,7 +412,6 @@
           <section aria-labelledby="wb-coverage-heading">
             <div class="section-heading text-only">
               <div>
-                <p class="eyebrow dark">Reporting pattern</p>
                 <h2 id="wb-coverage-heading">Coverage and precision by year</h2>
                 <p>Reported, less-precise, and missing records are shown separately by year.</p>
               </div>
@@ -461,7 +430,6 @@
           <section aria-labelledby="wb-records-heading">
             <div class="section-heading">
               <div>
-                <p class="eyebrow dark">Long-form estimates</p>
                 <h2 id="wb-records-heading">Estimates in the current view</h2>
                 <p>Intervals automatically use within-state errors for a one-state selection and adjusted cross-state errors when selected districts span states.</p>
               </div>
@@ -470,20 +438,13 @@
             <article class="panel-card">
               <div class="table-scroll">
                 <table>
-                  <thead><tr><th>District</th><th>School year</th><th>Estimate</th><th>95% interval</th><th>SE basis</th><th>Tests represented</th><th>Precision</th></tr></thead>
+                  <thead><tr><th>District</th><th>School year</th><th>Average score</th><th>95% range</th><th>Error basis</th><th>Tests represented</th><th>Precision</th></tr></thead>
                   <tbody id="wb-records-body"></tbody>
                 </table>
               </div>
             </article>
           </section>
 
-          <section class="method-comparison single-column" aria-labelledby="wb-difference-heading">
-            <div>
-              <p class="eyebrow dark">Workbench scope</p>
-              <h2 id="wb-difference-heading">Annual district-grade-subject estimates</h2>
-              <p>I kept this version at the administrative-district level so the achievement estimates, context measures, and district identifiers use one consistent unit. It covers all students in grades 3–8, keeps math and reading separate, and provides yearly estimates, uncertainty, missingness, test counts, multi-district charts, and filtered export.</p>
-            </div>
-          </section>
         </div>
       </div>
     </section>
@@ -492,9 +453,9 @@
       <div class="research-hero">
         <div class="shell research-hero-grid">
           <div class="research-hero-copy">
-            <p class="eyebrow">Worked study design</p>
-            <h1>How I would build data for a new research question</h1>
-            <p class="hero-copy">This study plan shows how I would join 2022–2024 SEDA estimates with public finance, enrollment, staffing, and inflation data. No results have been calculated.</p>
+            <p class="eyebrow">Study design</p>
+            <h1>Instructional spending and fourth-grade math</h1>
+            <p class="hero-copy">A plan for joining 2022–2024 SEDA estimates with public finance, enrollment, staffing, and inflation data. This page defines the analysis; no results have been calculated.</p>
             <div class="research-hero-meta" aria-label="Research example status">
               <span>2022–2024</span>
               <span>Grade 4 math</span>
@@ -502,7 +463,6 @@
             </div>
           </div>
           <aside class="research-brief" aria-labelledby="research-brief-title">
-            <p class="eyebrow dark">Study question</p>
             <h2 id="research-brief-title">Did districts that increased instructional spending per student also improve faster in fourth-grade math?</h2>
             <dl>
               <div><dt>Years</dt><dd>2022–2024</dd></div>
@@ -517,7 +477,7 @@
       <div class="shell content-shell research-content">
         <section class="research-opening" aria-labelledby="research-question-heading">
           <div>
-            <h2 id="research-question-heading">The required information is stored in separate systems</h2>
+            <h2 id="research-question-heading">What has to be joined</h2>
           </div>
           <div class="research-opening-copy">
             <p>Achievement, spending, enrollment, staffing, inflation, and district identity are stored in separate files. The joins must account for changing district IDs, source years, units, duplicates, and missing records.</p>
@@ -527,7 +487,7 @@
         <section aria-labelledby="research-join-heading">
           <div class="section-heading text-only">
             <div>
-              <h2 id="research-join-heading">How the public sources would be joined</h2>
+              <h2 id="research-join-heading">Joining the public sources</h2>
               <p>Each source answers a different part of the question. The crosswalk is the lookup table that keeps district identities aligned as identifiers change.</p>
             </div>
           </div>
@@ -571,7 +531,6 @@
         <section aria-labelledby="research-dataset-heading">
           <div class="section-heading">
             <div>
-              <p class="eyebrow dark">Proposed analysis file</p>
               <h2 id="research-dataset-heading">Unit of analysis</h2>
               <p>Each row would represent one stable district, school year, grade, and subject. The fields below show the proposed structure.</p>
             </div>
@@ -596,7 +555,6 @@
         <section class="research-handoff" aria-labelledby="research-handoff-heading">
           <div>
             <h2 id="research-handoff-heading">What the researcher would receive</h2>
-            <p>These materials would let another analyst review the planned joins, run the analysis, and revise its assumptions.</p>
           </div>
           <ul>
             <li>Clean dataset and data dictionary</li>
@@ -606,7 +564,6 @@
         </section>
 
         <section class="research-sources" aria-labelledby="research-sources-heading">
-          <p class="eyebrow dark">Sources</p>
           <h2 id="research-sources-heading">Public data and time window</h2>
           <div>
             <a href="https://edopportunity.org/trends/data/downloads/">Stanford Education Data Archive <span aria-hidden="true">↗</span></a>
@@ -622,14 +579,14 @@
     <section id="technical-panel" class="tab-panel technical-panel" role="tabpanel" aria-labelledby="technical-tab" hidden>
       <div class="technical-hero">
         <div class="shell">
-          <p class="eyebrow">Technical implementation</p>
-          <h1>How I processed and published 1.21 GB of data</h1>
-          <p>The project uses Python, SQL, and DuckDB to verify three source files, build district-year tables, calculate comparisons, and prepare data for the browser.</p>
+          <p class="eyebrow">Project notes</p>
+          <h1>From source files to dashboard</h1>
+          <p>Python and SQL load 1.21 GB of SEDA files, check the data, calculate the comparisons, and prepare smaller files for the browser.</p>
           <div class="technical-kpis" aria-label="Pipeline summary">
-            <div><strong id="source-size-kpi">—</strong><span>verified source files</span></div>
-            <div><strong id="staged-rows-kpi">—</strong><span>achievement records loaded</span></div>
-            <div><strong id="districts-kpi">—</strong><span>stable district records</span></div>
-            <div><strong id="qa-kpi">—</strong><span>QA checks, no blocking failures</span></div>
+            <div><strong id="source-size-kpi">—</strong><span>source files checked</span></div>
+            <div><strong id="staged-rows-kpi">—</strong><span>achievement records</span></div>
+            <div><strong id="districts-kpi">—</strong><span>district records</span></div>
+            <div><strong id="qa-kpi">—</strong><span>checks passed</span></div>
           </div>
         </div>
       </div>
@@ -638,20 +595,20 @@
         <section aria-labelledby="architecture-heading">
           <div class="section-heading text-only">
             <div>
-              <h2 id="architecture-heading">Six steps from source files to dashboard</h2>
-              <p>The database is rebuilt atomically: a refresh writes a temporary <code>.building.duckdb</code>, runs quality checks, and replaces the prior database only after the checks succeed.</p>
+              <h2 id="architecture-heading">The build</h2>
+              <p>A refresh writes a temporary database, runs the checks, and replaces the previous database only when they pass.</p>
             </div>
           </div>
           <ol class="pipeline" aria-label="Analytical pipeline">
-            <li><span>01</span><strong>Verify</strong><p>Names, sizes, headers, required columns, and SHA-256 fingerprints</p></li>
-            <li><span>02</span><strong>Stage</strong><p>Explicit CSV parsing, all-string intake, and controlled type conversion</p></li>
-            <li><span>03</span><strong>Model</strong><p>Stable district dimension, analytical marts, coverage, and audit tables</p></li>
-            <li><span>04</span><strong>Match</strong><p>Select comparison districts using the four context measures</p></li>
-            <li><span>05</span><strong>Quantify</strong><p>Use the appropriate uncertainty measure and check reporting coverage</p></li>
-            <li><span>06</span><strong>Publish</strong><p>Create one browser file per grade, smaller state files for the opening view, and render the interactive charts</p></li>
+            <li><span>01</span><strong>Check</strong><p>Confirm the files, columns, sizes, and fingerprints.</p></li>
+            <li><span>02</span><strong>Load</strong><p>Read the CSVs as text first, then convert each field deliberately.</p></li>
+            <li><span>03</span><strong>Organize</strong><p>Build district, yearly result, coverage, and audit tables.</p></li>
+            <li><span>04</span><strong>Compare</strong><p>Find districts with similar community characteristics.</p></li>
+            <li><span>05</span><strong>Check again</strong><p>Apply the uncertainty and reporting rules.</p></li>
+            <li><span>06</span><strong>Publish</strong><p>Split the results into smaller files the browser can load as needed.</p></li>
           </ol>
           <div class="stack-list" aria-label="Technology stack">
-            <span>Python 3.11+</span><span>SQL</span><span>DuckDB</span><span>pandas</span><span>NumPy</span><span>Plotly</span><span>Jinja2</span><span>PyYAML</span><span>pytest</span><span>Ruff</span><span>GitHub Actions</span><span>GitHub Pages</span>
+            <p>Built with Python, SQL, DuckDB, pandas, Plotly, automated tests, and GitHub Pages.</p>
           </div>
         </section>
 
@@ -751,11 +708,10 @@
 
         <section class="debug-story" aria-labelledby="debug-heading">
           <div>
-            <p class="eyebrow">CSV parsing issue</p>
-            <h2 id="debug-heading">Full-file failure at line <span id="failure-line">1,236,002</span></h2>
+            <h2 id="debug-heading">One issue caught during the full-file load</h2>
           </div>
           <div class="debug-story-copy">
-            <p>A small sample loaded correctly, but the full achievement file failed when a quoted district name contained a comma.</p>
+            <p>A small sample loaded correctly, but the full achievement file failed at line <span id="failure-line">1,236,002</span> when a quoted district name contained a comma.</p>
             <p>I set the delimiter, quotation, escape, and all-string import rules explicitly, then converted fields with <code>TRY_CAST</code> and added a full-file check.</p>
           </div>
         </section>
@@ -787,7 +743,7 @@
   <footer class="site-footer">
     <div class="shell footer-grid">
       <p><strong>Dataset:</strong> Reardon et al. (2026), <em>Stanford Education Data Archive, Version 2025.2</em>. <a href="https://doi.org/10.25740/np279jm6134">DOI 10.25740/np279jm6134</a>.</p>
-      <p><a href="https://github.com/nilkamal11/district-learning-context-explorer">Source and methodology</a> · Independent work by Nilkamal Shah. Not endorsed by Stanford, EOP, HMH, or NWEA.</p>
+      <p><a href="https://github.com/nilkamal11/district-learning-context-explorer">Source and methodology</a> · Built by Nilkamal Shah. Independent project; not affiliated with Stanford or the Education Opportunity Project.</p>
     </div>
   </footer>
 
