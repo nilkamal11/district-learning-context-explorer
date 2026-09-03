@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from district_context.dashboard import (
@@ -40,20 +41,55 @@ def test_workbench_script_uses_grade_namespace_and_round_trips():
 
 def test_public_site_exposes_the_workbench_and_lazy_loader():
     html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
-    javascript = (ROOT / "site" / "assets" / "workbench.js").read_text(encoding="utf-8")
+    workbench_javascript = (ROOT / "site" / "assets" / "workbench.js").read_text(
+        encoding="utf-8"
+    )
+    trends_javascript = (ROOT / "site" / "assets" / "trends.js").read_text(
+        encoding="utf-8"
+    )
 
     assert 'id="workbench-tab"' in html
     assert 'id="workbench-panel"' in html
     assert 'id="wb-trend-chart"' in html
     assert 'id="wb-distribution-chart"' in html
-    assert "workbench-grade-${grade}.js" in javascript
-    assert "window.SEDA_WORKBENCH" in javascript
-    assert "validateBundle" in javascript
-    assert 'scriptUrl.searchParams.set("v", source.generated_at_utc)' in javascript
+    assert "workbench-grade-${grade}.js" in workbench_javascript
+    assert "window.SEDA_WORKBENCH" in workbench_javascript
+    assert "validateBundle" in workbench_javascript
+    assert 'scriptUrl.searchParams.set("v", source.generated_at_utc)' in workbench_javascript
     assert (
         'document.querySelectorAll("#workbench-panel button, #workbench-panel select, '
-        '#workbench-panel input")' in javascript
+        '#workbench-panel input")' in workbench_javascript
     )
+
+    assert 'id="trends-tab"' in html
+    assert 'id="trends-panel"' in html
+    assert 'id="trend-chart"' in html
+    assert 'id="trend-data-note"' in html
+    assert 'id="trend-records-body"' in html
+    assert 'src="assets/trends.js' in html
+    assert "How this differs from Stanford’s Explorer" in html
+    assert 'const DEFAULT_DISTRICT_ID = "1728890"' in trends_javascript
+    assert "const BASELINE_YEARS = [2019, 2022]" in trends_javascript
+    assert "workbench-grade-${grade}.js" in trends_javascript
+    assert "validateBundle" in trends_javascript
+    assert "connectgaps: false" in trends_javascript
+    assert "window.SEDA_TRENDS" in trends_javascript
+    assert "latestYear <= baselineYear" in trends_javascript
+    assert "different group of students" in html
+    assert 'aria-describedby="trend-chart-caption"' in html
+
+    assert re.search(
+        r'<section aria-labelledby="trend-heading">.*?<h2 id="trend-heading"', html, re.S
+    )
+    assert re.search(
+        r'<section aria-labelledby="simple-trend-heading">.*?'
+        r'<h2 id="simple-trend-heading"',
+        html,
+        re.S,
+    )
+
+    element_ids = re.findall(r'\bid="([^"]+)"', html)
+    assert len(element_ids) == len(set(element_ids))
 
 
 def test_public_dashboard_rejects_a_non_grade_four_initial_bundle(tmp_path):

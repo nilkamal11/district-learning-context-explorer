@@ -244,6 +244,7 @@ VERSIONED_SITE_ASSETS = (
     "assets/plotly-3.1.0.min.js",
     "assets/dashboard.js",
     "assets/workbench.js",
+    "assets/trends.js",
 )
 
 
@@ -549,6 +550,7 @@ def main() -> None:
         ROOT / "site" / "assets" / "styles.css",
         ROOT / "site" / "assets" / "dashboard.js",
         ROOT / "site" / "assets" / "workbench.js",
+        ROOT / "site" / "assets" / "trends.js",
         ROOT / "site" / "assets" / "plotly-3.1.0.min.js",
         DATA_PATH,
         *(

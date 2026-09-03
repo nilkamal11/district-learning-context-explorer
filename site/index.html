@@ -3,13 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore yearly grade-specific district achievement estimates, uncertainty, and context-matched comparisons using Stanford SEDA 2025.2.">
+  <meta name="description" content="Explore simple district trends, yearly grade-specific estimates, uncertainty, and context-matched comparisons using Stanford SEDA 2025.2.">
   <title>District Learning Context Explorer</title>
-  <link rel="stylesheet" href="assets/styles.css?v=9b5ea19f8451d65d">
+  <link rel="stylesheet" href="assets/styles.css?v=c8cf913fcf37aec2">
   <script src="data/dashboard-data.js?v=27364a739919418a" defer></script>
   <script src="assets/plotly-3.1.0.min.js?v=8ef4c6ab1369f001" defer></script>
-  <script src="assets/dashboard.js?v=de29f9b83ac3bff9" defer></script>
+  <script src="assets/dashboard.js?v=9349b498bfb15124" defer></script>
   <script src="assets/workbench.js?v=593e6f5ebc6c6e3c" defer></script>
+  <script src="assets/trends.js?v=1b7b62aa72be3276" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -24,6 +25,7 @@
       </a>
       <nav class="tabs" role="tablist" aria-label="Dashboard sections">
         <button id="explore-tab" class="tab is-active" type="button" role="tab" aria-label="Explore districts" aria-selected="true" aria-controls="explore-panel" data-tab="explore"><span class="tab-wide">Explore districts</span><span class="tab-short" aria-hidden="true">Explore</span></button>
+        <button id="trends-tab" class="tab" type="button" role="tab" aria-label="Simple district trends" aria-selected="false" aria-controls="trends-panel" data-tab="trends"><span class="tab-wide">Simple trends</span><span class="tab-short" aria-hidden="true">Trends</span></button>
         <button id="workbench-tab" class="tab" type="button" role="tab" aria-label="SEDA workbench" aria-selected="false" aria-controls="workbench-panel" data-tab="workbench"><span class="tab-wide">SEDA workbench</span><span class="tab-short" aria-hidden="true">Workbench</span></button>
         <button id="technical-tab" class="tab" type="button" role="tab" aria-label="Technical process" aria-selected="false" aria-controls="technical-panel" data-tab="technical"><span class="tab-wide">Technical process</span><span class="tab-short" aria-hidden="true">Process</span></button>
       </nav>
@@ -187,6 +189,189 @@
               </ul>
             </article>
           </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="trends-panel" class="tab-panel trends-panel" role="tabpanel" aria-labelledby="trends-tab" hidden>
+      <div class="trends-hero">
+        <div class="shell trends-hero-grid">
+          <div>
+            <p class="eyebrow">One district · one grade · one subject</p>
+            <h1>See how a district’s result changed over time</h1>
+            <p class="hero-copy">A simpler way to explore the same public SEDA data. Start with North Palos School District 117, then choose any other district.</p>
+            <div class="hero-meta" aria-label="Simple trends scope">
+              <span>District-wide results</span>
+              <span>No peer group</span>
+              <span>No ranking</span>
+            </div>
+          </div>
+          <aside class="trend-hero-result">
+            <p class="eyebrow dark">Starting view</p>
+            <h2 id="trend-hero-district">North Palos SD 117</h2>
+            <span id="trend-hero-school-year" class="trend-hero-year">Loading grade 4 math…</span>
+            <strong id="trend-hero-score" class="trend-hero-score">—</strong>
+            <p id="trend-hero-copy">Preparing the latest reported district result.</p>
+          </aside>
+        </div>
+      </div>
+
+      <div class="shell content-shell trends-content">
+        <div class="interpretation-note">
+          <strong>This is a district trend, not a child’s score.</strong>
+          Each point summarizes a different group of students tested in that district and year. It cannot describe an individual student or explain why a result changed.
+        </div>
+
+        <section class="trends-controls" aria-labelledby="trend-controls-heading">
+          <div class="trends-controls-heading">
+            <div>
+              <p class="eyebrow dark">Choose one view</p>
+              <h2 id="trend-controls-heading">What do you want to see?</h2>
+            </div>
+            <button id="trend-copy" class="secondary-button" type="button">Copy this view link</button>
+          </div>
+          <div class="trend-control-grid">
+            <label>
+              <span>State</span>
+              <select id="trend-state" aria-label="Select a state"></select>
+            </label>
+            <label class="trend-district-picker">
+              <span>District</span>
+              <select id="trend-district" aria-label="Select a district"></select>
+            </label>
+            <label>
+              <span>Grade</span>
+              <select id="trend-grade" aria-label="Select a grade">
+                <option value="3">Grade 3</option><option value="4" selected>Grade 4</option><option value="5">Grade 5</option><option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option>
+              </select>
+            </label>
+            <label>
+              <span>Subject</span>
+              <select id="trend-subject" aria-label="Select a subject">
+                <option value="mth">Math</option><option value="rla">Reading</option>
+              </select>
+            </label>
+          </div>
+          <div class="trend-control-footer">
+            <label class="toggle-control">
+              <input id="trend-show-range" type="checkbox">
+              <span>Show the estimate range on the chart</span>
+            </label>
+            <p id="trend-status" class="workbench-status" role="status" aria-live="polite">Preparing grade 4 math results…</p>
+          </div>
+        </section>
+
+        <section id="trend-unavailable" class="unavailable-card trend-unavailable" hidden aria-live="polite">
+          <p class="eyebrow dark">No released result</p>
+          <h2>This choice does not have a trend to show</h2>
+          <p id="trend-unavailable-copy"></p>
+          <p class="small">Nothing has been filled in or treated as zero. Try another grade, subject, or district.</p>
+        </section>
+
+        <div id="trend-results" hidden>
+          <div id="trend-data-note" class="trend-data-note" role="note"></div>
+          <section aria-labelledby="trend-summary-heading">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow dark">The short answer</p>
+                <h2 id="trend-summary-heading">Latest result and exact-year changes</h2>
+              </div>
+              <span id="trend-record-count" class="quiet-label">—</span>
+            </div>
+            <div class="trend-metric-grid">
+              <article>
+                <span>Latest reported result</span>
+                <strong id="trend-latest-value">—</strong>
+                <p id="trend-latest-detail">—</p>
+              </article>
+              <article>
+                <span>Change since 2018–19</span>
+                <strong id="trend-change-2019">—</strong>
+                <p id="trend-change-2019-detail">Uses spring 2019 as the starting point.</p>
+              </article>
+              <article>
+                <span>Change since 2021–22</span>
+                <strong id="trend-change-2022">—</strong>
+                <p id="trend-change-2022-detail">Uses spring 2022 as the starting point.</p>
+              </article>
+            </div>
+          </section>
+
+          <section aria-labelledby="simple-trend-heading">
+            <div class="section-heading text-only">
+              <div>
+                <p class="eyebrow dark">District trend</p>
+                <h2 id="simple-trend-heading">Grade 4 math over time</h2>
+                <p id="trend-chart-caption">Each dot is one spring result. The blank space in 2020 and 2021 reflects years with no released annual result.</p>
+              </div>
+            </div>
+            <article class="chart-card trend-chart-card">
+              <div id="trend-chart" class="chart trend-chart" aria-label="Selected district trend chart" aria-describedby="trend-chart-caption"></div>
+            </article>
+          </section>
+
+          <section class="trend-difference" aria-labelledby="trend-difference-heading">
+            <div class="trend-difference-intro">
+              <p class="eyebrow dark">How this differs from Stanford’s Explorer</p>
+              <h2 id="trend-difference-heading">Same SEDA release, different job</h2>
+              <p>Stanford turns grade-year data into broad 2022–2025 summaries for national exploration. This view stays closer to the released annual estimates for one district, grade, and subject.</p>
+              <a class="primary-button trend-official-link" href="https://edopportunity.org/trends/explorer/">Open Stanford’s Explorer <span aria-hidden="true">↗</span></a>
+            </div>
+            <div class="trend-difference-columns">
+              <article>
+                <span>Stanford’s Explorer</span>
+                <h3>Start with the national map</h3>
+                <ul>
+                  <li>National map, chart, and combined views</li>
+                  <li>Four modeled 2022–2025 score and learning-rate summaries</li>
+                  <li>Schools, districts, states, subgroups, and similar places</li>
+                </ul>
+              </article>
+              <article>
+                <span>This project</span>
+                <h3>Open the annual district evidence</h3>
+                <ul>
+                  <li>Administrative districts and all students only</li>
+                  <li>One selected grade and subject across released annual estimates</li>
+                  <li>Exact-year changes, missing years, yearly test counts, and optional 95% ranges</li>
+                  <li>Public code, SQL pipeline, and data checks behind the result</li>
+                </ul>
+              </article>
+            </div>
+          </section>
+
+          <section class="trend-explain-grid" aria-label="How to interpret this view">
+            <article class="panel-card">
+              <p class="eyebrow dark">How to read the number</p>
+              <h2>Zero is the national reference</h2>
+              <p>On this SEDA scale, +1.00 means the district’s estimated average was about one student-level standard deviation above SEDA’s fixed national reference for that grade and subject. It is not the current year’s national district average, a percent, or a score out of 100.</p>
+            </article>
+            <article class="panel-card">
+              <p class="eyebrow dark">What a change means</p>
+              <h2>Different students each year</h2>
+              <p>A change means the district-wide estimate was different from the chosen earlier year. It is not growth for the same students, a school rating, or evidence that one program caused the change.</p>
+            </article>
+          </section>
+
+          <section aria-labelledby="trend-records-heading">
+            <div class="section-heading text-only">
+              <div>
+                <p class="eyebrow dark">The reported values</p>
+                <h2 id="trend-records-heading">Year-by-year detail</h2>
+                <p>The 95% range shows the uncertainty around each estimate. Test counts are aggregate counts supplied in the public district file.</p>
+              </div>
+            </div>
+            <article class="panel-card">
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>School year</th><th>Spring</th><th>Result</th><th>95% estimate range</th><th>Tests represented</th><th>Count note</th></tr></thead>
+                  <tbody id="trend-records-body"></tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <p class="trend-source-note">Source: Stanford Education Data Archive 2025.2, administrative districts, all students, Cohort Standardized scale. <a href="https://edopportunity.org/trends/data/downloads/">View Stanford’s data documentation <span aria-hidden="true">↗</span></a></p>
         </div>
       </div>
     </section>

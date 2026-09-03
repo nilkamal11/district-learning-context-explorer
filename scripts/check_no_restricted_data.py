@@ -15,6 +15,7 @@ APPROVED_SITE_FILES = {
     "site/assets/dashboard.js",
     "site/assets/plotly-3.1.0.min.js",
     "site/assets/styles.css",
+    "site/assets/trends.js",
     "site/assets/workbench.js",
     "site/data/dashboard-data.js",
     "site/data/workbench-grade-3.js",

@@ -71,6 +71,7 @@ VERSIONED_SITE_ASSETS = (
     "assets/plotly-3.1.0.min.js",
     "assets/dashboard.js",
     "assets/workbench.js",
+    "assets/trends.js",
 )
 
 

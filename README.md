@@ -6,7 +6,7 @@ A reproducible, uncertainty-aware way to ask a practical education question:
 
 The first view focuses on grade 4 because that is where the question became personally meaningful to me as the parent of a fourth-grade daughter. The analytical design covers grades 3 through 8 and keeps the selected district configurable. No family, child, school, or home-district information is stored in the repository.
 
-**[Open the interactive dashboard](https://nilkamal11.github.io/district-learning-context-explorer/)** to build a grade-4 peer profile, compare yearly grade-specific estimates in the SEDA workbench, or inspect the full technical process.
+**[Open the Simple District Trends report](https://nilkamal11.github.io/district-learning-context-explorer/?trend_district=1728890&trend_grade=4&trend_subject=mth#trends)** to begin with North Palos School District 117, grade 4 math. The [full interactive dashboard](https://nilkamal11.github.io/district-learning-context-explorer/) also includes the original grade-4 peer profile, the detailed SEDA workbench, and the technical process.
 
 ## What this project demonstrates
 
@@ -16,6 +16,7 @@ The first view focuses on grade 4 because that is where the question became pers
 - Stable identifier handling, including seven-character IDs, crosswalk audits, and source-to-stable ID resolution
 - Reproducible source manifests, SHA-256 checks, deterministic peer selection, and Git-based CI
 - Clear translation from statistical estimates to a district and parent-facing explanation
+- A chart-first, one-district view with plain-language changes from exact earlier years
 - Responsible handling of suppression, missingness, measurement error, and limits on causal inference
 - Lazy browser loading of six grade slices, multi-district comparison, URL state, and filtered CSV export
 
@@ -49,9 +50,11 @@ The achievement file covers spring 2009 through 2019 and 2022 through 2025. Ther
 
 Source files are governed by Stanford's [Data Use Agreement](https://edopportunity.org/trends/data/). Stanford confirmed to the project owner that this Git portfolio use is permitted. The repository publishes selected derived columns for the all-student, administrative-district CS estimates used by the grade 3–8 browser workbench; it does not include the raw source files, local DuckDB database, or unrestricted working outputs. That confirmation applies to this project owner's use and does not grant downstream users independent rights to Stanford data.
 
-## Two analytical views
+## Three analytical views
 
-The district profile asks a focused question about one fourth-grade district and context-matched peers. The **SEDA 2025.2 District Data Workbench** exposes the more detailed yearly grade-specific evidence behind that kind of summary:
+**Simple District Trends** asks the easiest question first: how did one district's result change over time for one grade and subject? It starts with North Palos School District 117, shows the latest released result, calculates exact changes from spring 2019 and spring 2022, and keeps missing 2020, 2021, or later results visibly missing. It does not use peers or rankings.
+
+The original **district profile** asks a separate question about one fourth-grade district and context-matched peers. The **SEDA 2025.2 District Data Workbench** exposes the more detailed yearly grade-specific evidence behind both summaries:
 
 - Grades 3–8, mathematics and reading, and the 15 released years from 2009–2019 and 2022–2025
 - Up to four administrative districts in one view, including districts with missing grade-subject-year estimates
@@ -59,7 +62,7 @@ The district profile asks a focused question about one fourth-grade district and
 - A state or national distribution without rankings
 - A coverage and precision matrix, long-form estimate table, persistent share link, and current-view CSV export
 
-Stanford already offers the official [Education Opportunity Trends Explorer](https://edopportunity.org/trends/explorer/) for national maps, subgroup gaps, similar places, and modeled 2022–2025 achievement and learning-rate summaries. This project does not attempt to replace it. The workbench is intentionally narrower: administrative districts, all students, and the Cohort Standardized scale.
+Stanford already offers the official [Education Opportunity Trends Explorer](https://edopportunity.org/trends/explorer/) for national map and chart views, subgroup gaps, similar places, and four modeled 2022–2025 score and learning-rate summaries. This project does not attempt to replace it. Stanford's tool is the stronger national discovery experience. This project's simpler report opens one district's released annual grade-subject estimates from 2009 forward, while the workbench exposes the yearly uncertainty, missingness, and test counts. The scope remains intentionally narrow: administrative districts, all students, and the Cohort Standardized scale.
 
 ## Quick start
 
