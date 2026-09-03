@@ -1,4 +1,4 @@
-# Five-minute interview walkthrough
+# Six-minute interview walkthrough
 
 ## 1. Start with the question
 
@@ -19,6 +19,10 @@
 ## 5. End with judgment
 
 “The strongest part of the project is the interpretation boundary. It does not rank districts, measure a child, or claim causes. It shows what the data support, what they do not support, and exactly how each number was produced.”
+
+## 6. Show the research-support extension
+
+“The Research Extensions page shows the work between a question and a model. The example asks whether changes in instructional spending per student are associated with later changes in fourth-grade math. SEDA cannot answer that alone, so I specify a year-aware join to federal finance, enrollment, staffing, and inflation data. Before modeling, I would align fiscal and outcome years, audit changing district IDs, normalize spending, preserve missingness, carry uncertainty, and agree on the sensitivity checks. The researcher receives an analysis-ready file, the join and coverage audits, reproducible SQL and Python, and a plain-language interpretation memo. I am demonstrating the data engineering and analytical judgment behind research support, not presenting a result I did not calculate.”
 
 ## Two useful debugging stories
 
@@ -42,4 +46,4 @@ CCD agency type and status, SAIPE poverty as a sensitivity measure, stronger cro
 
 **What does this not demonstrate?**
 
-It does not claim product-event analytics. I would add that as a separate module using a real public event log because assessment outcomes and telemetry answer different questions.
+It does not claim access to internal product-event data or completed product-efficacy findings. The Research Extensions page shows how I would specify that work using governed licenses, rosters, implementation dates, product events, and outcomes, while keeping the public portfolio’s evidence boundary clear.

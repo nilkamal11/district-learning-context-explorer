@@ -92,6 +92,29 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert len(element_ids) == len(set(element_ids))
 
 
+def test_public_site_exposes_research_extensions_with_clear_boundaries():
+    html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
+    dashboard_javascript = (ROOT / "site" / "assets" / "dashboard.js").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'id="research-tab"' in html
+    assert 'aria-controls="research-panel"' in html
+    assert 'id="research-panel"' in html
+    assert 'aria-labelledby="research-tab"' in html
+    assert "Did districts that increased instructional spending per student" in html
+    assert "No findings invented" in html
+    assert "Association, not causation" in html
+    assert "174 crosswalk records need an ID change" in html
+    assert "does not claim access to internal product data" in html
+    assert "https://edopportunity.org/trends/data/downloads/" in html
+    assert "https://www.census.gov/programs-surveys/school-finances.html" in html
+    assert "https://nces.ed.gov/ccd/pau_rev.asp" in html
+    assert "https://www.bls.gov/cpi/data.htm" in html
+    assert '["explore", "trends", "workbench", "research", "technical"]' in dashboard_javascript
+    assert '["trends", "workbench", "research", "technical"]' in dashboard_javascript
+
+
 def test_public_dashboard_rejects_a_non_grade_four_initial_bundle(tmp_path):
     try:
         build_dashboard(

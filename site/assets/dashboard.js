@@ -620,7 +620,7 @@
       button.setAttribute("aria-selected", String(active));
       button.tabIndex = active ? 0 : -1;
     }
-    for (const panelName of ["explore", "trends", "workbench", "technical"]) {
+    for (const panelName of ["explore", "trends", "workbench", "research", "technical"]) {
       document.getElementById(`${panelName}-panel`).hidden = name !== panelName;
     }
     if (updateHash) {
@@ -658,7 +658,7 @@
       });
     });
     const requested = window.location.hash.replace("#", "");
-    activateTab(["trends", "workbench", "technical"].includes(requested) ? requested : "explore", false);
+    activateTab(["trends", "workbench", "research", "technical"].includes(requested) ? requested : "explore", false);
   };
 
   renderTechnical();

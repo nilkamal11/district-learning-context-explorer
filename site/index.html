@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Explore simple district trends, yearly grade-specific estimates, uncertainty, and context-matched comparisons using Stanford SEDA 2025.2.">
+  <meta name="description" content="Explore district trends, annual estimates, research-ready data joins, uncertainty, and context-matched comparisons using Stanford SEDA 2025.2.">
   <title>District Learning Context Explorer</title>
-  <link rel="stylesheet" href="assets/styles.css?v=c8cf913fcf37aec2">
-  <script src="data/dashboard-data.js?v=27364a739919418a" defer></script>
+  <link rel="stylesheet" href="assets/styles.css?v=ce773d153e568086">
+  <script src="data/dashboard-data.js?v=de676be0a6518f3b" defer></script>
   <script src="assets/plotly-3.1.0.min.js?v=8ef4c6ab1369f001" defer></script>
-  <script src="assets/dashboard.js?v=9349b498bfb15124" defer></script>
+  <script src="assets/dashboard.js?v=95684fb92d1af558" defer></script>
   <script src="assets/workbench.js?v=593e6f5ebc6c6e3c" defer></script>
   <script src="assets/trends.js?v=1b7b62aa72be3276" defer></script>
 </head>
@@ -26,7 +26,8 @@
       <nav class="tabs" role="tablist" aria-label="Dashboard sections">
         <button id="explore-tab" class="tab is-active" type="button" role="tab" aria-label="Explore districts" aria-selected="true" aria-controls="explore-panel" data-tab="explore"><span class="tab-wide">Explore districts</span><span class="tab-short" aria-hidden="true">Explore</span></button>
         <button id="trends-tab" class="tab" type="button" role="tab" aria-label="Simple district trends" aria-selected="false" aria-controls="trends-panel" data-tab="trends"><span class="tab-wide">Simple trends</span><span class="tab-short" aria-hidden="true">Trends</span></button>
-        <button id="workbench-tab" class="tab" type="button" role="tab" aria-label="SEDA workbench" aria-selected="false" aria-controls="workbench-panel" data-tab="workbench"><span class="tab-wide">SEDA workbench</span><span class="tab-short" aria-hidden="true">Workbench</span></button>
+        <button id="workbench-tab" class="tab" type="button" role="tab" aria-label="SEDA workbench" aria-selected="false" aria-controls="workbench-panel" data-tab="workbench"><span class="tab-wide">SEDA workbench</span><span class="tab-short" aria-hidden="true">Data</span></button>
+        <button id="research-tab" class="tab" type="button" role="tab" aria-label="Research extensions" aria-selected="false" aria-controls="research-panel" data-tab="research"><span class="tab-wide">Research extensions</span><span class="tab-short" aria-hidden="true">Research</span></button>
         <button id="technical-tab" class="tab" type="button" role="tab" aria-label="Technical process" aria-selected="false" aria-controls="technical-panel" data-tab="technical"><span class="tab-wide">Technical process</span><span class="tab-short" aria-hidden="true">Process</span></button>
       </nav>
     </div>
@@ -556,6 +557,218 @@
             <p class="small">Scope: administrative districts, all students, Cohort Standardized scale only. This is not the complete SEDA 2025.2 file library.</p>
           </section>
         </div>
+      </div>
+    </section>
+
+    <section id="research-panel" class="tab-panel research-panel" role="tabpanel" aria-labelledby="research-tab" hidden>
+      <div class="research-hero">
+        <div class="shell research-hero-grid">
+          <div class="research-hero-copy">
+            <p class="eyebrow">Research support demonstration</p>
+            <h1>A public estimate is only the starting point.</h1>
+            <p class="hero-copy">Stanford helps people find patterns. This page shows the next analyst step: turn a question into a defensible data specification, connect the right evidence, test every join, and give a researcher a file they can trust.</p>
+            <div class="research-hero-meta" aria-label="Research example status">
+              <span>Public-data study design</span>
+              <span>No findings invented</span>
+              <span>Reproducible handoff</span>
+            </div>
+          </div>
+          <aside class="research-brief" aria-labelledby="research-brief-title">
+            <p class="eyebrow dark">Worked research brief</p>
+            <h2 id="research-brief-title">Do district resource changes line up with later changes in grade 4 math?</h2>
+            <dl>
+              <div><dt>Shared window</dt><dd>2022–2024</dd></div>
+              <div><dt>One row means</dt><dd>District × year × grade × subject</dd></div>
+              <div><dt>Evidence</dt><dd>Four public data systems</dd></div>
+              <div><dt>What it can claim</dt><dd>Association, not causation</dd></div>
+            </dl>
+          </aside>
+        </div>
+      </div>
+
+      <div class="shell content-shell research-content">
+        <section class="research-opening" aria-labelledby="research-question-heading">
+          <div>
+            <p class="eyebrow dark">The question behind the chart</p>
+            <h2 id="research-question-heading">Did districts that increased instructional spending per student also improve faster in fourth-grade math?</h2>
+          </div>
+          <div class="research-opening-copy">
+            <p>SEDA alone cannot answer that. Achievement, spending, enrollment, staffing, inflation, and district identity live in separate files. Even a correct-looking join can silently duplicate a district, attach the wrong year, or compare dollars that mean different things.</p>
+            <p>The analytical work is to make those decisions visible before a model is run.</p>
+          </div>
+        </section>
+
+        <section aria-labelledby="research-join-heading">
+          <div class="section-heading text-only">
+            <div>
+              <p class="eyebrow dark">The joined evidence</p>
+              <h2 id="research-join-heading">Five steps to one research-ready row</h2>
+              <p>Each source answers a different part of the question. The crosswalk is the lookup table that keeps district identities aligned as identifiers change.</p>
+            </div>
+          </div>
+          <ol class="research-join-flow" aria-label="Public data join sequence">
+            <li>
+              <span class="research-flow-number">01</span>
+              <strong>Student outcomes</strong>
+              <p>Stanford Education Data Archive annual achievement estimates, uncertainty, and test counts.</p>
+              <a href="https://edopportunity.org/trends/data/downloads/">SEDA 2025.2 <span aria-hidden="true">↗</span></a>
+            </li>
+            <li>
+              <span class="research-flow-number">02</span>
+              <strong>District identity</strong>
+              <p>A year-specific lookup links SEDA’s stable district ID to the federal ID used in each year’s source files.</p>
+              <span class="research-flow-source">Stable ID bridge</span>
+            </li>
+            <li>
+              <span class="research-flow-number">03</span>
+              <strong>Money and people</strong>
+              <p>Census school-finance records plus federal enrollment and staffing records.</p>
+              <span class="research-flow-source">Finance · enrollment · staffing</span>
+            </li>
+            <li>
+              <span class="research-flow-number">04</span>
+              <strong>Comparable measures</strong>
+              <p>Convert spending to constant dollars per student and align resource years before outcome years.</p>
+              <span class="research-flow-source">Inflation · timing · units</span>
+            </li>
+            <li>
+              <span class="research-flow-number">05</span>
+              <strong>Research table</strong>
+              <p>One documented row per stable district, year, grade, and subject, plus join-quality flags.</p>
+              <span class="research-flow-source">Ready for modeling</span>
+            </li>
+          </ol>
+          <aside class="research-audit" aria-label="Example join risk found in the released data">
+            <div>
+              <span>Concrete join issue</span>
+              <strong>174 crosswalk records need an ID change</strong>
+            </div>
+            <p>The released SEDA crosswalk contains 174 administrative-district records where the source district ID differs from the stable SEDA ID. That is why the join must use the year-aware bridge and produce an unmatched and duplicate-key report.</p>
+          </aside>
+        </section>
+
+        <section class="research-notebook" aria-labelledby="research-notebook-heading">
+          <header>
+            <div>
+              <p class="eyebrow dark">The analyst’s notebook</p>
+              <h2 id="research-notebook-heading">What gets decided before anyone interprets a result</h2>
+            </div>
+            <span>Specification first</span>
+          </header>
+          <ol class="research-steps">
+            <li>
+              <span>01</span>
+              <div><h3>Fix the comparison</h3><p>Keep grade 4 and math constant. Define the recent shared 2022–2024 window, the district population, and the minimum evidence needed for inclusion.</p></div>
+              <small>Prevents unlike outcomes from being pooled</small>
+            </li>
+            <li>
+              <span>02</span>
+              <div><h3>Make district identity year-aware</h3><p>Join through the released annual crosswalk, then stop the build when a district-year key is unexpectedly duplicated or cannot be resolved.</p></div>
+              <small>Prevents mergers and ID changes from looking like learning changes</small>
+            </li>
+            <li>
+              <span>03</span>
+              <div><h3>Put resources before outcomes</h3><p>Agree on the school-year and fiscal-year relationship before looking at results. Test a pre-specified one-year lag rather than choosing the most favorable timing afterward.</p></div>
+              <small>Protects the time order of the question</small>
+            </li>
+            <li>
+              <span>04</span>
+              <div><h3>Normalize the measures</h3><p>Convert dollars to a common year, calculate spending per student, keep staffing definitions stable, and preserve missing or suppressed values as missing.</p></div>
+              <small>Makes comparisons interpretable</small>
+            </li>
+            <li>
+              <span>05</span>
+              <div><h3>Stress-test the answer</h3><p>Carry SEDA uncertainty into change estimates, inspect pre-existing trends, compare alternate lag choices, and show how exclusions affect coverage.</p></div>
+              <small>Separates a durable pattern from a fragile one</small>
+            </li>
+          </ol>
+        </section>
+
+        <section aria-labelledby="research-dataset-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow dark">The finished analytical file</p>
+              <h2 id="research-dataset-heading">One row, one meaning</h2>
+              <p>The exact grain is part of the contract: one stable district, school year, grade, and subject. These are example fields, not fictional observations.</p>
+            </div>
+            <span class="research-grain">district × year × grade × subject</span>
+          </div>
+          <article class="research-dataset">
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Field group</th><th>Example fields</th><th>Why it belongs</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Outcome</strong></td><td><code>achievement_estimate</code>, <code>standard_error</code>, <code>tested_count</code></td><td>Keeps the result and its precision together.</td></tr>
+                  <tr><td><strong>Starting point</strong></td><td><code>prior_achievement</code>, <code>prior_trend</code></td><td>Distinguishes improvement from simply starting higher.</td></tr>
+                  <tr><td><strong>Resources</strong></td><td><code>real_instruction_spend_per_pupil_lag1</code>, <code>student_staff_ratio</code></td><td>Puts spending and staffing on comparable scales and before the outcome.</td></tr>
+                  <tr><td><strong>Context</strong></td><td><code>enrollment</code>, <code>poverty_rate</code>, <code>locale</code></td><td>Describes meaningful differences among districts.</td></tr>
+                  <tr><td><strong>Join quality</strong></td><td><code>id_lineage_flag</code>, <code>source_match_status</code>, <code>coverage_flag</code></td><td>Makes unresolved identity, missingness, and coverage visible to the researcher.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="research-handoff" aria-labelledby="research-handoff-heading">
+          <div>
+            <p class="eyebrow">Researcher handoff</p>
+            <h2 id="research-handoff-heading">The deliverable is more than a dataset.</h2>
+            <p>A researcher should be able to understand the choices, reproduce the build, change the specification, and see exactly which records did not make it through.</p>
+          </div>
+          <dl>
+            <div><dt>01</dt><dd>Signed-off data specification</dd></div>
+            <div><dt>02</dt><dd>Analysis-ready dataset and data dictionary</dd></div>
+            <div><dt>03</dt><dd>Join, duplicate-key, coverage, and missingness audits</dd></div>
+            <div><dt>04</dt><dd>Reproducible SQL and Python workflow</dd></div>
+            <div><dt>05</dt><dd>Sensitivity results and interpretation memo</dd></div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="research-more-heading">
+          <div class="section-heading text-only">
+            <div>
+              <p class="eyebrow dark">Two more questions the same foundation could support</p>
+              <h2 id="research-more-heading">Change the question, keep the discipline</h2>
+              <p>These examples show how the workflow extends to product research and data-quality investigation without pretending the public portfolio has access to internal records.</p>
+            </div>
+          </div>
+          <div class="research-extensions">
+            <details>
+              <summary>
+                <span><small>Governed product data</small>Does sustained, eligible product use precede stronger outcomes?</span>
+                <strong>Open example</strong>
+              </summary>
+              <div class="research-extension-body">
+                <p><strong>Extra joins:</strong> licenses, rosters, implementation dates, training milestones, product events, and assessment outcomes.</p>
+                <p><strong>Smart part:</strong> define meaningful exposure before viewing results; separate adoption from dosage; align usage to the outcome window; and audit duplicate events, missing telemetry, time zones, and students moving between rosters.</p>
+                <p class="research-boundary"><strong>Boundary:</strong> This is a study-design example. This portfolio uses public data only and does not claim access to internal product data.</p>
+              </div>
+            </details>
+            <details>
+              <summary>
+                <span><small>Public data integrity</small>Is that jump a real signal, or did district identity or coverage change?</span>
+                <strong>Open example</strong>
+              </summary>
+              <div class="research-extension-body">
+                <p><strong>Extra joins:</strong> SEDA annual estimates and test counts, the year-specific district crosswalk, and the National Center for Education Statistics district directory and status history.</p>
+                <p><strong>Smart part:</strong> reconstruct the district’s ID lineage, flag mergers and splits, compare reporting coverage and precision across years, and rerun the trend with affected years clearly marked or excluded.</p>
+                <p class="research-boundary"><strong>Researcher gets:</strong> a diagnostic table that separates likely data-lineage or coverage changes from outcome changes worthy of substantive follow-up.</p>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section class="research-sources" aria-labelledby="research-sources-heading">
+          <p class="eyebrow dark">Public sources for the worked example</p>
+          <h2 id="research-sources-heading">A study plan grounded in available evidence</h2>
+          <div>
+            <a href="https://edopportunity.org/trends/data/downloads/">Stanford Education Data Archive <span aria-hidden="true">↗</span></a>
+            <a href="https://www.census.gov/programs-surveys/school-finances.html">Census school-finance data <span aria-hidden="true">↗</span></a>
+            <a href="https://nces.ed.gov/ccd/pau_rev.asp">National Center for Education Statistics district data <span aria-hidden="true">↗</span></a>
+            <a href="https://www.bls.gov/cpi/data.htm">Bureau of Labor Statistics inflation data <span aria-hidden="true">↗</span></a>
+          </div>
+          <p>The 2022–2024 window reflects the overlap between the released recent SEDA district crosswalk and currently available public finance data. Extending the study to older years would require an additional historical district-identity bridge.</p>
+        </section>
       </div>
     </section>
 
