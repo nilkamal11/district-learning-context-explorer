@@ -227,13 +227,13 @@
   };
 
   const directionCopy = (value) => {
-    if (Math.abs(value) < 0.005) return "at SEDA’s fixed national reference";
-    return `${Math.abs(value).toFixed(2)} scale points ${value > 0 ? "above" : "below"} SEDA’s fixed national reference`;
+    if (Math.abs(value) < 0.005) return "at Stanford’s fixed national reference";
+    return `${Math.abs(value).toFixed(2)} points ${value > 0 ? "above" : "below"} Stanford’s fixed national reference on this standardized scale`;
   };
 
   const changeCopy = (change, baselineYear) => {
     if (Math.abs(change) < 0.005) return `Essentially unchanged from ${schoolYear(baselineYear)} at two decimal places.`;
-    return `${Math.abs(change).toFixed(2)} scale points ${change > 0 ? "higher" : "lower"} than ${schoolYear(baselineYear)}.`;
+    return `${Math.abs(change).toFixed(2)} points ${change > 0 ? "higher" : "lower"} than ${schoolYear(baselineYear)} on this standardized scale.`;
   };
 
   const baselineComparison = (latestEstimate, latestYear, baselineYear) => {
@@ -322,10 +322,10 @@
         width: 3
       },
       connectgaps: false,
-      hovertemplate: "%{customdata[0]}<br>Result %{y:.3f}<br>95% margin ±%{customdata[3]:.3f}<br>Tests represented %{customdata[1]} (%{customdata[2]})<extra></extra>"
+      hovertemplate: "%{customdata[0]}<br>Estimated average: %{y:.3f}<br>Uncertainty margin: ±%{customdata[3]:.3f}<br>Tests represented: %{customdata[1]} (%{customdata[2]})<extra></extra>"
     };
     const layout = {
-      margin: { l: 62, r: 24, t: 36, b: 68 },
+      margin: { l: 90, r: 24, t: 36, b: 72 },
       height: 430,
       paper_bgcolor: "#fffefa",
       plot_bgcolor: "#fffefa",
@@ -333,13 +333,15 @@
       hovermode: "closest",
       showlegend: false,
       xaxis: {
-        title: "Spring assessment year",
+        title: { text: "Year", standoff: 10 },
+        automargin: true,
         gridcolor: "#e9edec",
         dtick: 2,
         range: [YEARS[0] - 0.4, YEARS.at(-1) + 0.4]
       },
       yaxis: {
-        title: "SEDA result (0 = national reference)",
+        title: { text: "Average score vs. national reference", standoff: 12 },
+        automargin: true,
         gridcolor: "#e9edec",
         zeroline: true,
         zerolinecolor: "#82939a",
@@ -356,15 +358,30 @@
         line: { width: 0 },
         layer: "below"
       }],
-      annotations: [{
-        x: 2020.5,
-        y: 1,
-        yref: "paper",
-        text: "No 2020–21 annual results",
-        showarrow: false,
-        yshift: 10,
-        font: { size: 9, color: "#64727c" }
-      }]
+      annotations: [
+        {
+          x: 2020.5,
+          y: 1,
+          yref: "paper",
+          text: "No results released",
+          showarrow: false,
+          yshift: 10,
+          font: { size: 9, color: "#64727c" }
+        },
+        {
+          x: 1,
+          xref: "paper",
+          xanchor: "right",
+          y: 0,
+          yref: "y",
+          yanchor: "bottom",
+          text: "National reference (0)",
+          showarrow: false,
+          yshift: 4,
+          bgcolor: "rgba(255,254,250,.88)",
+          font: { size: 9, color: "#52656e" }
+        }
+      ]
     };
     const latest = rows.at(-1);
     const latestTrace = {
@@ -420,8 +437,8 @@
       : "";
     renderHero(latest);
     renderSummary(rows);
-    elements["simple-trend-heading"].textContent = `${name}’s ${gradeSubject()} trend`;
-    elements["trend-chart-caption"].textContent = `Each dot is one spring district result. The blank space in 2020 and 2021 reflects years with no released annual result. Missing years stay blank.`;
+    elements["simple-trend-heading"].textContent = `${name}’s ${gradeSubject()} estimates by year`;
+    elements["trend-chart-caption"].textContent = `Each dot is one spring district estimate. Zero is SEDA’s fixed national reference for the same grade and subject. Higher values indicate stronger estimated performance. No annual estimates are available for 2020 or 2021.`;
     renderRecords(rows);
     renderChart(rows);
     elements["trend-status"].textContent = `${formatCount(rows.length)} reported school years · latest ${schoolYear(latestYear)} · ${name} (${state.districtId}).`;

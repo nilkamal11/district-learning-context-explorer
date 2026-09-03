@@ -16,7 +16,7 @@
 | Mart | `mart_crosswalk_audit` | Year and state mapping counts, stable-ID changes, and flag availability |
 | Mart | `mart_exclusion_audit` | Counts and scope of intentionally excluded multi-component units |
 | Python | peer membership | Fixed context-only same-state and national peer sets |
-| Output | local HTML profile | Aggregated, uncertainty-aware district comparison |
+| Output | local HTML profile | District comparison with uncertainty intervals |
 
 All source rows and local analytical databases remain outside Git. The build manifest records source hashes, SQL model order, row counts, timestamps, QA status, and the Git commit when available. SHA-256 values are project-computed fingerprints of the retrieved files, not provider-issued checksums. A skipped hash is stored as unverified rather than being presented as observed.
 

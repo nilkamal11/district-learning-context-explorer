@@ -87,7 +87,7 @@ def calculate_context_distances(
     target_id: str,
     domain_weights: dict[str, float],
 ) -> tuple[pd.DataFrame, dict[str, float]]:
-    """Score contextual similarity from an explicit context-only column allowlist."""
+    """Score contextual similarity using the defined matching columns."""
     missing = sorted(set(MATCH_CONTEXT_COLUMNS) - set(eligible.columns))
     if missing:
         raise ValueError(f"Peer context is missing required columns: {missing}")

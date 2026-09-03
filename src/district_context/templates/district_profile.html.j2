@@ -128,8 +128,7 @@
 
   <main class="wrap">
     <div class="notice">
-      <strong>Read this as context, not a district grade.</strong>
-      These are modeled, aggregate estimates for groups of students. They do not measure an individual child, school, teacher, or instructional program, and they do not establish cause and effect.
+      These are district-level estimates for groups of students. They describe the selected grade and subject, with uncertainty, but do not measure an individual child or explain what caused a change.
     </div>
 
     <section class="grid" aria-label="Latest estimates">
@@ -161,8 +160,8 @@
       {% endfor %}
     </section>
 
-    <h2 class="section-title">Why these are comparable districts</h2>
-    <p class="section-intro">The algorithm uses enrollment, family economic context, student composition, locale, and grade span. It never uses achievement to choose peers. The peer IDs are then held fixed for every year in the chart.</p>
+    <h2 class="section-title">How comparison districts were chosen</h2>
+    <p class="section-intro">The calculation uses enrollment, family economic context, student composition, locale, and grade span. Test scores are excluded from selection. The same district IDs are used for every year in the chart.</p>
     <section class="grid">
       <article class="card full">
         <table>
@@ -188,7 +187,7 @@
           Relaxation stage: <code>{{ diagnostics.national_relaxation_stage }}</code>.
           {% endif %}
         </p>
-        <p class="small">A complete count is not proof of a good match. The table below exposes the median distance in each weighted domain; lower values indicate greater similarity.</p>
+        <p class="small">The table shows the median difference in each weighted category. Lower values mean a closer match.</p>
         <table>
           <thead><tr><th>Matching domain</th><th>Median distance</th></tr></thead>
           <tbody>
@@ -243,32 +242,15 @@
       </table>
     </article>
 
-    <h2 class="section-title">What this evidence can and cannot support</h2>
-    <section class="two-column">
-      <div class="callout">
-        <h3>It can support</h3>
-        <ul>
-          <li>A transparent description of district-level achievement estimates.</li>
-          <li>Comparison with a fixed group of districts similar on the selected context measures.</li>
-          <li>Separate trends for grade {{ grade }} math and reading.</li>
-          <li>An uncertainty-aware discussion of whether apparent differences are precise.</li>
-        </ul>
-      </div>
-      <div class="callout caution">
-        <h3>It cannot support</h3>
-        <ul>
-          <li>A conclusion about an individual student or a child’s likely outcome.</li>
-          <li>A ranking of schools, teachers, curricula, or districts.</li>
-          <li>A claim that the same students were followed from year to year.</li>
-          <li>A causal claim about why achievement changed.</li>
-        </ul>
-      </div>
-    </section>
+    <h2 class="section-title">Interpretation</h2>
+    <article class="callout">
+      <p>This profile compares district-level estimates for grade {{ grade }} math and reading with a fixed group of districts serving similar communities. Each year includes a different group of tested students. The results should not be used to rank schools or explain why a district changed.</p>
+    </article>
 
     <h2 class="section-title">Technical record</h2>
     <article class="card full">
       <p><strong>Scale:</strong> Cohort Standardized (CS), measured in student-level standard deviations. Separate math and reading results are not directly comparable.</p>
-      <p><strong>Peer model:</strong> Domain-balanced Gower-style distance with Hellinger distance for composition vectors. Primary matching variables receive equal domain weights. Outcome variables used in matching: <code>[]</code>.</p>
+      <p><strong>Comparison model:</strong> District size, economic context, student composition, and locale each contribute 25%. Test scores are excluded from the matching calculation. See the methodology for the full formula.</p>
       <p><strong>Uncertainty:</strong> {{ confidence_percentage }}% intervals use the normal critical value configured for this build. Within-state comparisons use the unadjusted standard error. National comparisons use the NAEP-linking-adjusted standard error and remain descriptive because linking errors may be correlated within states. A comparison needs at least 10 reporting peers and 70% coverage of its selected peer set.</p>
       <p><strong>Quality checks:</strong>
         {% if qa_passed %}<span class="status">{{ qa_count }} checks completed without errors</span>

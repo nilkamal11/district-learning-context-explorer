@@ -47,6 +47,9 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     trends_javascript = (ROOT / "site" / "assets" / "trends.js").read_text(
         encoding="utf-8"
     )
+    dashboard_javascript = (ROOT / "site" / "assets" / "dashboard.js").read_text(
+        encoding="utf-8"
+    )
 
     assert 'id="workbench-tab"' in html
     assert 'id="workbench-panel"' in html
@@ -67,7 +70,7 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert 'id="trend-data-note"' in html
     assert 'id="trend-records-body"' in html
     assert 'src="assets/trends.js' in html
-    assert "How this differs from Stanford’s Explorer" in html
+    assert "Annual estimates for one district, grade, and subject" in html
     assert 'const DEFAULT_DISTRICT_ID = "1728890"' in trends_javascript
     assert "const BASELINE_YEARS = [2019, 2022]" in trends_javascript
     assert "workbench-grade-${grade}.js" in trends_javascript
@@ -77,6 +80,12 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert "latestYear <= baselineYear" in trends_javascript
     assert "different group of students" in html
     assert 'aria-describedby="trend-chart-caption"' in html
+    assert "Average test score over time" in html
+    assert "25% each" in html
+    assert "Hellinger distance" not in html
+    assert "Average score vs. national reference" in dashboard_javascript
+    assert "National reference (0)" in dashboard_javascript
+    assert "Average score vs. national reference" in trends_javascript
 
     assert re.search(
         r'<section aria-labelledby="trend-heading">.*?<h2 id="trend-heading"', html, re.S
@@ -92,7 +101,7 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert len(element_ids) == len(set(element_ids))
 
 
-def test_public_site_exposes_research_extensions_with_clear_boundaries():
+def test_public_site_has_study_design_page():
     html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
     dashboard_javascript = (ROOT / "site" / "assets" / "dashboard.js").read_text(
         encoding="utf-8"
@@ -103,17 +112,16 @@ def test_public_site_exposes_research_extensions_with_clear_boundaries():
     assert 'id="research-panel"' in html
     assert 'aria-labelledby="research-tab"' in html
     assert "Did districts that increased instructional spending per student" in html
-    assert "No findings invented" in html
+    assert "no results have been calculated" in html
     assert "Association, not causation" in html
     assert "174 crosswalk records need an ID change" in html
-    assert "does not claim access to internal product data" in html
+    assert "four public data sources" in html.lower()
     assert "https://edopportunity.org/trends/data/downloads/" in html
     assert "https://www.census.gov/programs-surveys/school-finances.html" in html
     assert "https://nces.ed.gov/ccd/pau_rev.asp" in html
     assert "https://www.bls.gov/cpi/data.htm" in html
     assert '["explore", "trends", "workbench", "research", "technical"]' in dashboard_javascript
     assert '["trends", "workbench", "research", "technical"]' in dashboard_javascript
-
 
 def test_public_dashboard_rejects_a_non_grade_four_initial_bundle(tmp_path):
     try:

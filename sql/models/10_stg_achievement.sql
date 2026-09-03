@@ -1,8 +1,10 @@
 CREATE OR REPLACE TABLE stg_achievement AS
 SELECT
+    -- Normalize numeric-looking IDs, then restore SEDA's seven-character format.
     lpad(CAST(CAST(sedaadmin AS BIGINT) AS VARCHAR), 7, '0') AS district_id,
     trim(sedaadminname) AS district_name,
     lower(trim(subject)) AS subject,
+    -- Unexpected source values remain NULL for QA instead of stopping the full load.
     TRY_CAST(grade AS SMALLINT) AS grade,
     TRY_CAST(year AS SMALLINT) AS year,
     TRY_CAST(fips AS SMALLINT) AS state_fips,
@@ -31,6 +33,8 @@ SELECT
             coalesce(cs_mn_se_adj_all, '<NULL>')
         )
     ) AS source_row_hash
+-- A quoted district name containing a comma broke the full-file autodetected
+-- parse, so delimiter, quote, escape, and input type are pinned here.
 FROM read_csv_auto(
     '{{ achievement_path }}',
     header = true,

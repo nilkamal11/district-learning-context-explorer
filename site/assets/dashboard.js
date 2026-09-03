@@ -309,12 +309,12 @@
 
   const interpretation = (row, crossState) => {
     if (!row) return "Not enough overlapping data";
-    if (!row.hasCoverage) return "Not enough reporting peers for a stable comparison";
-    if (crossState) return "Descriptive cross-state comparison only";
-    if (row.lowPrecision) return "Estimate is too imprecise for a directional comparison";
-    if (row.differenceLow > 0) return "Higher than the peer mean in this estimate";
-    if (row.differenceHigh < 0) return "Lower than the peer mean in this estimate";
-    return "Not clearly different from the peer mean";
+    if (!row.hasCoverage) return "Not enough comparison districts reported data";
+    if (crossState) return "Nationwide comparison shown for context only";
+    if (row.lowPrecision) return "The estimate is too uncertain for a clear comparison";
+    if (row.differenceLow > 0) return "Higher than the comparison-group average";
+    if (row.differenceHigh < 0) return "Lower than the comparison-group average";
+    return "Not clearly different from the comparison-group average";
   };
 
   const latestSummary = (summary) => [...summary]
@@ -323,32 +323,35 @@
 
   const renderMetricCard = (element, label, latest, selectedCount, crossState) => {
     if (!latest) {
-      element.innerHTML = `<h3>${escapeHtml(label)}</h3><p class="comparison-copy">Not enough overlapping data</p><p class="metric-detail">No year has both a district estimate and a peer benchmark.</p>`;
+      element.innerHTML = `<h3>${escapeHtml(label)}</h3><p class="comparison-copy">Not enough results in the same year</p><p class="metric-detail">No year has both a district result and a comparison-group result.</p>`;
       return;
     }
     element.innerHTML = `
       <h3>${escapeHtml(label)}</h3>
       <div class="metric-value">${formatNumber(latest.targetEstimate, 2)}</div>
-      <div class="metric-detail">${latest.year} CS estimate · 95% interval ${formatNumber(latest.targetLow, 2)} to ${formatNumber(latest.targetHigh, 2)}</div>
+      <div class="metric-detail">${latest.year} estimated average · 95% uncertainty interval ${formatNumber(latest.targetLow, 2)} to ${formatNumber(latest.targetHigh, 2)}</div>
       <p class="comparison-copy">${escapeHtml(interpretation(latest, crossState))}</p>
-      <p class="metric-detail">Peer mean ${formatNumber(latest.peerMean, 2)}; median ${formatNumber(latest.peerMedian, 2)}; middle 50% ${formatNumber(latest.peerQ25, 2)} to ${formatNumber(latest.peerQ75, 2)} across ${latest.peerCount} of ${selectedCount} selected peers.</p>
-      ${latest.lowPrecision ? '<span class="precision-tag">Use extra caution: low precision</span>' : ""}
+      <p class="metric-detail">Comparison-group average ${formatNumber(latest.peerMean, 2)}; typical result ${formatNumber(latest.peerMedian, 2)}; middle half ${formatNumber(latest.peerQ25, 2)} to ${formatNumber(latest.peerQ75, 2)}. ${latest.peerCount} of ${selectedCount} selected districts reported a result.</p>
+      ${latest.lowPrecision ? '<span class="precision-tag">Use extra caution: this estimate is less certain</span>' : ""}
     `;
   };
 
   const chartLayout = (title) => ({
     title: { text: title, x: 0.02, xanchor: "left", font: { size: 17, color: "#152632" } },
-    height: 390,
-    margin: { l: 54, r: 18, t: 54, b: 56 },
+    height: 420,
+    margin: { l: 84, r: 20, t: 54, b: 82 },
     paper_bgcolor: "#fffefa",
     plot_bgcolor: "#fffefa",
     font: { family: "Inter, Arial, sans-serif", color: "#344852", size: 11 },
-    legend: { orientation: "h", y: -0.23, x: 0, font: { size: 10 } },
+    legend: { orientation: "h", y: -0.28, x: 0, font: { size: 10 } },
     hovermode: "x unified",
-    xaxis: { title: "Spring assessment year", dtick: 2, range: [2008.6, 2025.4], gridcolor: "#e9edec" },
-    yaxis: { title: "CS standard deviations", zeroline: true, zerolinecolor: "#aeb9bd", gridcolor: "#e9edec" },
+    xaxis: { title: { text: "Year", standoff: 10 }, automargin: true, dtick: 2, range: [2008.6, 2025.4], gridcolor: "#e9edec" },
+    yaxis: { title: { text: "Average score vs. national reference", standoff: 12 }, automargin: true, zeroline: true, zerolinecolor: "#82939a", zerolinewidth: 1.5, gridcolor: "#e9edec" },
     shapes: [{ type: "rect", x0: 2019.5, x1: 2021.5, y0: 0, y1: 1, yref: "paper", fillcolor: "rgba(100,114,124,.10)", line: { width: 0 } }],
-    annotations: [{ x: 2020.5, y: 1, yref: "paper", text: "No 2020–21 results", showarrow: false, yshift: 10, font: { size: 9, color: "#64727c" } }]
+    annotations: [
+      { x: 2020.5, y: 1, yref: "paper", text: "No results released", showarrow: false, yshift: 10, font: { size: 9, color: "#64727c" } },
+      { x: 1, xref: "paper", xanchor: "right", y: 0, yref: "y", yanchor: "bottom", text: "National reference (0)", showarrow: false, yshift: 4, bgcolor: "rgba(255,254,250,.88)", font: { size: 9, color: "#52656e" } }
+    ]
   });
 
   const renderChart = (elementId, title, districtName, peerLabel, summary) => {
@@ -361,18 +364,20 @@
       {
         x: years, y: summary.map((row) => row.peerQ25), mode: "lines",
         line: { width: 0 }, fill: "tonexty", fillcolor: "rgba(45,113,140,.14)",
-        name: `${peerLabel} middle 50%`, hovertemplate: "Year %{x}<br>Peer lower quartile %{y:.2f}<extra></extra>", connectgaps: false
+        customdata: summary.map((row) => row.peerQ75),
+        name: `Middle half of ${peerLabel}`, hovertemplate: "Year %{x}<br>Middle half of comparison districts: %{y:.2f} to %{customdata:.2f}<extra></extra>", connectgaps: false
       },
       {
         x: years, y: summary.map((row) => row.peerMedian), mode: "lines",
-        line: { color: "#2d718c", width: 2, dash: "dot" }, name: `${peerLabel} median`,
-        hovertemplate: "Year %{x}<br>Peer median %{y:.2f}<extra></extra>", connectgaps: false
+        line: { color: "#2d718c", width: 2, dash: "dot" }, name: `Typical ${peerLabel}`,
+        hovertemplate: "Year %{x}<br>Typical comparison district: %{y:.2f}<extra></extra>", connectgaps: false
       },
       {
         x: years, y: summary.map((row) => row.targetEstimate), mode: "lines+markers",
         line: { color: "#dc7139", width: 3 }, marker: { color: "#dc7139", size: 6 },
         error_y: { type: "data", array: summary.map((row) => row.targetMargin), visible: true, color: "rgba(220,113,57,.45)", thickness: 1, width: 2 },
-        name: districtName, hovertemplate: "Year %{x}<br>District estimate %{y:.2f}<extra></extra>", connectgaps: false
+        customdata: summary.map((row) => [row.targetLow, row.targetHigh]),
+        name: districtName, hovertemplate: "Year %{x}<br>Estimated average: %{y:.2f}<br>95% uncertainty interval: %{customdata[0]:.2f} to %{customdata[1]:.2f}<extra></extra>", connectgaps: false
       }
     ];
     window.Plotly.react(elementId, traces, chartLayout(title), { displaylogo: false, responsive: true, displayModeBar: false });
@@ -402,18 +407,18 @@
 
   const renderMatchDiagnostics = (pool, poolLabel) => {
     const statusLabels = {
-      full_count_strict: "Full peer count under strict calipers",
-      full_count_relaxed: "Full peer count after documented relaxation",
-      minimum_count_only: "Minimum peer count reached",
-      insufficient: "Insufficient peer count"
+      full_count_strict: "Close match on all four factors",
+      full_count_relaxed: "Match found after widening the search",
+      minimum_count_only: "Smaller comparison group",
+      insufficient: "Not enough similar districts"
     };
     const statusClass = pool.status === "full_count_strict" ? "pass" : "warn";
     elements["selection-status-copy"].innerHTML = `
       <span class="status-tag ${statusClass}">${statusLabels[pool.status]}</span><br>
-      <span class="small">${pool.selected.length} ${poolLabel.toLowerCase()} selected from ${formatNumber(pool.universe)} eligible candidates. Relaxation stage: <code>${pool.stage}</code>.</span>
+      <span class="small">${pool.selected.length} ${poolLabel.toLowerCase()} selected from ${formatNumber(pool.universe)} available candidates. Shorter bars below mean a closer match.</span>
     `;
     const labels = {
-      district_scale: "District scale",
+      district_scale: "District size",
       economic_context: "Economic context",
       student_composition: "Student composition",
       place: "Place / locale"
@@ -432,8 +437,8 @@
 
   const renderSensitivity = (targetId, selection) => {
     const pools = [
-      ["Same-state peers", selection.sameState, false],
-      ["National analogs", selection.national, true]
+      ["Same-state comparison", selection.sameState, false],
+      ["Nationwide comparison", selection.national, true]
     ];
     const subjects = [["mth", "Mathematics"], ["rla", "Reading / language arts"]];
     elements["sensitivity-table-body"].innerHTML = pools.flatMap(([label, pool, crossState]) => (
@@ -482,7 +487,7 @@
     const districtName = catalogRow[CATALOG.district_name];
     const state = catalogRow[CATALOG.state];
     elements["district-heading"].textContent = districtName;
-    elements["district-subtitle"].textContent = `How do this district’s grade ${grade} math and reading estimates compare with districts serving similar communities?`;
+    elements["district-subtitle"].textContent = `How do this district’s grade ${grade} math and reading results compare with districts serving similar communities?`;
     elements["district-id-meta"].textContent = `SEDA district ${districtId}`;
     elements["district-state-meta"].textContent = state;
 
@@ -500,21 +505,21 @@
       const stateReportable = selection.sameState.selected.length >= analysis.state_peer_minimum;
       const primary = stateReportable ? selection.sameState : selection.national;
       const crossState = !stateReportable;
-      const peerLabel = stateReportable ? "Similar in-state districts" : "Similar districts nationally";
+      const peerLabel = stateReportable ? "similar same-state districts" : "similar districts nationwide";
       elements["availability-indicator"].textContent = "Profile available";
       elements["availability-indicator"].className = "status-dot available";
       elements["unavailable-panel"].hidden = true;
       elements["analysis-content"].hidden = false;
-      elements["primary-pool-label"].textContent = `${peerLabel} · ${primary.selected.length} selected`;
+      elements["primary-pool-label"].textContent = `${primary.selected.length} ${peerLabel}`;
 
       const math = trendSummary(districtId, primary.selected, "mth", crossState);
       const reading = trendSummary(districtId, primary.selected, "rla", crossState);
-      renderMetricCard(elements["math-card"], "Mathematics", latestSummary(math), primary.selected.length, crossState);
-      renderMetricCard(elements["reading-card"], "Reading / language arts", latestSummary(reading), primary.selected.length, crossState);
-      renderChart("math-chart", "Mathematics", districtName, peerLabel, math);
-      renderChart("reading-chart", "Reading / language arts", districtName, peerLabel, reading);
+      renderMetricCard(elements["math-card"], "Fourth-grade math", latestSummary(math), primary.selected.length, crossState);
+      renderMetricCard(elements["reading-card"], "Fourth-grade reading", latestSummary(reading), primary.selected.length, crossState);
+      renderChart("math-chart", "Average math score", districtName, peerLabel, math);
+      renderChart("reading-chart", "Average reading score", districtName, peerLabel, reading);
       renderContextTable(context, primary.selected);
-      renderMatchDiagnostics(primary, stateReportable ? "Same-state peers" : "National analogs");
+      renderMatchDiagnostics(primary, stateReportable ? "same-state districts" : "districts nationwide");
       renderSensitivity(districtId, selection);
     }
 
@@ -581,26 +586,26 @@
     `).join("");
 
     const modelRows = [
-      ["Achievement staging → mart", `${formatNumber(technical.table_counts.stg_achievement)} → ${formatNumber(technical.table_counts.mart_achievement)} rows`],
-      ["Context staging / snapshot", `${formatNumber(technical.table_counts.stg_context)} rows`],
-      ["Crosswalk staging", `${formatNumber(technical.table_counts.stg_crosswalk_admin)} mappings`],
-      ["Changed source / stable IDs", `${formatNumber(technical.changed_source_stable_id_mappings)} mappings`],
-      ["Coverage mart", `${formatNumber(technical.table_counts.mart_data_coverage)} state-year-grade-subject cells`],
-      ["Persisted DuckDB", `${formatExactBytes(technical.database_bytes)} · ${technical.persisted_table_count} tables`],
-      ["Offline single-profile HTML", formatExactBytes(technical.offline_profile_bytes)],
-      [`Initial grade ${grade} bundle`, `${formatExactBytes(technical.public_bundle_bytes)} · ${formatNumber(technical.published_achievement_rows)} grade-specific estimate rows`],
-      ["Public browser data", `${formatExactBytes(technical.workbench_public_data_bytes)} across six grade-partitioned files`],
-      ["Workbench estimate scope", `${formatNumber(technical.workbench_total_rows)} long-form district-grade-subject-year estimates across grades 3–8`],
-      ["Browser catalog / context", `${formatNumber(technical.published_catalog_rows)} districts / ${formatNumber(technical.published_context_rows)} context rows`]
+      ["Achievement rows loaded and kept", `${formatNumber(technical.table_counts.stg_achievement)} loaded; ${formatNumber(technical.table_counts.mart_achievement)} kept`],
+      ["District context rows", formatNumber(technical.table_counts.stg_context)],
+      ["District ID mappings", formatNumber(technical.table_counts.stg_crosswalk_admin)],
+      ["Source IDs that changed", formatNumber(technical.changed_source_stable_id_mappings)],
+      ["Coverage summary rows", formatNumber(technical.table_counts.mart_data_coverage)],
+      ["DuckDB database", `${formatExactBytes(technical.database_bytes)} · ${technical.persisted_table_count} tables`],
+      ["Single-district offline report", formatExactBytes(technical.offline_profile_bytes)],
+      [`Grade ${grade} browser file`, `${formatExactBytes(technical.public_bundle_bytes)} · ${formatNumber(technical.published_achievement_rows)} estimates`],
+      ["All six browser data files", formatExactBytes(technical.workbench_public_data_bytes)],
+      ["Annual estimates available in the workbench", formatNumber(technical.workbench_total_rows)],
+      ["District selector and context data", `${formatNumber(technical.published_catalog_rows)} districts · ${formatNumber(technical.published_context_rows)} context rows`]
     ];
     elements["model-table-body"].innerHTML = modelRows.map(([label, value]) => `<tr><td>${label}</td><td>${value}</td></tr>`).join("");
     elements["sql-model-list"].innerHTML = technical.sql_models.map((model) => `<li>${model}</li>`).join("");
 
     const qaCards = [
-      [`${technical.qa_pass_count} passed`, "error-level data contracts"],
-      [`${technical.qa_warning_count} surfaced`, "diagnostic warnings"],
-      [`${technical.software_test_count} discovered`, "automated tests executed by CI"],
-      ["Required", "Ruff, tests, and publication guards before deploy"]
+      [`${technical.qa_pass_count} passed`, "required data checks"],
+      [`${technical.qa_warning_count} flagged`, "items to review"],
+      [formatNumber(technical.software_test_count), "software tests"],
+      ["Every update", "tests and publication checks run before publishing"]
     ];
     elements["qa-status-grid"].innerHTML = qaCards.map(([value, label]) => `<article><strong>${value}</strong><span>${label}</span></article>`).join("");
     const warningText = {

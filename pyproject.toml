@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "district-learning-context-explorer"
 version = "0.1.0"
-description = "A reproducible, uncertainty-aware comparison of school districts serving similar communities."
+description = "A reproducible comparison of school districts using public SEDA data."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}

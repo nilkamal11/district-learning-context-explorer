@@ -150,7 +150,7 @@ def build_parser() -> argparse.ArgumentParser:
     default_grade = int(project_config()["analysis"]["default_grade"])
     parser = argparse.ArgumentParser(
         prog="district-context",
-        description="Build uncertainty-aware district comparisons from SEDA 2025.2.",
+        description="Build district comparisons from SEDA 2025.2.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 

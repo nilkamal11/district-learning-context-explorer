@@ -13,6 +13,7 @@ def test_all_sql_models_compile_against_test_only_fixtures(tmp_path):
     pd.DataFrame(
         [
             {
+                # Regression case for the quoted comma that broke the full-file load.
                 "sedaadmin": "10003",
                 "sedaadminname": "Test District, The",
                 "subject": "mth",

@@ -17,11 +17,15 @@ analysis:
 
 peer_model:
   version: context-match-v1
+  # Equal weights are a starting choice, not a validated optimum.
+  # TODO: measure how much peer membership changes under alternative weights.
   domain_weights:
     district_scale: 0.25
     economic_context: 0.25
     student_composition: 0.25
     place: 0.25
+  # These screening thresholds are demonstration heuristics. Review them with
+  # the researcher before using the comparison group for substantive analysis.
   strict_calipers:
     enrollment_factor: 4
     poverty_points: 0.15

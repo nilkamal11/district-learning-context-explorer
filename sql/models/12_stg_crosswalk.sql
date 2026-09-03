@@ -1,3 +1,5 @@
+-- TODO: add a historical ID bridge before joining external sources from before
+-- 2022; the administrative-district rows in this release cover 2022-2025.
 CREATE OR REPLACE TABLE stg_crosswalk_admin AS
 SELECT
     lower(trim(geo)) AS geography_type,

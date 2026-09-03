@@ -41,6 +41,8 @@ SELECT
         ELSE NULL
     END AS share_other_race_ethnicity,
     c.grade_low <= 4 AND c.grade_high >= 4 AS serves_grade_4,
+    -- Recent EL and special-education fields stay in staging for audit but are
+    -- excluded from peer selection because both are constant at zero in 2024.
     c.enrollment_grades_3_8 > 0
         AND c.family_poverty_rate IS NOT NULL
         AND c.share_city IS NOT NULL

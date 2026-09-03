@@ -161,7 +161,7 @@ def _comparison_phrase(row: pd.Series) -> str:
             return "Estimate is too imprecise for a directional comparison"
         return "Descriptive cross-state comparison only"
     if pd.isna(row["difference_ci_low"]) or pd.isna(row["difference_ci_high"]):
-        return "Not enough peer data for an uncertainty-aware comparison"
+        return "Not enough peer data for a precise comparison"
     if row["difference_ci_low"] > 0:
         return "Higher than the peer mean in this estimate"
     if row["difference_ci_high"] < 0:
