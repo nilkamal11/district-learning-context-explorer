@@ -96,16 +96,16 @@
         <article class="subject-guide math"><h3>Math · Mathematics</h3><p>Measures grade-level mathematical knowledge, reasoning, and application. Students solve problems, explain mathematical thinking, and apply concepts in multi-step and real-world situations.</p></article>
       </div>
       <div class="measurement-definitions">
-        <div class="definition"><strong>Proficiency rate</strong><br>The percentage of tested students whose scale scores meet Illinois's proficiency benchmark. This dashboard uses Levels 4+5 for 2022–2024 and Levels 3+4 for 2025. Illinois changed the cut scores, so the break from 2024 must be interpreted cautiously.</div>
+        <div class="definition"><strong>Proficiency rate</strong><br>The percentage of tested students whose scale scores meet Illinois's proficiency benchmark. {{ proficiency_definition }}</div>
         <div class="definition growth"><strong>Growth percentile</strong><br>Compares a student's scale-score progress with Illinois academic peers who had similar prior scores. Values run from 1 to 99; 50 is expected growth. The dashboard reports the published school mean, not an individual score or percentage.</div>
       </div>
-      <p class="source-links"><a href="https://www.isbe.net/iar" target="_blank" rel="noopener">Illinois IAR overview ↗</a><a href="https://www.isbe.net/Documents/IAR-Tech-Report-2024-2025.pdf" target="_blank" rel="noopener">2025 performance levels ↗</a><a href="https://www.isbe.net/Documents/Student-Growth-Percentile-2025.pdf" target="_blank" rel="noopener">How Illinois measures growth ↗</a><a href="https://www.isbe.net/ilreportcarddata" target="_blank" rel="noopener">Report Card data library ↗</a></p>
+      <p class="source-links"><a href="https://www.isbe.net/iar" target="_blank" rel="noopener">Illinois IAR overview ↗</a><a href="https://www.isbe.net/Documents/Public-Business-Rules-2024-Report-Card-Metrics.pdf" target="_blank" rel="noopener">2024 proficiency definition ↗</a><a href="https://www.isbe.net/Documents/IAR-Tech-Report-2024-2025.pdf" target="_blank" rel="noopener">2025 performance levels and cut scores ↗</a><a href="https://www.isbe.net/Documents/Unified-Perf-Levels-FAQ.pdf" target="_blank" rel="noopener">ISBE comparison guidance ↗</a><a href="https://www.isbe.net/Documents/Student-Growth-Percentile-2025.pdf" target="_blank" rel="noopener">How Illinois measures growth ↗</a><a href="https://www.isbe.net/ilreportcarddata" target="_blank" rel="noopener">Report Card data library ↗</a></p>
     </section>
 
     <section id="kpi-cards" class="kpis" aria-label="Latest selected results"></section>
 
     <section class="dashboard-grid">
-      <article class="notice"><strong>2025 starts a new proficiency measurement chapter.</strong> Illinois changed IAR performance levels. The 2024-to-2025 step is displayed but should not be read as a like-for-like change. Growth is a separate published metric.</article>
+      <article class="notice"><strong>2025 is a break in the proficiency series.</strong> IAR changed from five levels, with Levels 4 and 5 proficient, to four levels, with Levels 3 and 4 proficient. For Grade 4, the minimum proficient scale score changed from 750 to 737 in ELA and from 750 to 740 in mathematics. ISBE publishes old-versus-new cut-score tables and explicitly says not to compare 2025 proficiency rates with prior years. The test scale and Student Growth Percentile calculation did not change.</article>
       <article class="panel full"><h2>Proficiency trend</h2><p class="panel-copy">Solid lines are ELA; dashed lines are mathematics. Missing and suppressed values remain blank.</p><div id="proficiency-chart" class="chart"></div></article>
       <article class="panel"><h2>Growth</h2><p class="panel-copy">Mean student growth percentile; 50 represents expected growth.</p><div id="growth-chart" class="chart"></div></article>
       <article class="panel"><h2>Learning context</h2><p class="panel-copy">Solid: mobility. Dotted: schoolwide chronic absenteeism.</p><div id="context-chart" class="chart"></div></article>
@@ -113,7 +113,7 @@
 
     <div class="table-heading"><h2>Filtered records</h2><span id="row-count"></span></div>
     <div class="table-wrap"><table><thead><tr><th>Year</th><th>School</th><th>RCDTS</th><th>Subject</th><th>Proficiency</th><th>Participation</th><th>Growth</th><th>Mobility</th><th>Chronic absence</th></tr></thead><tbody id="record-table"></tbody></table></div>
-    <footer>Built {{ built_at }} from Illinois Report Card public files. Proficiency is Levels 4+5 for 2022–2024 and the published rate under the new four-level system for 2025. “Not published” is distinct from suppression.</footer>
+    <footer>Source: Illinois Report Card public files. {{ proficiency_definition }} “Not published” is distinct from suppression.</footer>
   </main>
   <script>
     const DATA = {{ dashboard_records | tojson }};

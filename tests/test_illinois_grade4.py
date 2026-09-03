@@ -2,6 +2,7 @@ import pytest
 
 from district_context.illinois_grade4 import (
     _derived_proficiency,
+    _iar_metric_columns,
     _metric,
     format_rcdts,
     normalize_rcdts,
@@ -23,6 +24,19 @@ def test_legacy_proficiency_adds_levels_four_and_five():
 
 def test_legacy_proficiency_stays_suppressed_if_either_component_is_suppressed():
     assert _derived_proficiency("*", 18.1) == (None, "suppressed")
+
+
+def test_2025_proficiency_uses_the_published_rate_field_directly():
+    headers = [
+        "IAR ELA Proficiency Rate Grade 4 - Total",
+        "IAR ELA Participation Rate Grade 4 - Total",
+        "ELA Growth Percentile Grade 4 - Total",
+    ]
+
+    mapping = _iar_metric_columns(headers, 2025, "ela")
+
+    assert mapping["proficiency"] == "IAR ELA Proficiency Rate Grade 4 - Total"
+    assert mapping["levels"] == []
 
 
 def test_rcdts_normalization_removes_presentation_hyphens_only():

@@ -31,8 +31,16 @@ def test_illinois_profile_template_has_dashboard_controls_and_dynamic_charts():
     assert "ELA · English language arts/literacy" in template
     assert "Math · Mathematics" in template
     assert "https://www.isbe.net/iar" in template
+    assert "Public-Business-Rules-2024-Report-Card-Metrics.pdf" in template
+    assert "Unified-Perf-Levels-FAQ.pdf" in template
     assert "Student-Growth-Percentile-2025.pdf" in template
     assert 'src="assets/plotly-cartesian-3.7.0.min.js"' in template
+    assert template.count("{{ proficiency_definition }}") == 2
+    assert "minimum proficient scale score changed from 750 to 737 in ELA" in template
+    assert "from 750 to 740 in mathematics" in template
+    assert "explicitly says not to compare 2025 proficiency rates with prior years" in template
+    assert "Built {{ built_at }}" not in template
+    assert "Levels 3+4" not in template
     assert "What this can support" not in template
     assert "What it cannot claim" not in template
     assert "No causal effect" not in template

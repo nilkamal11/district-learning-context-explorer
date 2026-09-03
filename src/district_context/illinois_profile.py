@@ -21,6 +21,13 @@ FEATURED_DISTRICTS = (
     "Worth SD 127",
 )
 
+PROFICIENCY_DEFINITION = (
+    "For 2022–2024, this dashboard derives proficiency by adding ISBE's published "
+    "Level 4 and Level 5 percentages. For 2025, it uses ISBE's published Grade 4 "
+    "proficiency-rate field; under the new four-level structure, Levels 3 and 4 "
+    "count as proficient."
+)
+
 
 def _safe_value(value: Any) -> Any:
     if pd.isna(value):
@@ -121,10 +128,10 @@ def build_north_palos_profile(*, db_path: Path | None = None) -> dict[str, Any]:
     template = environment.get_template("illinois_grade4_profile.html.j2")
     built_at = datetime.now(UTC)
     template_context = {
-        "built_at": built_at.strftime("%B %d, %Y"),
         "dashboard_records": records,
         "school_catalog": catalog,
         "default_district": NORTH_PALOS,
+        "proficiency_definition": PROFICIENCY_DEFINITION,
     }
     html = template.render(
         **template_context,

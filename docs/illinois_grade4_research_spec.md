@@ -15,7 +15,9 @@ The public files do not contain student identifiers or assessment histories. Thi
 ## Schema finding that governs the first build
 
 - The 2022–2024 annual IAR sheets publish Grade 4 performance-level distributions. The pipeline derives the then-current proficiency rate as Levels 4 plus 5.
-- The 2025 IAR sheet publishes Grade 4 proficiency, participation, and growth fields directly.
+- The 2025 IAR sheet publishes Grade 4 proficiency, participation, and growth fields directly. The pipeline uses the published proficiency-rate field; it does not reconstruct that rate from the four level percentages.
+- In 2025, IAR changed from five performance levels to four. The new levels are Below Proficient, Approaching Proficient, Proficient, and Above Proficient; the latter two categories, Levels 3 and 4, form the proficiency numerator.
+- For Grade 4, the minimum proficient scale score changed from 750 to 737 in ELA and from 750 to 740 in mathematics. ISBE publishes old-versus-new cut-score tables and explicitly directs readers not to compare 2025 proficiency rates with prior years; scale scores and Student Growth Percentile calculations remain comparable.
 - The separate 2022–2024 cohort-versus-baseline workbooks publish school-level SGP comparisons across the tested grade span, not a Grade 4-only result. They are retained as reference sources but are not relabeled as Grade 4 growth.
 
 Consequently, the initial analytical table leaves Grade 4 SGP missing for 2022–2024 and reports it for 2025. This is a source limitation, not an imputation target. Longitudinal Grade 4 proficiency remains available for all four years, with the 2025 comparability break displayed.

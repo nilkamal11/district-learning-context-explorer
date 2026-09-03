@@ -17,7 +17,7 @@ results so schools that do not serve Grade 4 remain visible instead of disappear
 | `subject` | `ela` or `math` |
 | `proficiency_rate` | Published or reproducibly derived Grade 4 proficiency percentage |
 | `proficiency_status` | `reported`, `suppressed`, `missing`, or `invalid` |
-| `proficiency_metric_version` | Identifies the pre-2025 five-level definition or 2025 four-level definition |
+| `proficiency_metric_version` | Identifies the pre-2025 five-level definition (derived Level 4 + Level 5 shares) or the direct 2025 published rate under the four-level definition (Levels 3 + 4 proficient) |
 | `participation_rate` | Published Grade 4 participation percentage; currently available in the 2025 layout |
 | `participation_status` | Includes `not_published` when the annual file lacks the metric at this grain |
 | `growth_percentile` | Published Grade 4 mean Student Growth Percentile; currently available in the 2025 layout |
