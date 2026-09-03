@@ -118,12 +118,12 @@ def _choose_demo_district(state: str, grade: int) -> str:
                         AND a.grade = ? AND a.year = latest.year AND a.subject = 'rla'
                   )
             ), benchmark AS (
-                SELECT median(ln(1 + enrollment_grades_3_8)) AS median_log_enrollment
+                SELECT median(ln(1 + total_enrollment_grades_3_8)) AS median_log_enrollment
                 FROM eligible
             )
             SELECT district_id
             FROM eligible, benchmark
-            ORDER BY abs(ln(1 + enrollment_grades_3_8) - median_log_enrollment), district_id
+            ORDER BY abs(ln(1 + total_enrollment_grades_3_8) - median_log_enrollment), district_id
             LIMIT 1
             """,
             [state, grade, context_year, state, grade, grade, grade, grade],

@@ -17,7 +17,7 @@ PREFIX = "window.DISTRICT_DASHBOARD_DATA="
 SUFFIX = ";\n"
 INITIAL_GRADE = 4
 WORKBENCH_GRADES = tuple(range(3, 9))
-LAZY_WORKBENCH_GRADES = tuple(grade for grade in WORKBENCH_GRADES if grade != INITIAL_GRADE)
+PLOTLY_CARTESIAN_SHA256 = "7c593b9eda0e74a1d07335cf89cbf7a55ffc114909980c3729af835453bdb02a"
 
 CATALOG_FIELDS = (
     "district_id",
@@ -76,7 +76,6 @@ MAIN_KEYS = {
     "achievement_fields",
     "catalog",
     "context",
-    "achievement",
     "model",
     "technical",
 }
@@ -100,6 +99,7 @@ WORKBENCH_KEYS = {
     "row_count",
     "achievement",
 }
+STATE_ACHIEVEMENT_KEYS = WORKBENCH_KEYS | {"state"}
 MODEL_KEYS = {"analysis", "peer_model", "robust_ranges"}
 TECHNICAL_KEYS = {
     "sources",
@@ -125,6 +125,9 @@ TECHNICAL_KEYS = {
     "publication_note",
     "workbench_bundle_bytes",
     "workbench_public_data_bytes",
+    "achievement_state_rows",
+    "achievement_state_bundle_bytes",
+    "achievement_state_public_data_bytes",
 }
 SOURCE_KEYS = {
     "source_id",
@@ -241,7 +244,7 @@ STATE_PATTERN = re.compile(r"[A-Z]{2}")
 VERSIONED_SITE_ASSETS = (
     "assets/styles.css",
     "data/dashboard-data.js",
-    "assets/plotly-3.1.0.min.js",
+    "assets/data-loader.js",
     "assets/dashboard.js",
     "assets/workbench.js",
     "assets/trends.js",
@@ -410,11 +413,13 @@ def _validate_achievement(
     grade: int,
     catalog_ids: set[str],
     label: str,
-) -> int:
-    expected_count = EXPECTED_GRADE_ROWS[grade]
+    expected_count: int | None = None,
+    require_full_domain: bool = True,
+) -> dict[tuple[str, str, int], tuple[Any, ...]]:
+    expected_count = EXPECTED_GRADE_ROWS[grade] if expected_count is None else expected_count
     if not isinstance(rows, list) or len(rows) != expected_count:
         _fail(f"{label} must contain exactly {expected_count:,} achievement rows")
-    keys: set[tuple[str, str, int]] = set()
+    records: dict[tuple[str, str, int], tuple[Any, ...]] = {}
     subjects: set[str] = set()
     years: set[int] = set()
     for row_number, row in enumerate(rows, start=1):
@@ -430,7 +435,7 @@ def _validate_achievement(
         if type(year) is not int or year not in EXPECTED_YEARS:
             _fail(f"{label} row {row_number} has an invalid year")
         key = (district_id, subject, year)
-        if key in keys:
+        if key in records:
             _fail(f"{label} contains duplicate key {key}")
         if not _is_number(estimate):
             _fail(f"{label} row {row_number} has an invalid estimate")
@@ -442,14 +447,14 @@ def _validate_achievement(
             _fail(f"{label} row {row_number} violates the released test-count bound")
         if type(estimated) is not int or estimated not in (0, 1):
             _fail(f"{label} row {row_number} has an invalid estimated-count flag")
-        keys.add(key)
+        records[key] = tuple(row)
         subjects.add(subject)
         years.add(year)
-    if subjects != EXPECTED_SUBJECTS:
+    if require_full_domain and subjects != EXPECTED_SUBJECTS:
         _fail(f"{label} subject coverage is incomplete: {sorted(subjects)}")
-    if years != EXPECTED_YEARS:
+    if require_full_domain and years != EXPECTED_YEARS:
         _fail(f"{label} year coverage is incomplete: {sorted(years)}")
-    return expected_count
+    return records
 
 
 def _validate_sources(technical: dict[str, Any], source_config: dict[str, Any]) -> None:
@@ -510,6 +515,20 @@ def _validate_technical(
         _fail("Published initial achievement-row metadata differs from the approved row contract")
     if technical["public_bundle_bytes"] != data_size:
         _fail("Initial dashboard bundle size does not match its metadata")
+    state_rows = technical["achievement_state_rows"]
+    state_bytes = technical["achievement_state_bundle_bytes"]
+    if not isinstance(state_rows, dict) or set(state_rows) != EXPECTED_STATES:
+        _fail("Grade 4 state-row metadata does not cover the approved state domain")
+    if not isinstance(state_bytes, dict) or set(state_bytes) != EXPECTED_STATES:
+        _fail("Grade 4 state-bundle metadata does not cover the approved state domain")
+    if any(type(value) is not int or value < 0 for value in state_rows.values()):
+        _fail("Grade 4 state-row counts must be nonnegative integers")
+    if any(type(value) is not int or value <= 0 for value in state_bytes.values()):
+        _fail("Grade 4 state-bundle sizes must be positive integers")
+    if sum(state_rows.values()) != EXPECTED_GRADE_ROWS[INITIAL_GRADE]:
+        _fail("Grade 4 state-row counts do not add to the approved grade total")
+    if technical["achievement_state_public_data_bytes"] != sum(state_bytes.values()):
+        _fail("Grade 4 state-bundle sizes do not add to the published total")
     table_counts = _exact_keys(technical["table_counts"], TABLE_COUNT_KEYS, "Table counts")
     if any(type(value) is not int or value < 0 for value in table_counts.values()):
         _fail("Table counts must be nonnegative integers")
@@ -549,18 +568,38 @@ def main() -> None:
         ROOT / "site" / "index.html",
         ROOT / "site" / "assets" / "styles.css",
         ROOT / "site" / "assets" / "dashboard.js",
+        ROOT / "site" / "assets" / "data-loader.js",
         ROOT / "site" / "assets" / "workbench.js",
         ROOT / "site" / "assets" / "trends.js",
-        ROOT / "site" / "assets" / "plotly-3.1.0.min.js",
+        ROOT / "site" / "assets" / "plotly-cartesian-3.7.0.min.js",
         DATA_PATH,
         *(
             ROOT / "site" / "data" / f"workbench-grade-{grade}.js"
-            for grade in LAZY_WORKBENCH_GRADES
+            for grade in WORKBENCH_GRADES
         ),
     ]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.is_file()]
     if missing:
         _fail(f"Public dashboard files are missing: {', '.join(missing)}")
+
+    plotly_path = ROOT / "site" / "assets" / "plotly-cartesian-3.7.0.min.js"
+    if hashlib.sha256(plotly_path.read_bytes()).hexdigest() != PLOTLY_CARTESIAN_SHA256:
+        _fail("The local Plotly cartesian bundle differs from the pinned official release")
+
+    expected_state_paths = {
+        ROOT / "site" / "data" / f"achievement-grade-{INITIAL_GRADE}-{state}.js"
+        for state in EXPECTED_STATES
+    }
+    actual_state_paths = set(
+        (ROOT / "site" / "data").glob(f"achievement-grade-{INITIAL_GRADE}-*.js")
+    )
+    if actual_state_paths != expected_state_paths:
+        unexpected = sorted(path.name for path in actual_state_paths - expected_state_paths)
+        absent = sorted(path.name for path in expected_state_paths - actual_state_paths)
+        _fail(
+            "Grade 4 state-bundle inventory differs from the approved state domain; "
+            f"unexpected={unexpected}, missing={absent}"
+        )
 
     index_html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
     for relative_path in VERSIONED_SITE_ASSETS:
@@ -593,7 +632,7 @@ def main() -> None:
         payload["grade"] != INITIAL_GRADE
         or project_config["analysis"]["default_grade"] != INITIAL_GRADE
     ):
-        _fail("The approved public dashboard contract requires grade 4 as the initial bundle")
+        _fail("The approved public dashboard contract requires grade 4 for the Explore view")
     workbench = _exact_keys(payload["workbench"], WORKBENCH_CONFIG_KEYS, "Workbench metadata")
     confidence_level = project_config["analysis"]["confidence_level"]
     expected_workbench = {
@@ -630,18 +669,14 @@ def main() -> None:
     if payload["default_district_id"] not in catalog_ids:
         _fail("Default district is absent from the dashboard catalog")
     _validate_context(payload["context"], catalog_lookup)
-    workbench_rows = _validate_achievement(
-        payload["achievement"],
-        grade=INITIAL_GRADE,
-        catalog_ids=catalog_ids,
-        label="Initial grade 4 bundle",
-    )
     technical = _validate_technical(
         payload["technical"], source_config=source_config, data_size=data_size
     )
 
-    workbench_bytes = {str(INITIAL_GRADE): data_size}
-    for grade in LAZY_WORKBENCH_GRADES:
+    workbench_rows = 0
+    workbench_bytes: dict[str, int] = {}
+    grade_four_records: dict[tuple[str, str, int], tuple[Any, ...]] = {}
+    for grade in WORKBENCH_GRADES:
         grade_path = ROOT / "site" / "data" / f"workbench-grade-{grade}.js"
         grade_prefix = (
             "window.SEDA_WORKBENCH_GRADES=window.SEDA_WORKBENCH_GRADES||{};"
@@ -666,12 +701,15 @@ def main() -> None:
             _fail(f"Grade {grade} fields differ from the approved public allowlist")
         if grade_payload["row_count"] != EXPECTED_GRADE_ROWS[grade]:
             _fail(f"Grade {grade} row_count differs from the approved row contract")
-        workbench_rows += _validate_achievement(
+        grade_records = _validate_achievement(
             grade_payload["achievement"],
             grade=grade,
             catalog_ids=catalog_ids,
             label=f"Grade {grade} bundle",
         )
+        workbench_rows += len(grade_records)
+        if grade == INITIAL_GRADE:
+            grade_four_records = grade_records
         workbench_bytes[str(grade)] = grade_size
 
     if workbench_rows != sum(EXPECTED_GRADE_ROWS.values()):
@@ -681,6 +719,71 @@ def main() -> None:
         _fail("Workbench bundle sizes do not match their metadata")
     if technical["workbench_public_data_bytes"] != sum(expected_bytes.values()):
         _fail("Total public workbench data size does not match its metadata")
+
+    state_records: dict[tuple[str, str, int], tuple[Any, ...]] = {}
+    state_bytes: dict[str, int] = {}
+    for state in sorted(EXPECTED_STATES):
+        state_path = ROOT / "site" / "data" / f"achievement-grade-{INITIAL_GRADE}-{state}.js"
+        if not state_path.is_file():
+            _fail(f"Grade {INITIAL_GRADE} {state} state bundle is missing")
+        state_prefix = (
+            "window.SEDA_ACHIEVEMENT_STATES=window.SEDA_ACHIEVEMENT_STATES||{};"
+            f"window.SEDA_ACHIEVEMENT_STATES[{INITIAL_GRADE}]="
+            f"window.SEDA_ACHIEVEMENT_STATES[{INITIAL_GRADE}]||{{}};"
+            f'window.SEDA_ACHIEVEMENT_STATES[{INITIAL_GRADE}]["{state}"]='
+        )
+        state_payload, state_size = _read_assignment(
+            state_path,
+            state_prefix,
+            f"Grade {INITIAL_GRADE} {state} state bundle",
+        )
+        state_payload = _exact_keys(
+            state_payload,
+            STATE_ACHIEVEMENT_KEYS,
+            f"Grade {INITIAL_GRADE} {state} state payload",
+        )
+        expected_scope = {
+            "schema_version": 1,
+            "release": project_config["project"]["data_version"],
+            "geography": "administrative district",
+            "subgroup": "all students",
+            "scale": "Cohort Standardized (CS)",
+            "grade": INITIAL_GRADE,
+            "state": state,
+        }
+        for field, expected in expected_scope.items():
+            if state_payload[field] != expected:
+                _fail(f"Grade {INITIAL_GRADE} {state} bundle has invalid {field} metadata")
+        if tuple(state_payload["achievement_fields"]) != ACHIEVEMENT_FIELDS:
+            _fail(f"Grade {INITIAL_GRADE} {state} fields differ from the public allowlist")
+        expected_count = technical["achievement_state_rows"][state]
+        if state_payload["row_count"] != expected_count:
+            _fail(f"Grade {INITIAL_GRADE} {state} row_count differs from its metadata")
+        current_records = _validate_achievement(
+            state_payload["achievement"],
+            grade=INITIAL_GRADE,
+            catalog_ids=catalog_ids,
+            label=f"Grade {INITIAL_GRADE} {state} state bundle",
+            expected_count=expected_count,
+            require_full_domain=False,
+        )
+        wrong_state = [
+            row[0]
+            for row in state_payload["achievement"]
+            if catalog_lookup[row[0]][1] != state
+        ]
+        if wrong_state:
+            _fail(f"Grade {INITIAL_GRADE} {state} bundle contains another state's district")
+        overlap = state_records.keys() & current_records.keys()
+        if overlap:
+            _fail(f"Grade {INITIAL_GRADE} state bundles duplicate key {next(iter(overlap))}")
+        state_records.update(current_records)
+        state_bytes[state] = state_size
+
+    if state_records != grade_four_records:
+        _fail("The grade 4 state-bundle union differs from the full grade 4 workbench bundle")
+    if technical["achievement_state_bundle_bytes"] != state_bytes:
+        _fail("Grade 4 state-bundle sizes do not match their metadata")
     print(
         "PASS: public dashboard matches the exact SEDA 2025.2 field, row, source, "
         "domain, uniqueness, membership, and bundle contracts"

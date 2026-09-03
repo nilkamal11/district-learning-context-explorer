@@ -17,7 +17,14 @@
   const analysis = data.model.analysis;
   const peerModel = data.model.peer_model;
   const ranges = data.model.robust_ranges;
-  const criticalValue = 1.959963984540054;
+  const loader = window.SEDA_DATA_LOADER;
+  const years = data.workbench.years;
+  const chartYears = Array.from(
+    { length: years.at(-1) - years[0] + 1 },
+    (_, index) => years[0] + index
+  );
+  const criticalValue = data.workbench.confidence_critical_value;
+  const confidencePercent = Math.round(data.workbench.confidence_level * 100);
 
   const catalogById = new Map(catalog.map((row) => [row[CATALOG.district_id], row]));
   const contextById = new Map(contexts.map((row) => [row[CONTEXT.district_id], row]));
@@ -30,14 +37,30 @@
   ));
 
   const achievementByDistrict = new Map();
-  for (const row of data.achievement) {
-    const districtId = row[ACHIEVEMENT.district_id];
-    const subject = row[ACHIEVEMENT.subject];
-    if (!achievementByDistrict.has(districtId)) {
-      achievementByDistrict.set(districtId, { mth: [], rla: [] });
+  const indexedAchievementStates = new Set();
+  let renderRequestToken = 0;
+  let selectorsInitialized = false;
+  let technicalRendered = false;
+
+  const indexStateBundle = (bundle) => {
+    if (indexedAchievementStates.has(bundle.state)) return;
+    for (const row of bundle.achievement) {
+      const districtId = row[ACHIEVEMENT.district_id];
+      const subject = row[ACHIEVEMENT.subject];
+      if (!achievementByDistrict.has(districtId)) {
+        achievementByDistrict.set(districtId, { mth: [], rla: [] });
+      }
+      achievementByDistrict.get(districtId)[subject].push(row);
     }
-    achievementByDistrict.get(districtId)[subject].push(row);
-  }
+    indexedAchievementStates.add(bundle.state);
+  };
+
+  const loadAchievementStates = async (states) => {
+    if (!loader) throw new Error("The dashboard data loader is unavailable.");
+    const needed = [...new Set(states)].filter((state) => !indexedAchievementStates.has(state));
+    const bundles = await Promise.all(needed.map((state) => loader.loadAchievementState(grade, state)));
+    for (const bundle of bundles) indexStateBundle(bundle);
+  };
 
   const elements = Object.fromEntries([
     "state-select", "district-select", "district-heading", "district-subtitle",
@@ -187,7 +210,7 @@
       ));
       if (maxPerState !== null) candidates = capStates(candidates, maxPerState);
       stage = stageName;
-      if (candidates.length >= desired || candidates.length >= minimum) break;
+      if (candidates.length >= minimum) break;
     }
     return { selected: candidates.slice(0, desired), stage };
   };
@@ -249,7 +272,7 @@
 
   const trendSummary = (targetId, peers, subject, crossState) => {
     const selectedCount = peers.length;
-    return Array.from({ length: 17 }, (_, offset) => 2009 + offset).map((year) => {
+    return chartYears.map((year) => {
       const target = achievementRow(targetId, subject, year);
       const peerRows = peers
         .map(({ row }) => achievementRow(row[CONTEXT.district_id], subject, year))
@@ -329,7 +352,7 @@
     element.innerHTML = `
       <h3>${escapeHtml(label)}</h3>
       <div class="metric-value">${formatNumber(latest.targetEstimate, 2)}</div>
-      <div class="metric-detail">${latest.year} estimated average · 95% uncertainty interval ${formatNumber(latest.targetLow, 2)} to ${formatNumber(latest.targetHigh, 2)}</div>
+      <div class="metric-detail">${latest.year} estimated average · ${confidencePercent}% uncertainty interval ${formatNumber(latest.targetLow, 2)} to ${formatNumber(latest.targetHigh, 2)}</div>
       <p class="comparison-copy">${escapeHtml(interpretation(latest, crossState))}</p>
       <p class="metric-detail">Comparison-group average ${formatNumber(latest.peerMean, 2)}; typical result ${formatNumber(latest.peerMedian, 2)}; middle half ${formatNumber(latest.peerQ25, 2)} to ${formatNumber(latest.peerQ75, 2)}. ${latest.peerCount} of ${selectedCount} selected districts reported a result.</p>
       ${latest.lowPrecision ? '<span class="precision-tag">Use extra caution: this estimate is less certain</span>' : ""}
@@ -345,7 +368,7 @@
     font: { family: "Inter, Arial, sans-serif", color: "#344852", size: 11 },
     legend: { orientation: "h", y: -0.28, x: 0, font: { size: 10 } },
     hovermode: "x unified",
-    xaxis: { title: { text: "Year", standoff: 10 }, automargin: true, dtick: 2, range: [2008.6, 2025.4], gridcolor: "#e9edec" },
+    xaxis: { title: { text: "Year", standoff: 10 }, automargin: true, dtick: 2, range: [chartYears[0] - 0.4, chartYears.at(-1) + 0.4], gridcolor: "#e9edec" },
     yaxis: { title: { text: "Average score vs. national reference", standoff: 12 }, automargin: true, zeroline: true, zerolinecolor: "#82939a", zerolinewidth: 1.5, gridcolor: "#e9edec" },
     shapes: [{ type: "rect", x0: 2019.5, x1: 2021.5, y0: 0, y1: 1, yref: "paper", fillcolor: "rgba(100,114,124,.10)", line: { width: 0 } }],
     annotations: [
@@ -377,7 +400,7 @@
         line: { color: "#dc7139", width: 3 }, marker: { color: "#dc7139", size: 6 },
         error_y: { type: "data", array: summary.map((row) => row.targetMargin), visible: true, color: "rgba(220,113,57,.45)", thickness: 1, width: 2 },
         customdata: summary.map((row) => [row.targetLow, row.targetHigh]),
-        name: districtName, hovertemplate: "Year %{x}<br>Estimated average: %{y:.2f}<br>95% uncertainty interval: %{customdata[0]:.2f} to %{customdata[1]:.2f}<extra></extra>", connectgaps: false
+        name: districtName, hovertemplate: `Year %{x}<br>Estimated average: %{y:.2f}<br>${confidencePercent}% uncertainty interval: %{customdata[0]:.2f} to %{customdata[1]:.2f}<extra></extra>`, connectgaps: false
       }
     ];
     window.Plotly.react(elementId, traces, chartLayout(title), { displaylogo: false, responsive: true, displayModeBar: false });
@@ -435,7 +458,7 @@
     }).join("");
   };
 
-  const renderSensitivity = (targetId, selection) => {
+  const renderSensitivity = (targetId, selection, nationalStatus = "ready") => {
     const pools = [
       ["Same-state comparison", selection.sameState, false],
       ["Nationwide comparison", selection.national, true]
@@ -443,6 +466,12 @@
     const subjects = [["mth", "Mathematics"], ["rla", "Reading / language arts"]];
     elements["sensitivity-table-body"].innerHTML = pools.flatMap(([label, pool, crossState]) => (
       subjects.map(([subject, subjectLabel]) => {
+        if (crossState && nationalStatus !== "ready") {
+          const message = nationalStatus === "failed"
+            ? "Nationwide records could not be loaded. Reload the page to retry."
+            : "Loading the selected nationwide comparison records…";
+          return `<tr><td>${label}</td><td>${subjectLabel}</td><td colspan="5">${message}</td></tr>`;
+        }
         const latest = latestSummary(trendSummary(targetId, pool.selected, subject, crossState));
         if (!latest) return `<tr><td>${label}</td><td>${subjectLabel}</td><td colspan="5">Not enough overlapping data</td></tr>`;
         const limited = latest.hasCoverage ? "" : ' <span class="status-tag warn">limited</span>';
@@ -476,11 +505,21 @@
     elements["unavailable-panel"].hidden = false;
     elements["unavailable-title"].textContent = `No grade ${grade} comparison for this district`;
     elements["unavailable-copy"].textContent = `${catalogRow[CATALOG.district_name]} remains in the full catalog, but ${reasons.join("; ")}.`;
-    window.Plotly.purge("math-chart");
-    window.Plotly.purge("reading-chart");
+    window.Plotly?.purge?.("math-chart");
+    window.Plotly?.purge?.("reading-chart");
   };
 
-  const renderDistrict = (districtId) => {
+  const renderLoadFailure = (districtName, error) => {
+    elements["availability-indicator"].textContent = "Data could not be loaded";
+    elements["availability-indicator"].className = "status-dot unavailable";
+    elements["analysis-content"].hidden = true;
+    elements["unavailable-panel"].hidden = false;
+    elements["unavailable-title"].textContent = `Could not load ${districtName}’s results`;
+    elements["unavailable-copy"].textContent = `${error.message} Reload the page to try again.`;
+  };
+
+  const renderDistrict = async (districtId) => {
+    const token = ++renderRequestToken;
     const catalogRow = catalogById.get(districtId);
     if (!catalogRow) return;
     const context = contextById.get(districtId);
@@ -491,6 +530,11 @@
     elements["district-id-meta"].textContent = `SEDA district ${districtId}`;
     elements["district-state-meta"].textContent = state;
 
+    const url = new URL(window.location.href);
+    url.searchParams.set("state", state);
+    url.searchParams.set("district", districtId);
+    window.history.replaceState({}, "", url);
+
     const eligible = context
       && context[CONTEXT.has_core_context]
       && context[CONTEXT.grade_low] !== null
@@ -500,33 +544,59 @@
       && (catalogRow[CATALOG.has_math] || catalogRow[CATALOG.has_reading]);
     if (!eligible) {
       renderUnavailable(catalogRow, context);
-    } else {
-      const selection = selectPeers(context);
-      const stateReportable = selection.sameState.selected.length >= analysis.state_peer_minimum;
-      const primary = stateReportable ? selection.sameState : selection.national;
-      const crossState = !stateReportable;
-      const peerLabel = stateReportable ? "similar same-state districts" : "similar districts nationwide";
-      elements["availability-indicator"].textContent = "Profile available";
-      elements["availability-indicator"].className = "status-dot available";
-      elements["unavailable-panel"].hidden = true;
-      elements["analysis-content"].hidden = false;
-      elements["primary-pool-label"].textContent = `${primary.selected.length} ${peerLabel}`;
-
-      const math = trendSummary(districtId, primary.selected, "mth", crossState);
-      const reading = trendSummary(districtId, primary.selected, "rla", crossState);
-      renderMetricCard(elements["math-card"], "Fourth-grade math", latestSummary(math), primary.selected.length, crossState);
-      renderMetricCard(elements["reading-card"], "Fourth-grade reading", latestSummary(reading), primary.selected.length, crossState);
-      renderChart("math-chart", "Average math score", districtName, peerLabel, math);
-      renderChart("reading-chart", "Average reading score", districtName, peerLabel, reading);
-      renderContextTable(context, primary.selected);
-      renderMatchDiagnostics(primary, stateReportable ? "same-state districts" : "districts nationwide");
-      renderSensitivity(districtId, selection);
+      return;
     }
 
-    const url = new URL(window.location.href);
-    url.searchParams.set("state", state);
-    url.searchParams.set("district", districtId);
-    window.history.replaceState({}, "", url);
+    const selection = selectPeers(context);
+    const stateReportable = selection.sameState.selected.length >= analysis.state_peer_minimum;
+    const primary = stateReportable ? selection.sameState : selection.national;
+    const crossState = !stateReportable;
+    const peerLabel = stateReportable ? "similar same-state districts" : "similar districts nationwide";
+    const primaryStates = [
+      state,
+      ...primary.selected.map(({ row }) => row[CONTEXT.state])
+    ];
+
+    elements["availability-indicator"].textContent = "Loading results";
+    elements["availability-indicator"].className = "status-dot";
+    elements["unavailable-panel"].hidden = true;
+    elements["analysis-content"].hidden = true;
+
+    try {
+      await Promise.all([loader.loadPlotly(), loadAchievementStates(primaryStates)]);
+      if (token !== renderRequestToken) return;
+    } catch (error) {
+      if (token === renderRequestToken) renderLoadFailure(districtName, error);
+      return;
+    }
+
+    elements["availability-indicator"].textContent = "Profile available";
+    elements["availability-indicator"].className = "status-dot available";
+    elements["analysis-content"].hidden = false;
+    elements["primary-pool-label"].textContent = `${primary.selected.length} ${peerLabel}`;
+
+    const math = trendSummary(districtId, primary.selected, "mth", crossState);
+    const reading = trendSummary(districtId, primary.selected, "rla", crossState);
+    renderMetricCard(elements["math-card"], "Fourth-grade math", latestSummary(math), primary.selected.length, crossState);
+    renderMetricCard(elements["reading-card"], "Fourth-grade reading", latestSummary(reading), primary.selected.length, crossState);
+    renderChart("math-chart", "Average math score", districtName, peerLabel, math);
+    renderChart("reading-chart", "Average reading score", districtName, peerLabel, reading);
+    renderContextTable(context, primary.selected);
+    renderMatchDiagnostics(primary, stateReportable ? "same-state districts" : "districts nationwide");
+    renderSensitivity(districtId, selection, stateReportable ? "loading" : "ready");
+
+    if (stateReportable) {
+      const nationalStates = [
+        state,
+        ...selection.national.selected.map(({ row }) => row[CONTEXT.state])
+      ];
+      try {
+        await loadAchievementStates(nationalStates);
+        if (token === renderRequestToken) renderSensitivity(districtId, selection, "ready");
+      } catch (_) {
+        if (token === renderRequestToken) renderSensitivity(districtId, selection, "failed");
+      }
+    }
   };
 
   const populateDistricts = (state, selectedId = null) => {
@@ -542,15 +612,15 @@
   };
 
   const initializeSelectors = () => {
+    if (selectorsInitialized) return;
+    selectorsInitialized = true;
     const states = [...new Set(catalog.map((row) => row[CATALOG.state]).filter(Boolean))].sort();
     elements["state-select"].innerHTML = states.map((state) => `<option value="${state}">${state}</option>`).join("");
     elements["catalog-count"].textContent = formatNumber(catalog.length);
     const params = new URLSearchParams(window.location.search);
     const requestedId = params.get("district");
     const defaultRow = catalogById.get(requestedId) || catalogById.get(data.default_district_id) || catalog[0];
-    const state = params.get("state") && states.includes(params.get("state"))
-      ? params.get("state")
-      : defaultRow[CATALOG.state];
+    const state = defaultRow[CATALOG.state];
     elements["state-select"].value = state;
     const selected = populateDistricts(state, defaultRow[CATALOG.district_id]);
     if (selected) renderDistrict(selected);
@@ -593,8 +663,9 @@
       ["Coverage summary rows", formatNumber(technical.table_counts.mart_data_coverage)],
       ["DuckDB database", `${formatExactBytes(technical.database_bytes)} · ${technical.persisted_table_count} tables`],
       ["Single-district offline report", formatExactBytes(technical.offline_profile_bytes)],
-      [`Grade ${grade} browser file`, `${formatExactBytes(technical.public_bundle_bytes)} · ${formatNumber(technical.published_achievement_rows)} estimates`],
-      ["All six browser data files", formatExactBytes(technical.workbench_public_data_bytes)],
+      ["Opening catalog and context file", formatExactBytes(technical.public_bundle_bytes)],
+      [`Grade ${grade} state files`, `${formatExactBytes(technical.achievement_state_public_data_bytes)} · ${formatNumber(technical.published_achievement_rows)} estimates`],
+      ["Six grade-level workbench files", formatExactBytes(technical.workbench_public_data_bytes)],
       ["Annual estimates available in the workbench", formatNumber(technical.workbench_total_rows)],
       ["District selector and context data", `${formatNumber(technical.published_catalog_rows)} districts · ${formatNumber(technical.published_context_rows)} context rows`]
     ];
@@ -634,10 +705,11 @@
       window.history.replaceState({}, "", url);
     }
     if (name === "explore") {
+      initializeSelectors();
       window.setTimeout(() => {
         for (const id of ["math-chart", "reading-chart"]) {
           const chart = document.getElementById(id);
-          if (chart?.data) window.Plotly.Plots.resize(chart);
+          if (chart?.data) window.Plotly?.Plots?.resize(chart);
         }
       }, 0);
     }
@@ -646,6 +718,10 @@
     }
     if (name === "trends") {
       window.setTimeout(() => window.SEDA_TRENDS?.activate(), 0);
+    }
+    if (name === "technical" && !technicalRendered) {
+      renderTechnical();
+      technicalRendered = true;
     }
   };
 
@@ -666,7 +742,5 @@
     activateTab(["trends", "workbench", "research", "technical"].includes(requested) ? requested : "explore", false);
   };
 
-  renderTechnical();
-  initializeSelectors();
   initializeTabs();
 })();

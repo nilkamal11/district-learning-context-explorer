@@ -207,7 +207,7 @@
                 <td>{{ peer.state_abbreviation }}</td>
                 <td>{{ "%.3f"|format(peer.context_distance) }}</td>
                 <td>{{ peer.dominant_locale }}</td>
-                <td>{{ "{:,.0f}".format(peer.enrollment_grades_3_8) }}</td>
+                <td>{{ "{:,.0f}".format(peer.total_enrollment_grades_3_8) }}</td>
               </tr>
               {% endfor %}
             </tbody>

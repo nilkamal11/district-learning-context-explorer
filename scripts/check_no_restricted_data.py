@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -12,13 +13,15 @@ ALLOWED_DATA_FILES = {
 APPROVED_SITE_FILES = {
     "site/.nojekyll",
     "site/index.html",
+    "site/assets/data-loader.js",
     "site/assets/dashboard.js",
-    "site/assets/plotly-3.1.0.min.js",
+    "site/assets/plotly-cartesian-3.7.0.min.js",
     "site/assets/styles.css",
     "site/assets/trends.js",
     "site/assets/workbench.js",
     "site/data/dashboard-data.js",
     "site/data/workbench-grade-3.js",
+    "site/data/workbench-grade-4.js",
     "site/data/workbench-grade-5.js",
     "site/data/workbench-grade-6.js",
     "site/data/workbench-grade-7.js",
@@ -76,7 +79,27 @@ def _violations(paths: list[str]) -> list[str]:
     violations = []
     for relative in paths:
         path = Path(relative)
-        unapproved_site_file = relative.startswith("site/") and relative not in APPROVED_SITE_FILES
+        approved_state_bundle = re.fullmatch(
+            r"site/data/achievement-grade-4-[A-Z]{2}\.js",
+            relative,
+        )
+        approved_state_bundle = (
+            approved_state_bundle
+            and relative[-5:-3]
+            in {
+                "AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DC", "DE", "FL",
+                "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA",
+                "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE",
+                "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI",
+                "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV",
+                "WY",
+            }
+        )
+        unapproved_site_file = (
+            relative.startswith("site/")
+            and relative not in APPROVED_SITE_FILES
+            and not approved_state_bundle
+        )
         restricted_data_path = relative.startswith("data/") and relative not in ALLOWED_DATA_FILES
         row_level_artifact = path.suffix.lower() in BLOCKED_SUFFIXES and not relative.startswith(
             "site/"

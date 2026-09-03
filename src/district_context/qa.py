@@ -168,7 +168,7 @@ CHECKS = [
         "severity": "error",
         "sql": """
             SELECT CASE
-                WHEN stddev_pop(ln(1 + enrollment_grades_3_8)) > 0
+                WHEN stddev_pop(ln(1 + total_enrollment_grades_3_8)) > 0
                  AND stddev_pop(family_poverty_rate) > 0
                  AND stddev_pop(socioeconomic_status_composite) > 0
                  AND stddev_pop(share_native_american) > 0

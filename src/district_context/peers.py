@@ -30,7 +30,7 @@ MATCH_CONTEXT_COLUMNS = [
     "grade_span_bucket",
     "dominant_locale",
     "has_core_peer_context",
-    "enrollment_grades_3_8",
+    "total_enrollment_grades_3_8",
     "family_poverty_rate",
     "socioeconomic_status_composite",
     *DOMAIN_COLUMNS["student_composition"],
@@ -68,12 +68,6 @@ def _robust_ranges(frame: pd.DataFrame) -> dict[str, float]:
     return ranges
 
 
-def _numeric_distance(value: object, target: object, span: float) -> float:
-    if pd.isna(value) or pd.isna(target):
-        return np.nan
-    return float(min(abs(float(value) - float(target)) / span, 1.0))
-
-
 def _composition_distances(
     frame: pd.DataFrame, columns: list[str], target_vector: np.ndarray
 ) -> pd.Series:
@@ -93,7 +87,9 @@ def calculate_context_distances(
         raise ValueError(f"Peer context is missing required columns: {missing}")
 
     working = eligible[MATCH_CONTEXT_COLUMNS].copy()
-    working["log_enrollment"] = np.log1p(working["enrollment_grades_3_8"].astype(float))
+    working["log_enrollment"] = np.log1p(
+        working["total_enrollment_grades_3_8"].astype(float)
+    )
     target_rows = working.loc[working["district_id"] == target_id]
     if len(target_rows) != 1:
         raise ValueError(
@@ -147,11 +143,11 @@ def _apply_calipers(
     poverty_points: float,
     same_locale: bool,
 ) -> pd.DataFrame:
-    enrollment = float(target["enrollment_grades_3_8"])
+    enrollment = float(target["total_enrollment_grades_3_8"])
     mask = (
         (scored["grade_span_bucket"] == target["grade_span_bucket"])
-        & (scored["enrollment_grades_3_8"] >= enrollment / enrollment_factor)
-        & (scored["enrollment_grades_3_8"] <= enrollment * enrollment_factor)
+        & (scored["total_enrollment_grades_3_8"] >= enrollment / enrollment_factor)
+        & (scored["total_enrollment_grades_3_8"] <= enrollment * enrollment_factor)
         & (
             (scored["family_poverty_rate"] - float(target["family_poverty_rate"])).abs()
             <= poverty_points
@@ -167,7 +163,6 @@ def _staged_candidates(
     scored: pd.DataFrame,
     target: pd.Series,
     *,
-    desired_count: int,
     minimum_count: int,
     strict_calipers: dict[str, Any],
     relaxed_calipers: dict[str, Any],
@@ -206,7 +201,7 @@ def _staged_candidates(
         if max_per_state is not None:
             latest = _cap_per_state(latest, max_per_state)
         latest_name = name
-        if len(latest) >= desired_count or len(latest) >= minimum_count:
+        if len(latest) >= minimum_count:
             break
     return latest, latest_name
 
@@ -296,7 +291,6 @@ def select_peer_sets(
     state_candidates, state_stage = _staged_candidates(
         state_universe,
         target,
-        desired_count=state_count,
         minimum_count=state_minimum,
         strict_calipers=strict_calipers,
         relaxed_calipers=relaxed_calipers,
@@ -316,7 +310,6 @@ def select_peer_sets(
     national_candidates, national_stage = _staged_candidates(
         cross_state_candidates,
         target,
-        desired_count=national_count,
         minimum_count=national_count,
         strict_calipers=strict_calipers,
         relaxed_calipers=relaxed_calipers,
@@ -343,7 +336,7 @@ def select_peer_sets(
         "missing_match_domains",
         "grade_span_bucket",
         "dominant_locale",
-        "enrollment_grades_3_8",
+        "total_enrollment_grades_3_8",
         "family_poverty_rate",
         "socioeconomic_status_composite",
         *[f"distance_{domain}" for domain in domain_weights],

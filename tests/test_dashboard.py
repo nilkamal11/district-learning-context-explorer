@@ -5,6 +5,7 @@ from pathlib import Path
 from district_context.dashboard import (
     _compact_number,
     _safe_javascript_assignment,
+    _safe_state_assignment,
     _safe_workbench_assignment,
     build_dashboard,
 )
@@ -39,8 +40,30 @@ def test_workbench_script_uses_grade_namespace_and_round_trips():
     }
 
 
+def test_state_script_uses_separate_namespace_and_round_trips():
+    script = _safe_state_assignment(
+        4,
+        "IL",
+        {"district": "Example </script> & District"},
+    )
+    prefix = (
+        "window.SEDA_ACHIEVEMENT_STATES=window.SEDA_ACHIEVEMENT_STATES||{};"
+        "window.SEDA_ACHIEVEMENT_STATES[4]=window.SEDA_ACHIEVEMENT_STATES[4]||{};"
+        'window.SEDA_ACHIEVEMENT_STATES[4]["IL"]='
+    )
+
+    assert script.startswith(prefix)
+    assert "</script>" not in script
+    assert json.loads(script.removeprefix(prefix).removesuffix(";\n")) == {
+        "district": "Example </script> & District"
+    }
+
+
 def test_public_site_exposes_the_workbench_and_lazy_loader():
     html = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
+    loader_javascript = (ROOT / "site" / "assets" / "data-loader.js").read_text(
+        encoding="utf-8"
+    )
     workbench_javascript = (ROOT / "site" / "assets" / "workbench.js").read_text(
         encoding="utf-8"
     )
@@ -55,10 +78,15 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert 'id="workbench-panel"' in html
     assert 'id="wb-trend-chart"' in html
     assert 'id="wb-distribution-chart"' in html
-    assert "workbench-grade-${grade}.js" in workbench_javascript
+    assert 'src="assets/data-loader.js' in html
+    assert 'src="assets/plotly-cartesian-3.7.0.min.js' not in html
+    assert "workbench-grade-${grade}.js" in loader_javascript
+    assert "achievement-grade-${grade}-${normalizedState}.js" in loader_javascript
+    assert '"assets/plotly-cartesian-3.7.0.min.js"' in loader_javascript
     assert "window.SEDA_WORKBENCH" in workbench_javascript
     assert "validateBundle" in workbench_javascript
-    assert 'scriptUrl.searchParams.set("v", source.generated_at_utc)' in workbench_javascript
+    assert "loader.loadWorkbenchGrade" in workbench_javascript
+    assert "loader.loadPlotly" in workbench_javascript
     assert (
         'document.querySelectorAll("#workbench-panel button, #workbench-panel select, '
         '#workbench-panel input")' in workbench_javascript
@@ -73,7 +101,8 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert "Annual estimates for one district, grade, and subject" in html
     assert 'const DEFAULT_DISTRICT_ID = "1728890"' in trends_javascript
     assert "const BASELINE_YEARS = [2019, 2022]" in trends_javascript
-    assert "workbench-grade-${grade}.js" in trends_javascript
+    assert "loader.loadAchievementState" in trends_javascript
+    assert "loader.loadWorkbenchGrade" in trends_javascript
     assert "validateBundle" in trends_javascript
     assert "connectgaps: false" in trends_javascript
     assert "window.SEDA_TRENDS" in trends_javascript
@@ -81,11 +110,20 @@ def test_public_site_exposes_the_workbench_and_lazy_loader():
     assert "different group of students" in html
     assert 'aria-describedby="trend-chart-caption"' in html
     assert "Average test score over time" in html
-    assert "25% each" in html
+    assert "comparison score = 0.25" in html
+    assert html.count("Test scores are not") == 1
     assert "Hellinger distance" not in html
     assert "Average score vs. national reference" in dashboard_javascript
     assert "National reference (0)" in dashboard_javascript
     assert "Average score vs. national reference" in trends_javascript
+    assert "1.959963984540054" not in dashboard_javascript
+    assert "95%" not in dashboard_javascript
+    assert "data.workbench.confidence_critical_value" in dashboard_javascript
+    assert "length: 17" not in dashboard_javascript
+    assert "chartYears.map" in dashboard_javascript
+    assert "A score of +0.89 means" in html
+    assert "It is not 89%" in html
+    assert "SEDA 2025.2 technical documentation (PDF)" in html
 
     assert re.search(
         r'<section aria-labelledby="trend-heading">.*?<h2 id="trend-heading"', html, re.S
@@ -112,7 +150,7 @@ def test_public_site_has_study_design_page():
     assert 'id="research-panel"' in html
     assert 'aria-labelledby="research-tab"' in html
     assert "Did districts that increased instructional spending per student" in html
-    assert "no results have been calculated" in html
+    assert "no results have been calculated" in html.lower()
     assert "Association, not causation" in html
     assert "174 crosswalk records need an ID change" in html
     assert "four public data sources" in html.lower()
@@ -132,6 +170,6 @@ def test_public_dashboard_rejects_a_non_grade_four_initial_bundle(tmp_path):
             grade=5,
         )
     except ValueError as error:
-        assert "embeds grade 4" in str(error)
+        assert "uses grade 4" in str(error)
     else:
         raise AssertionError("Expected a non-grade-4 dashboard build to be rejected")

@@ -28,7 +28,7 @@
 
 | Field | Meaning |
 |---|---|
-| `enrollment_grades_3_8` | CCD enrollment in grades 3 through 8 |
+| `total_enrollment_grades_3_8` | Total district enrollment in grades 3 through 8 |
 | `family_poverty_rate` | ACS-based, empirical-Bayes family poverty rate |
 | `socioeconomic_status_composite` | SEDA empirical-Bayes composite of family socioeconomic conditions |
 | `share_*` | Proportion from 0 to 1, despite source labels sometimes saying percent |

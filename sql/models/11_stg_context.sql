@@ -27,7 +27,7 @@ WITH typed AS (
         TRY_CAST(perwht AS DOUBLE) AS share_white,
         TRY_CAST(perell AS DOUBLE) AS source_perell,
         TRY_CAST(perspeced AS DOUBLE) AS source_perspeced,
-        TRY_CAST(totenrl AS DOUBLE) AS enrollment_grades_3_8,
+        TRY_CAST(totenrl AS DOUBLE) AS total_enrollment_grades_3_8,
         TRY_CAST(povertyall AS DOUBLE) AS family_poverty_rate,
         TRY_CAST(sesall AS DOUBLE) AS socioeconomic_status_composite,
         trim(CAST(urbanicity AS VARCHAR)) AS source_urbanicity

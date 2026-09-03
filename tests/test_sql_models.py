@@ -89,6 +89,9 @@ def test_all_sql_models_compile_against_test_only_fixtures(tmp_path):
     assert connection.execute("SELECT district_name FROM stg_achievement").fetchone()[0] == (
         "Test District, The"
     )
+    assert connection.execute(
+        "SELECT total_enrollment_grades_3_8 FROM stg_context"
+    ).fetchone()[0] == 1000
     locale = connection.execute(
         "SELECT dominant_locale, share_argmax_locale FROM mart_context_snapshot"
     ).fetchone()

@@ -84,7 +84,7 @@ For a neutral smoke test, the demo command chooses the eligible district nearest
 district-context demo --state IL --grade 4
 ```
 
-Local outputs are written to `data/output/` and are ignored by Git. The single-profile HTML embeds its chart library once so it works without an internet connection. The `dashboard` command builds the public static site, its initial grade-4 slice, and lazy grade slices for grades 3 and 5–8. The browser performs deterministic matching and uncertainty calculations when a district is selected. Run both publication guards before every commit:
+Local outputs are written to `data/output/` and are ignored by Git. The single-profile HTML embeds its chart library once so it works without an internet connection. The `dashboard` command builds the public static site, a small catalog-and-context file, grade 4 state files for the opening views, and separate grade 3–8 files for the national workbench. The browser loads the detailed records only when a view needs them, then performs deterministic matching and uncertainty calculations. Run both publication guards before every commit:
 
 ```powershell
 python scripts/check_no_restricted_data.py

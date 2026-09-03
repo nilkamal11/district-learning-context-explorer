@@ -26,7 +26,7 @@
   const catalog = source.catalog;
   const catalogById = new Map(catalog.map((row) => [row[catalogFields.district_id], row]));
   const gradeCache = new Map();
-  const gradePromises = new Map();
+  const loader = window.SEDA_DATA_LOADER;
 
   const elements = Object.fromEntries([
     "wb-grade", "wb-subject", "wb-state", "wb-year", "wb-district-state", "wb-district", "wb-add-district",
@@ -58,7 +58,7 @@
     return sorted[lower] + ((sorted[upper] - sorted[lower]) * (position - lower));
   };
 
-  const schoolYear = (year) => `${year - 1}-${String(year).slice(-2)}`;
+  const schoolYear = (year) => `${year - 1}–${String(year).slice(-2)}`;
   const districtName = (districtId) => catalogById.get(districtId)?.[catalogFields.district_name] || districtId;
   const districtState = (districtId) => catalogById.get(districtId)?.[catalogFields.state] || "";
 
@@ -143,55 +143,11 @@
 
   const loadGrade = async (grade) => {
     if (gradeCache.has(grade)) return gradeCache.get(grade);
-    if (grade === source.grade) {
-      const indexed = indexBundle(validateBundle(grade, {
-        schema_version: source.schema_version,
-        release: scope.release,
-        geography: scope.geography,
-        subgroup: scope.subgroup,
-        scale: scope.scale,
-        grade: source.grade,
-        achievement_fields: source.achievement_fields,
-        row_count: source.achievement.length,
-        achievement: source.achievement
-      }));
-      gradeCache.set(grade, indexed);
-      return indexed;
-    }
-    if (window.SEDA_WORKBENCH_GRADES?.[grade]) {
-      try {
-        const indexed = indexBundle(validateBundle(grade, window.SEDA_WORKBENCH_GRADES[grade]));
-        gradeCache.set(grade, indexed);
-        return indexed;
-      } catch (_) {
-        delete window.SEDA_WORKBENCH_GRADES[grade];
-      }
-    }
-    if (gradePromises.has(grade)) return gradePromises.get(grade);
-
-    const promise = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      const scriptUrl = new URL(`data/workbench-grade-${grade}.js`, document.baseURI);
-      scriptUrl.searchParams.set("v", source.generated_at_utc);
-      script.src = scriptUrl.href;
-      script.async = true;
-      script.onload = () => {
-        const payload = window.SEDA_WORKBENCH_GRADES?.[grade];
-        let indexed;
-        try {
-          indexed = indexBundle(validateBundle(grade, payload));
-        } catch (error) {
-          reject(error);
-          return;
-        }
-        gradeCache.set(grade, indexed);
-        resolve(indexed);
-      };
-      script.onerror = () => reject(new Error(`Grade ${grade} records could not be loaded.`));
-      document.head.appendChild(script);
-    }).finally(() => gradePromises.delete(grade));
-    gradePromises.set(grade, promise);
-    return promise;
+    if (!loader) throw new Error("The workbench data loader is unavailable.");
+    const bundle = await loader.loadWorkbenchGrade(grade);
+    const indexed = indexBundle(validateBundle(grade, bundle));
+    gradeCache.set(grade, indexed);
+    return indexed;
   };
 
   const activeYears = () => YEARS.filter((year) => !state.endAt2024 || year <= SENSITIVITY_END_YEAR);
@@ -395,7 +351,7 @@
     elements["wb-distribution-summary"].textContent = estimates.length
       ? `${formatNumber(estimates.length)} districts · median ${formatNumber(median, 2)} · middle 50% ${formatNumber(q25, 2)} to ${formatNumber(q75, 2)}`
       : "No released records";
-    elements["wb-distribution-caption"].textContent = `The ${universeLabel} distribution is a broad reporting universe, not a matched peer set. It uses released ${schoolYear(state.year)} records and does not assign ordinal ranks.`;
+    elements["wb-distribution-caption"].textContent = `The ${universeLabel} distribution includes every district with a released ${schoolYear(state.year)} result. It is a broad reference distribution rather than the matched comparison used on Explore.`;
   };
 
   const renderMetrics = () => {
@@ -487,10 +443,10 @@
     const previousIndexed = state.indexed;
     setBusy(true, `Loading ${formatNumber(source.technical.workbench_grade_rows?.[String(grade)] || 0)} grade ${grade} records…`);
     try {
-      const indexed = await loadGrade(grade);
+      const [indexed] = await Promise.all([loadGrade(grade), loader.loadPlotly()]);
       if (token !== state.requestToken) return;
       for (const cachedGrade of gradeCache.keys()) {
-        if (cachedGrade !== source.grade && cachedGrade !== grade) gradeCache.delete(cachedGrade);
+        if (cachedGrade !== grade) gradeCache.delete(cachedGrade);
       }
       for (const loadedGrade of Object.keys(window.SEDA_WORKBENCH_GRADES || {})) {
         if (Number(loadedGrade) !== grade) delete window.SEDA_WORKBENCH_GRADES[loadedGrade];
@@ -652,7 +608,7 @@
         window.setTimeout(() => {
           for (const id of ["wb-trend-chart", "wb-distribution-chart"]) {
             const chart = document.getElementById(id);
-            if (chart?.data) window.Plotly.Plots.resize(chart);
+            if (chart?.data) window.Plotly?.Plots?.resize(chart);
           }
         }, 0);
       }

@@ -20,7 +20,7 @@ def context_fixture() -> pd.DataFrame:
                 "grade_span_bucket": "unified_or_k12",
                 "dominant_locale": "Suburb",
                 "has_core_peer_context": True,
-                "enrollment_grades_3_8": 2000 + index * 8,
+                "total_enrollment_grades_3_8": 2000 + index * 8,
                 "family_poverty_rate": 0.14 + shift,
                 "socioeconomic_status_composite": 0.20 - shift,
                 "share_native_american": 0.01,

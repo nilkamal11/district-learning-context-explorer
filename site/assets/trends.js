@@ -28,7 +28,7 @@
   const catalog = source.catalog;
   const catalogById = new Map(catalog.map((row) => [row[catalogFields.district_id], row]));
   const gradeCache = new Map();
-  const gradePromises = new Map();
+  const loader = window.SEDA_DATA_LOADER;
 
   const elements = Object.fromEntries([
     "trend-state", "trend-district", "trend-grade", "trend-subject", "trend-show-range",
@@ -77,7 +77,7 @@
     grade: WORKBENCH_GRADES.includes(requestedGrade) ? requestedGrade : DEFAULT_GRADE,
     subject: ["mth", "rla"].includes(requestedSubject) ? requestedSubject : DEFAULT_SUBJECT,
     districtId: initialDistrict,
-    stateCode: params.get("trend_state") || districtState(initialDistrict) || "IL",
+    stateCode: districtState(initialDistrict) || "IL",
     showRange: params.get("trend_range") === "1",
     indexed: null,
     initialized: false,
@@ -100,9 +100,11 @@
     return { ...bundle, fields, byDistrict };
   };
 
-  const validateBundle = (grade, bundle) => {
+  const validateBundle = (grade, bundle, stateCode = null) => {
     const expectedFields = JSON.stringify(source.achievement_fields);
-    const expectedRows = source.technical.workbench_grade_rows?.[String(grade)];
+    const expectedRows = stateCode
+      ? source.technical.achievement_state_rows?.[stateCode]
+      : source.technical.workbench_grade_rows?.[String(grade)];
     const valid = bundle
       && bundle.schema_version === source.schema_version
       && bundle.release === scope.release
@@ -110,6 +112,7 @@
       && bundle.subgroup === scope.subgroup
       && bundle.scale === scope.scale
       && bundle.grade === grade
+      && (stateCode === null || bundle.state === stateCode)
       && JSON.stringify(bundle.achievement_fields) === expectedFields
       && Number.isInteger(expectedRows)
       && bundle.row_count === expectedRows
@@ -119,54 +122,17 @@
     return bundle;
   };
 
-  const loadGrade = async (grade) => {
-    if (gradeCache.has(grade)) return gradeCache.get(grade);
-    if (grade === source.grade) {
-      const indexed = indexBundle(validateBundle(grade, {
-        schema_version: source.schema_version,
-        release: scope.release,
-        geography: scope.geography,
-        subgroup: scope.subgroup,
-        scale: scope.scale,
-        grade: source.grade,
-        achievement_fields: source.achievement_fields,
-        row_count: source.achievement.length,
-        achievement: source.achievement
-      }));
-      gradeCache.set(grade, indexed);
-      return indexed;
-    }
-    if (window.SEDA_WORKBENCH_GRADES?.[grade]) {
-      try {
-        const indexed = indexBundle(validateBundle(grade, window.SEDA_WORKBENCH_GRADES[grade]));
-        gradeCache.set(grade, indexed);
-        return indexed;
-      } catch (_) {
-        delete window.SEDA_WORKBENCH_GRADES[grade];
-      }
-    }
-    if (gradePromises.has(grade)) return gradePromises.get(grade);
-
-    const promise = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      const scriptUrl = new URL(`data/workbench-grade-${grade}.js`, document.baseURI);
-      scriptUrl.searchParams.set("v", source.generated_at_utc);
-      script.src = scriptUrl.href;
-      script.async = true;
-      script.onload = () => {
-        try {
-          const indexed = indexBundle(validateBundle(grade, window.SEDA_WORKBENCH_GRADES?.[grade]));
-          gradeCache.set(grade, indexed);
-          resolve(indexed);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      script.onerror = () => reject(new Error(`Grade ${grade} records could not be loaded.`));
-      document.head.appendChild(script);
-    }).finally(() => gradePromises.delete(grade));
-    gradePromises.set(grade, promise);
-    return promise;
+  const loadGrade = async (grade, stateCode) => {
+    const usesStateBundle = grade === source.grade;
+    const cacheKey = usesStateBundle ? `${grade}:${stateCode}` : `${grade}:all`;
+    if (gradeCache.has(cacheKey)) return gradeCache.get(cacheKey);
+    if (!loader) throw new Error("The district trend data loader is unavailable.");
+    const bundle = usesStateBundle
+      ? await loader.loadAchievementState(grade, stateCode)
+      : await loader.loadWorkbenchGrade(grade);
+    const indexed = indexBundle(validateBundle(grade, bundle, usesStateBundle ? stateCode : null));
+    gradeCache.set(cacheKey, indexed);
+    return indexed;
   };
 
   const rowFor = (year) => state.indexed?.byDistrict.get(state.districtId)?.[state.subject]?.get(year) || null;
@@ -228,12 +194,12 @@
 
   const directionCopy = (value) => {
     if (Math.abs(value) < 0.005) return "at Stanford’s fixed national reference";
-    return `${Math.abs(value).toFixed(2)} points ${value > 0 ? "above" : "below"} Stanford’s fixed national reference on this standardized scale`;
+    return `${Math.abs(value).toFixed(2)} standard deviations ${value > 0 ? "above" : "below"} Stanford’s fixed national reference`;
   };
 
   const changeCopy = (change, baselineYear) => {
     if (Math.abs(change) < 0.005) return `Essentially unchanged from ${schoolYear(baselineYear)} at two decimal places.`;
-    return `${Math.abs(change).toFixed(2)} points ${change > 0 ? "higher" : "lower"} than ${schoolYear(baselineYear)} on this standardized scale.`;
+    return `${Math.abs(change).toFixed(2)} standard deviations ${change > 0 ? "higher" : "lower"} than ${schoolYear(baselineYear)}.`;
   };
 
   const baselineComparison = (latestEstimate, latestYear, baselineYear) => {
@@ -438,7 +404,7 @@
     renderHero(latest);
     renderSummary(rows);
     elements["simple-trend-heading"].textContent = `${name}’s ${gradeSubject()} estimates by year`;
-    elements["trend-chart-caption"].textContent = `Each dot is one spring district estimate. Zero is SEDA’s fixed national reference for the same grade and subject. Higher values indicate stronger estimated performance. No annual estimates are available for 2020 or 2021.`;
+    elements["trend-chart-caption"].textContent = "Each dot is one spring district estimate. No annual estimates are available for 2020 or 2021.";
     renderRecords(rows);
     renderChart(rows);
     elements["trend-status"].textContent = `${formatCount(rows.length)} reported school years · latest ${schoolYear(latestYear)} · ${name} (${state.districtId}).`;
@@ -455,7 +421,10 @@
     elements["trend-hero-score"].textContent = "…";
     elements["trend-hero-copy"].textContent = "Checking the released annual district records.";
     try {
-      const indexed = await loadGrade(grade);
+      const [indexed] = await Promise.all([
+        loadGrade(grade, state.stateCode),
+        loader.loadPlotly()
+      ]);
       if (token !== state.requestToken) return;
       state.grade = grade;
       state.indexed = indexed;
@@ -499,10 +468,8 @@
     elements["trend-state"].addEventListener("change", (event) => {
       state.stateCode = event.target.value;
       const candidates = catalog.filter((row) => row[catalogFields.state] === state.stateCode);
-      state.districtId = candidates.find((row) => hasCurrentData(row[catalogFields.district_id]))?.[catalogFields.district_id]
-        || candidates[0]?.[catalogFields.district_id]
-        || state.districtId;
-      renderAll();
+      state.districtId = candidates[0]?.[catalogFields.district_id] || state.districtId;
+      selectGrade(state.grade);
     });
     elements["trend-district"].addEventListener("change", (event) => {
       state.districtId = event.target.value;
@@ -532,7 +499,7 @@
         renderChart(reportedRows());
         window.setTimeout(() => {
           const chart = document.getElementById("trend-chart");
-          if (chart?.data) window.Plotly.Plots.resize(chart);
+          if (chart?.data) window.Plotly?.Plots?.resize(chart);
         }, 0);
       }
     }

@@ -321,7 +321,7 @@ def _trend_figure(
 
 def _context_comparison(target: dict[str, Any], peers: pd.DataFrame) -> list[dict[str, Any]]:
     metrics = [
-        ("Enrollment in grades 3–8", "enrollment_grades_3_8", "number"),
+        ("Enrollment in grades 3–8", "total_enrollment_grades_3_8", "number"),
         ("Family poverty rate", "family_poverty_rate", "percent"),
         ("Socioeconomic status composite", "socioeconomic_status_composite", "decimal"),
     ]

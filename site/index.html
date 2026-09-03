@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Explore annual district results, comparison groups, a public-data study plan, and the SQL and Python pipeline behind Stanford SEDA 2025.2.">
   <title>District Learning Context Explorer</title>
-  <link rel="stylesheet" href="assets/styles.css?v=bc40d1e3d73f428a">
-  <script src="data/dashboard-data.js?v=de676be0a6518f3b" defer></script>
-  <script src="assets/plotly-3.1.0.min.js?v=8ef4c6ab1369f001" defer></script>
-  <script src="assets/dashboard.js?v=52cbb143dc857bfd" defer></script>
-  <script src="assets/workbench.js?v=593e6f5ebc6c6e3c" defer></script>
-  <script src="assets/trends.js?v=f507db4bdc6987c9" defer></script>
+  <link rel="stylesheet" href="assets/styles.css?v=0c34141f0e9334de">
+  <script src="data/dashboard-data.js?v=ce870af7643685df" defer></script>
+  <script src="assets/data-loader.js?v=afe022d8ac618143" defer></script>
+  <script src="assets/dashboard.js?v=711fca05bd130c04" defer></script>
+  <script src="assets/workbench.js?v=e8b8a858ed4766c8" defer></script>
+  <script src="assets/trends.js?v=18e946f127c330c4" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -71,11 +71,6 @@
       </div>
 
       <div class="shell content-shell">
-        <div class="interpretation-note">
-          <strong>About these results.</strong>
-          Each value estimates district-wide average performance for the students tested that year. Individual outcomes and causes require other evidence.
-        </div>
-
         <section id="unavailable-panel" class="unavailable-card" hidden aria-live="polite">
           <p class="eyebrow dark">Why a profile is not shown</p>
           <h2 id="unavailable-title">Grade 4 comparison unavailable</h2>
@@ -103,8 +98,10 @@
               <div>
                 <h2 id="trend-heading">Average test score over time</h2>
                 <div id="score-chart-guide" class="chart-reading-guide">
-                  <strong>Chart key</strong>
-                  <p>Orange is the selected district. The dotted blue line is the typical result among comparison districts, and the shaded area contains the middle 50%. <b>Zero is SEDA’s fixed national reference</b> for the same grade and subject. Thin orange bars show 95% uncertainty intervals. SEDA has no annual estimates for 2020 or 2021.</p>
+                  <strong>How to read these numbers</strong>
+                  <p>This page uses SEDA’s Cohort Standardized scale. The number measures the distance between a district’s estimated average and SEDA’s fixed national reference for the same grade and subject. Zero matches the reference. Positive numbers are above it and negative numbers are below it. The unit is a standard deviation, which lets Stanford place results from different state tests on one common scale.</p>
+                  <p><b>A score of +0.89 means the district’s estimated average is about 0.89 standard deviations above the reference.</b> It is not 89% and it is not an individual student score. The smaller range below each score shows uncertainty. For example, if the estimate is +1.03 and the range is +0.89 to +1.16, +1.03 is the best estimate and the other two numbers are the lower and upper ends of the range.</p>
+                  <p>Orange is the selected district. The dotted blue line is the typical result among comparison districts, the shaded area contains the middle 50%, and thin orange bars show uncertainty. Each point is the estimated district average for students tested that year. SEDA has no annual estimates for 2020 or 2021. Read <a href="https://edopportunity.org/trends/methods/">Stanford’s methods <span aria-hidden="true">↗</span></a> or the <a href="https://stacks.stanford.edu/file/np279jm6134/SEDA_documentation_2025.2.pdf">SEDA 2025.2 technical documentation (PDF) <span aria-hidden="true">↗</span></a>.</p>
                 </div>
               </div>
             </div>
@@ -119,12 +116,11 @@
           </section>
 
           <section aria-labelledby="match-heading">
-            <div class="section-heading">
+            <div class="section-heading text-only">
               <div>
-                <h2 id="match-heading">Four factors, weighted equally</h2>
-                <p>The comparison uses district size, economic context, student composition, and locale. Each factor counts for 25%. Test scores are not used to choose the group.</p>
+                <h2 id="match-heading">Why these districts are comparable</h2>
+                <p>The group is selected using four measures of community context. The full calculation is in Technical Process.</p>
               </div>
-              <span class="outcome-badge">25% each</span>
             </div>
             <div class="two-column-grid">
               <article class="panel-card">
@@ -170,12 +166,6 @@
               </div>
             </article>
           </section>
-
-          <section class="evidence-card comparison-limits" aria-labelledby="comparison-limits-heading">
-            <p class="eyebrow dark">Interpretation limits</p>
-            <h2 id="comparison-limits-heading">What these estimates describe</h2>
-            <p>These estimates describe district-level patterns within the selected grade and subject. They do not rank schools, predict an individual student’s outcome, or explain why results changed.</p>
-          </section>
         </div>
       </div>
     </section>
@@ -199,11 +189,6 @@
       </div>
 
       <div class="shell content-shell trends-content">
-        <div class="interpretation-note">
-          <strong>Each year includes a different group of students.</strong>
-          Each point is the estimated district average for the students tested that year. The chart does not track the same students over time.
-        </div>
-
         <section class="trends-controls" aria-labelledby="trend-controls-heading">
           <div class="trends-controls-heading">
             <div>
@@ -254,7 +239,7 @@
           <section aria-labelledby="trend-summary-heading">
             <div class="section-heading">
               <div>
-                <h2 id="trend-summary-heading">Latest result and changes from 2019 and 2022</h2>
+                <h2 id="trend-summary-heading">Latest result and changes since 2018–19 and 2021–22</h2>
               </div>
               <span id="trend-record-count" class="quiet-label">—</span>
             </div>
@@ -267,12 +252,12 @@
               <article>
                 <span>Change since 2018–19</span>
                 <strong id="trend-change-2019">—</strong>
-                <p id="trend-change-2019-detail">Uses spring 2019 as the starting point.</p>
+                <p id="trend-change-2019-detail">Starting point: 2018–19.</p>
               </article>
               <article>
                 <span>Change since 2021–22</span>
                 <strong id="trend-change-2022">—</strong>
-                <p id="trend-change-2022-detail">Uses spring 2022 as the starting point.</p>
+                <p id="trend-change-2022-detail">Starting point: 2021–22.</p>
               </article>
             </div>
           </section>
@@ -281,7 +266,7 @@
             <div class="section-heading text-only">
               <div>
                 <h2 id="simple-trend-heading">Fourth-grade math by year</h2>
-                <p id="trend-chart-caption">Each dot is one spring district estimate. Zero is SEDA’s fixed national reference for fourth-grade math. Higher values indicate stronger estimated performance. No annual estimates are available for 2020 or 2021.</p>
+                <p id="trend-chart-caption">Each dot is one spring district estimate. No annual estimates are available for 2020 or 2021.</p>
               </div>
             </div>
             <article class="chart-card trend-chart-card">
@@ -300,21 +285,15 @@
 
           <section class="trend-explain-grid" aria-label="How to interpret this view">
             <article class="panel-card">
-              <p class="eyebrow dark">How to read the number</p>
-              <h2>Zero is the national reference</h2>
-              <p>A value of +1.00 is about one student-level standard deviation above SEDA’s fixed national reference for the selected grade and subject. These are standardized estimates rather than percentages or raw scale scores.</p>
-            </article>
-            <article class="panel-card">
-              <p class="eyebrow dark">What a change means</p>
-              <h2>Each year includes a different group of students</h2>
-              <p>Changes in the line describe changes in the district average. They do not measure growth for the same students or establish a cause.</p>
+              <h2>How to read the chart</h2>
+              <p><strong>Zero is the national reference.</strong> A value of +1.00 is approximately one student-level standard deviation above SEDA’s fixed reference for the selected grade and subject.</p>
+              <p><strong>Each year includes a different group of students.</strong> Comparing points shows district-level change among the students tested each year. Same-student growth and causes require a separate analysis.</p>
             </article>
           </section>
 
           <section aria-labelledby="trend-records-heading">
             <div class="section-heading text-only">
               <div>
-                <p class="eyebrow dark">The reported values</p>
                 <h2 id="trend-records-heading">Year-by-year detail</h2>
                 <p>The 95% range shows the uncertainty around each estimate. Test counts are aggregate counts supplied in the public district file.</p>
               </div>
@@ -421,7 +400,6 @@
           <section aria-labelledby="wb-summary-heading">
             <div class="section-heading">
               <div>
-                <p class="eyebrow dark">Current evidence window</p>
                 <h2 id="wb-summary-heading">Coverage and precision at a glance</h2>
               </div>
               <span id="wb-se-basis" class="quiet-label">Within-state standard errors</span>
@@ -437,7 +415,6 @@
           <section aria-labelledby="wb-trend-heading">
             <div class="section-heading text-only">
               <div>
-                <p class="eyebrow dark">Yearly trajectory</p>
                 <h2 id="wb-trend-heading">One grade and subject, with 95% intervals</h2>
                 <p id="wb-trend-caption">The gap preserves the absence of 2020 and 2021 results. Hover a point for detail; the estimate table provides the same values for keyboard and screen-reader users.</p>
               </div>
@@ -504,7 +481,7 @@
             <div>
               <p class="eyebrow dark">Workbench scope</p>
               <h2 id="wb-difference-heading">Annual district-grade-subject estimates</h2>
-              <p>This view covers administrative districts, all students, grades 3–8, math and reading, and the Cohort Standardized scale. It provides yearly estimates, uncertainty, missingness, test counts, multi-district charts, and filtered export.</p>
+              <p>I kept this version at the administrative-district level so the achievement estimates, context measures, and district identifiers use one consistent unit. It covers all students in grades 3–8, keeps math and reading separate, and provides yearly estimates, uncertainty, missingness, test counts, multi-district charts, and filtered export.</p>
             </div>
           </section>
         </div>
@@ -517,7 +494,7 @@
           <div class="research-hero-copy">
             <p class="eyebrow">Worked study design</p>
             <h1>How I would build data for a new research question</h1>
-            <p class="hero-copy">This example joins 2022–2024 SEDA estimates with public finance, enrollment, staffing, and inflation data. It is a study plan; no results have been calculated.</p>
+            <p class="hero-copy">This study plan shows how I would join 2022–2024 SEDA estimates with public finance, enrollment, staffing, and inflation data. No results have been calculated.</p>
             <div class="research-hero-meta" aria-label="Research example status">
               <span>2022–2024</span>
               <span>Grade 4 math</span>
@@ -619,7 +596,7 @@
         <section class="research-handoff" aria-labelledby="research-handoff-heading">
           <div>
             <h2 id="research-handoff-heading">What the researcher would receive</h2>
-            <p>The handoff would include the dataset, its documentation, the join checks, the code used to build it, and a short explanation of the results.</p>
+            <p>These materials would let another analyst review the planned joins, run the analysis, and revise its assumptions.</p>
           </div>
           <ul>
             <li>Clean dataset and data dictionary</li>
@@ -637,7 +614,7 @@
             <a href="https://nces.ed.gov/ccd/pau_rev.asp">National Center for Education Statistics district data <span aria-hidden="true">↗</span></a>
             <a href="https://www.bls.gov/cpi/data.htm">Bureau of Labor Statistics inflation data <span aria-hidden="true">↗</span></a>
           </div>
-          <p>The 2022–2024 window reflects the overlap between the released recent SEDA district crosswalk and currently available public finance data. Extending the study to older years would require an additional historical district-identity bridge.</p>
+          <p>I stopped at 2022–2024 because that is the clean overlap between the recent SEDA district crosswalk and currently available public finance data. Going further back would require a separate historical district-identity bridge.</p>
         </section>
       </div>
     </section>
@@ -669,9 +646,9 @@
             <li><span>01</span><strong>Verify</strong><p>Names, sizes, headers, required columns, and SHA-256 fingerprints</p></li>
             <li><span>02</span><strong>Stage</strong><p>Explicit CSV parsing, all-string intake, and controlled type conversion</p></li>
             <li><span>03</span><strong>Model</strong><p>Stable district dimension, analytical marts, coverage, and audit tables</p></li>
-            <li><span>04</span><strong>Match</strong><p>Select comparison districts using community context, not test scores</p></li>
+            <li><span>04</span><strong>Match</strong><p>Select comparison districts using the four context measures</p></li>
             <li><span>05</span><strong>Quantify</strong><p>Use the appropriate uncertainty measure and check reporting coverage</p></li>
-            <li><span>06</span><strong>Publish</strong><p>Create one browser data file per grade and render the interactive charts</p></li>
+            <li><span>06</span><strong>Publish</strong><p>Create one browser file per grade, smaller state files for the opening view, and render the interactive charts</p></li>
           </ol>
           <div class="stack-list" aria-label="Technology stack">
             <span>Python 3.11+</span><span>SQL</span><span>DuckDB</span><span>pandas</span><span>NumPy</span><span>Plotly</span><span>Jinja2</span><span>PyYAML</span><span>pytest</span><span>Ruff</span><span>GitHub Actions</span><span>GitHub Pages</span>
@@ -718,23 +695,22 @@
         <section aria-labelledby="matching-heading">
           <div class="section-heading">
             <div>
-              <h2 id="matching-heading">Four factors, each worth 25%</h2>
-              <p>The model compares districts using community context. Test scores do not influence which districts are selected.</p>
+              <h2 id="matching-heading">How the comparison score is calculated</h2>
+              <p><code>comparison score = 0.25 × (size difference + economic difference + composition difference + place difference)</code></p>
             </div>
           </div>
           <div class="domain-grid">
-            <article><strong>District size</strong><span>25%</span><p>Student enrollment in grades 3–8</p></article>
-            <article><strong>Economic context</strong><span>25%</span><p>Family poverty and local economic conditions</p></article>
-            <article><strong>Student composition</strong><span>25%</span><p>District race and ethnicity shares</p></article>
-            <article><strong>Place</strong><span>25%</span><p>City, suburb, town, and rural mix</p></article>
+            <article><strong>District size</strong><p>Student enrollment in grades 3–8</p></article>
+            <article><strong>Economic context</strong><p>Family poverty and local economic conditions</p></article>
+            <article><strong>Student composition</strong><p>District race and ethnicity shares</p></article>
+            <article><strong>Place</strong><p>City, suburb, town, and rural mix</p></article>
           </div>
           <article class="method-card">
-            <p class="weighting-note">I used equal weights because I did not have a defensible reason to favor one category. I have not yet tested how much the selected comparison group changes under other weights; that would be my first sensitivity check.</p>
+            <p class="weighting-note">I used equal weights because I didn’t have a good reason to favor one factor. Test scores are not part of this calculation. My first sensitivity check would be to see how much the group changes under different weights.</p>
             <ol>
-              <li>Use 2024 community information and include only districts that serve the selected grade.</li>
+              <li>Use 2024 community information, the latest year with the full set of context fields, and hold that snapshot fixed across the chart.</li>
               <li>Start with districts in the same state that have a similar grade range, locale, enrollment, and poverty rate.</li>
-              <li>Calculate one comparison score from the four factors above. Each factor contributes 25%.</li>
-              <li>Select up to 15 same-state comparison districts. At least 10 are required for the main comparison.</li>
+              <li>Select up to 15 same-state districts; at least 10 are required for the main comparison.</li>
               <li>If there are too few in-state districts, show a separate nationwide comparison group.</li>
               <li>Report whenever the search rules had to be widened.</li>
             </ol>

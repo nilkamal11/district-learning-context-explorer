@@ -12,7 +12,6 @@ from typing import Any
 
 import duckdb
 import numpy as np
-from plotly.offline.offline import get_plotlyjs
 
 from district_context.config import PROJECT_ROOT, project_config, source_config
 
@@ -68,7 +67,7 @@ WORKBENCH_GRADES = tuple(range(3, 9))
 VERSIONED_SITE_ASSETS = (
     "assets/styles.css",
     "data/dashboard-data.js",
-    "assets/plotly-3.1.0.min.js",
+    "assets/data-loader.js",
     "assets/dashboard.js",
     "assets/workbench.js",
     "assets/trends.js",
@@ -118,6 +117,28 @@ def _safe_workbench_assignment(grade: int, payload: dict[str, Any]) -> str:
     )
 
 
+def _safe_state_assignment(
+    grade: int,
+    state: str,
+    payload: dict[str, Any],
+) -> str:
+    serialized = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    serialized = (
+        serialized.replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("&", "\\u0026")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+    state_key = json.dumps(state)
+    return (
+        "window.SEDA_ACHIEVEMENT_STATES=window.SEDA_ACHIEVEMENT_STATES||{};"
+        f"window.SEDA_ACHIEVEMENT_STATES[{grade}]="
+        f"window.SEDA_ACHIEVEMENT_STATES[{grade}]||{{}};"
+        f"window.SEDA_ACHIEVEMENT_STATES[{grade}][{state_key}]={serialized};\n"
+    )
+
+
 def _achievement_rows_for_grade(
     connection: duckdb.DuckDBPyConnection,
     grade: int,
@@ -141,6 +162,40 @@ def _achievement_rows_for_grade(
     ).fetchall()
 
 
+def _achievement_rows_by_state(
+    connection: duckdb.DuckDBPyConnection,
+    grade: int,
+) -> dict[str, list[tuple[Any, ...]]]:
+    rows = connection.execute(
+        """
+        SELECT
+            state_abbreviation,
+            district_id,
+            subject,
+            year,
+            achievement_cs,
+            standard_error_within_state,
+            standard_error_cross_state,
+            tested_count,
+            tested_count_estimated_flag
+        FROM mart_achievement
+        WHERE grade = ?
+        ORDER BY state_abbreviation, district_id, subject, year
+        """,
+        [grade],
+    ).fetchall()
+    grouped: dict[str, list[tuple[Any, ...]]] = {}
+    for row in rows:
+        grouped.setdefault(str(row[0]), []).append(row[1:])
+    states = [
+        str(row[0])
+        for row in connection.execute(
+            "SELECT DISTINCT state_abbreviation FROM dim_district ORDER BY state_abbreviation"
+        ).fetchall()
+    ]
+    return {state: grouped.get(state, []) for state in states}
+
+
 def _build_workbench_grade_payload(
     connection: duckdb.DuckDBPyConnection,
     grade: int,
@@ -157,6 +212,28 @@ def _build_workbench_grade_payload(
         "achievement_fields": ACHIEVEMENT_FIELDS,
         "row_count": len(rows),
         "achievement": rows,
+    }
+
+
+def _build_state_payload(
+    *,
+    grade: int,
+    state: str,
+    rows: list[tuple[Any, ...]],
+    scope: dict[str, Any],
+) -> dict[str, Any]:
+    compact_rows = _compact_rows(rows)
+    return {
+        "schema_version": 1,
+        "release": scope["release"],
+        "geography": scope["geography"],
+        "subgroup": scope["subgroup"],
+        "scale": scope["scale"],
+        "grade": grade,
+        "state": state,
+        "achievement_fields": ACHIEVEMENT_FIELDS,
+        "row_count": len(compact_rows),
+        "achievement": compact_rows,
     }
 
 
@@ -269,7 +346,7 @@ def _build_payload(
             grade_high,
             grade_span_bucket,
             dominant_locale,
-            enrollment_grades_3_8,
+            total_enrollment_grades_3_8,
             family_poverty_rate,
             socioeconomic_status_composite,
             share_native_american,
@@ -289,8 +366,6 @@ def _build_payload(
         """,
         [context_year],
     ).fetchall()
-
-    achievement_rows = _achievement_rows_for_grade(connection, grade)
 
     workbench_grade_rows = dict(
         connection.execute(
@@ -328,8 +403,8 @@ def _build_payload(
     robust_ranges = connection.execute(
         """
         SELECT
-            quantile_cont(ln(1 + enrollment_grades_3_8), 0.95)
-                - quantile_cont(ln(1 + enrollment_grades_3_8), 0.05),
+            quantile_cont(ln(1 + total_enrollment_grades_3_8), 0.95)
+                - quantile_cont(ln(1 + total_enrollment_grades_3_8), 0.05),
             quantile_cont(family_poverty_rate, 0.95)
                 - quantile_cont(family_poverty_rate, 0.05),
             quantile_cont(socioeconomic_status_composite, 0.95)
@@ -439,7 +514,6 @@ def _build_payload(
         "achievement_fields": ACHIEVEMENT_FIELDS,
         "catalog": _compact_rows(catalog_rows),
         "context": _compact_rows(context_rows),
-        "achievement": _compact_rows(achievement_rows),
         "model": {
             "analysis": cfg["analysis"],
             "peer_model": cfg["peer_model"],
@@ -467,7 +541,7 @@ def _build_payload(
             "eligible_match_districts": int(eligible_count),
             "published_catalog_rows": len(catalog_rows),
             "published_context_rows": len(context_rows),
-            "published_achievement_rows": len(achievement_rows),
+            "published_achievement_rows": int(workbench_grade_rows.get(grade, 0)),
             "workbench_grade_rows": {
                 str(row_grade): int(workbench_grade_rows.get(row_grade, 0))
                 for row_grade in WORKBENCH_GRADES
@@ -478,6 +552,9 @@ def _build_payload(
                 f"data/output/district_profile_{default_district_id}_grade_{grade}.html"
             ),
             "public_bundle_bytes": 0,
+            "achievement_state_rows": {},
+            "achievement_state_bundle_bytes": {},
+            "achievement_state_public_data_bytes": 0,
             "first_quoted_name_failure_line": 1_236_002,
             "publication_note": (
                 "The project owner confirmed Stanford permission for this Git portfolio use. "
@@ -497,15 +574,13 @@ def build_dashboard(
 ) -> Path:
     if grade != 4:
         raise ValueError(
-            "The public dashboard embeds grade 4 as its initial bundle; "
-            "grades 3 and 5 through 8 are generated as lazy workbench bundles."
+            "The public dashboard uses grade 4 for its Explore view; "
+            "grades 3 through 8 are generated as separate workbench bundles."
         )
 
     destination = destination or PROJECT_ROOT / "site"
     data_path = destination / "data" / "dashboard-data.js"
-    vendor_path = destination / "assets" / "plotly-3.1.0.min.js"
     data_path.parent.mkdir(parents=True, exist_ok=True)
-    vendor_path.parent.mkdir(parents=True, exist_ok=True)
 
     payload = _build_payload(
         connection,
@@ -515,8 +590,6 @@ def build_dashboard(
 
     workbench_bundle_bytes: dict[str, int] = {}
     for workbench_grade in WORKBENCH_GRADES:
-        if workbench_grade == grade:
-            continue
         workbench_payload = _build_workbench_grade_payload(
             connection,
             workbench_grade,
@@ -530,15 +603,38 @@ def build_dashboard(
         )
         workbench_bundle_bytes[str(workbench_grade)] = workbench_path.stat().st_size
 
+    state_rows = _achievement_rows_by_state(connection, grade)
+    state_bundle_bytes: dict[str, int] = {}
+    for state, rows in state_rows.items():
+        state_payload = _build_state_payload(
+            grade=grade,
+            state=state,
+            rows=rows,
+            scope=payload["workbench"],
+        )
+        state_path = destination / "data" / f"achievement-grade-{grade}-{state}.js"
+        state_path.write_text(
+            _safe_state_assignment(grade, state, state_payload),
+            encoding="utf-8",
+            newline="\n",
+        )
+        state_bundle_bytes[state] = state_path.stat().st_size
+
     payload["technical"]["workbench_bundle_bytes"] = workbench_bundle_bytes
     payload["technical"]["workbench_public_data_bytes"] = sum(
         workbench_bundle_bytes.values()
+    )
+    payload["technical"]["achievement_state_rows"] = {
+        state: len(rows) for state, rows in state_rows.items()
+    }
+    payload["technical"]["achievement_state_bundle_bytes"] = state_bundle_bytes
+    payload["technical"]["achievement_state_public_data_bytes"] = sum(
+        state_bundle_bytes.values()
     )
     for _ in range(5):
         script = _safe_javascript_assignment(payload)
         size = len(script.encode("utf-8"))
         payload["technical"]["public_bundle_bytes"] = size
-        payload["technical"]["workbench_bundle_bytes"][str(grade)] = size
         payload["technical"]["workbench_bundle_bytes"] = {
             str(bundle_grade): payload["technical"]["workbench_bundle_bytes"][
                 str(bundle_grade)
@@ -549,6 +645,5 @@ def build_dashboard(
             payload["technical"]["workbench_bundle_bytes"].values()
         )
     data_path.write_text(_safe_javascript_assignment(payload), encoding="utf-8", newline="\n")
-    vendor_path.write_text(get_plotlyjs(), encoding="utf-8", newline="\n")
     _version_site_assets(destination)
     return destination / "index.html"

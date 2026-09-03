@@ -14,7 +14,7 @@ Valid comparisons are across places and years within the same subject and grade.
 
 ## Browser workbench
 
-The public workbench uses the same long-form district-grade-subject-year estimates as the local profile but limits the browser payload to eight selected fields. Grade 4 travels with the main dashboard bundle; grades 3 and 5–8 are separate scripts loaded only when selected. This keeps each public file below GitHub's per-file limit and avoids making every visitor download all 1.83 million estimate rows.
+The public workbench uses the same long-form district-grade-subject-year estimates as the local profile but limits the browser payload to eight selected fields. The opening file contains only the district catalog and 2024 context. Grade 4 is split into state files for Explore and Simple Trends, and the national workbench loads one complete grade file at a time for grades 3–8. This keeps each public file below GitHub's per-file limit and avoids making every visitor download all 1.83 million estimate rows.
 
 The workbench can compare up to four districts within a fixed grade and subject. It automatically uses the unadjusted standard error when all selected districts are in one state and the adjusted standard error when the selection crosses state lines. The reference distribution is descriptive and deliberately omits ordinal ranks. Each reporting district contributes one observation for the selected grade, subject, and year; the distribution is not weighted by district enrollment or test count. The coverage matrix represents an absent grade-subject-year row as missing, never zero. Downloaded CSV files contain only the current district selection and inherit the public bundle's six-decimal rounding.
 

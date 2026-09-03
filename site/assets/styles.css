@@ -532,15 +532,14 @@ summary { cursor: pointer; color: var(--blue); font-size: 0.83rem; font-weight: 
 
 .trend-explain-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 18px;
   margin-top: 52px;
 }
 
 .trend-explain-grid .panel-card { border-top: 4px solid var(--green); }
-.trend-explain-grid .panel-card:last-child { border-top-color: var(--orange); }
 .trend-explain-grid h2 { margin: 0; font-size: 1.35rem; }
-.trend-explain-grid p:last-child { margin: 12px 0 0; color: var(--muted); }
+.trend-explain-grid .panel-card p { margin: 12px 0 0; color: var(--muted); }
 
 .trend-source-note {
   margin: 28px 0 0;
@@ -1173,8 +1172,7 @@ code { border-radius: 5px; background: #edf1f1; padding: 2px 5px; font-size: 0.8
   color: white;
 }
 
-.domain-grid article span { position: absolute; top: 18px; right: 18px; color: #88b8c5; font-size: 0.77rem; font-weight: 800; }
-.domain-grid article p { margin: 28px 0 0; color: #bed7de; font-size: 0.82rem; }
+.domain-grid article p { margin: 16px 0 0; color: #bed7de; font-size: 0.82rem; }
 
 .method-card { margin-top: 14px; padding: 24px 28px; box-shadow: none; }
 .weighting-note { margin: 0 0 18px; border-left: 3px solid var(--orange); padding-left: 15px; color: var(--navy); }

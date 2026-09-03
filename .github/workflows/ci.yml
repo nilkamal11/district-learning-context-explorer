@@ -16,5 +16,9 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: ruff check .
       - run: pytest
+      - run: node --check site/assets/data-loader.js
+      - run: node --check site/assets/dashboard.js
+      - run: node --check site/assets/trends.js
+      - run: node --check site/assets/workbench.js
       - run: python scripts/check_no_restricted_data.py
       - run: python scripts/check_public_dashboard.py

@@ -48,6 +48,14 @@ jobs:
       - if: github.event_name == 'workflow_dispatch'
         run: pytest
       - if: github.event_name == 'workflow_dispatch'
+        run: node --check site/assets/data-loader.js
+      - if: github.event_name == 'workflow_dispatch'
+        run: node --check site/assets/dashboard.js
+      - if: github.event_name == 'workflow_dispatch'
+        run: node --check site/assets/trends.js
+      - if: github.event_name == 'workflow_dispatch'
+        run: node --check site/assets/workbench.js
+      - if: github.event_name == 'workflow_dispatch'
         run: python scripts/check_no_restricted_data.py
       - if: github.event_name == 'workflow_dispatch'
         run: python scripts/check_public_dashboard.py
