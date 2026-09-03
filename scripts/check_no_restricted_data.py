@@ -13,6 +13,7 @@ ALLOWED_DATA_FILES = {
 APPROVED_SITE_FILES = {
     "site/.nojekyll",
     "site/index.html",
+    "site/illinois.html",
     "site/assets/data-loader.js",
     "site/assets/dashboard.js",
     "site/assets/plotly-cartesian-3.7.0.min.js",

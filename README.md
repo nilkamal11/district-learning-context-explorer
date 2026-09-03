@@ -1,5 +1,39 @@
 # District Learning Context Explorer
 
+## Illinois Grade 4 rebuild in progress
+
+The next version is being rebuilt around Illinois Report Card school-level Grade 4 results rather than SEDA district estimates. The first implemented milestone now:
+
+- pins and verifies the 2022–2025 Illinois public workbooks;
+- reads only the required cells from the unusually wide XLSX sheets;
+- normalizes punctuation differences in RCDTS while preserving the source value;
+- derives 2022–2024 Grade 4 proficiency from IAR Levels 4 and 5;
+- uses the directly published 2025 Grade 4 proficiency, participation, and mean SGP fields;
+- preserves suppression and distinguishes it from metrics that were not published at the Grade 4 grain; and
+- produces a tested school-year-subject extract for ELA and math.
+
+The schema audit found that the 2022–2024 public files do not provide Grade 4-only SGP at the same grain as the 2025 workbook. The separate cohort-versus-baseline files report school results across the tested grade span, so the pipeline does not relabel them as Grade 4 growth. See [the initial research specification](docs/illinois_grade4_research_spec.md) and [data dictionary](docs/illinois_grade4_data_dictionary.md).
+
+```powershell
+python scripts/download_illinois_sources.py
+python scripts/inspect_illinois_report_card.py data/raw/illinois_report_card/*-report-card.xlsx
+python scripts/build_illinois_grade4.py
+python scripts/build_illinois_database.py
+python scripts/build_illinois_profile.py
+```
+
+The Illinois pipeline writes a separate `illinois_grade4.duckdb` database with staging,
+school dimension, school-year, coverage, and RCDTS identity-audit tables. It also creates a
+standalone North Palos-area dashboard in `data/output/` with district, school, grade,
+subject, and year filters plus a filtered CSV download. It includes the complete current
+school rosters for North Palos 117, Indian Springs 109, Palos 118, and Worth 127. Schools
+that do not serve Grade 4 stay visible with an explicit not-applicable state. The Grade
+selector is populated from the loaded data; the current build intentionally contains Grade
+4 only. The existing SEDA dashboard remains separate until this replacement is ready to
+publish.
+
+**[Open the Illinois Grade 4 dashboard](https://nilkamal11.github.io/district-learning-context-explorer/illinois.html)** to compare North Palos 117 with nearby elementary districts and move between their current schools.
+
 I built this project around a practical education question:
 
 > How do a district's math and reading estimates compare with districts that are similar on selected public context measures, and how has that pattern changed over time?

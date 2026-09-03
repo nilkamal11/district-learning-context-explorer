@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>North Palos Area Grade 4 Dashboard</title>
+  <style>
+    :root { --ink:#172033; --muted:#5d6879; --line:#dce4ee; --blue:#1d4ed8; --amber:#d97706; --wash:#f5f8fc; --purple:#6d28d9; --green:#0f766e; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--wash); color:var(--ink); font-family:Inter,Arial,sans-serif; line-height:1.45; }
+    header { background:linear-gradient(125deg,#102a43,#184e77 58%,#1d4ed8); color:#fff; padding:38px 24px 34px; }
+    header .inner, main { max-width:1240px; margin:0 auto; }
+    .eyebrow { font-size:.74rem; font-weight:800; letter-spacing:.13em; text-transform:uppercase; opacity:.78; }
+    h1 { margin:7px 0 8px; font-size:clamp(2rem,4vw,3.5rem); line-height:1.02; letter-spacing:-.04em; }
+    header p { max-width:800px; margin:0; color:#dbeafe; }
+    main { padding:24px 20px 64px; }
+    .controls { position:sticky; top:0; z-index:10; display:grid; grid-template-columns:1.25fr 1.5fr repeat(4,1fr) auto; gap:12px; align-items:end; background:rgba(255,255,255,.97); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(34,54,78,.11); backdrop-filter:blur(8px); }
+    label { display:block; color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+    select,button { width:100%; min-height:42px; margin-top:5px; border:1px solid #bdc9d8; border-radius:9px; background:#fff; color:var(--ink); padding:8px 10px; font:inherit; }
+    select:focus,button:focus { outline:3px solid #bfdbfe; outline-offset:1px; }
+    button { width:auto; cursor:pointer; font-weight:750; }
+    button.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+    .actions { display:flex; gap:8px; }
+    .scope-note { display:flex; justify-content:space-between; gap:12px; margin:12px 3px 20px; color:var(--muted); font-size:.86rem; }
+    .scope-note strong { color:var(--ink); }
+    .measurement-guide { margin-bottom:18px; padding:20px; background:#fff; border:1px solid var(--line); border-radius:15px; box-shadow:0 7px 22px rgba(34,54,78,.05); }
+    .measurement-guide h2 { margin:0; font-size:1.2rem; }
+    .measurement-intro { margin:4px 0 15px; color:var(--muted); font-size:.9rem; }
+    .subject-guide-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .subject-guide { border:1px solid var(--line); border-radius:12px; padding:15px 16px; background:#f8fafc; }
+    .subject-guide.ela { border-top:4px solid var(--blue); }
+    .subject-guide.math { border-top:4px solid var(--green); }
+    .subject-guide h3 { margin:0 0 5px; font-size:1rem; }
+    .subject-guide p { margin:0; color:var(--muted); font-size:.86rem; }
+    .measurement-definitions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:14px; }
+    .definition { padding:12px 14px; border-radius:10px; background:#eef5ff; font-size:.84rem; }
+    .definition.growth { background:#eefbf8; }
+    .source-links { display:flex; flex-wrap:wrap; gap:8px 16px; margin:14px 0 0; font-size:.82rem; }
+    .source-links a { color:var(--blue); font-weight:750; text-underline-offset:3px; }
+    .kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+    .kpi { background:#fff; border:1px solid var(--line); border-top:4px solid var(--blue); border-radius:13px; padding:16px; box-shadow:0 6px 18px rgba(34,54,78,.05); }
+    .kpi.oak { border-top-color:var(--amber); }
+    .kpi .school { color:var(--muted); font-size:.75rem; font-weight:750; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .kpi .subject { font-size:.72rem; font-weight:850; letter-spacing:.08em; margin-top:4px; }
+    .kpi .numbers { display:flex; gap:22px; margin-top:10px; }
+    .kpi .value { font-size:1.55rem; font-weight:850; line-height:1.1; }
+    .kpi .label { color:var(--muted); font-size:.7rem; }
+    .dashboard-grid { display:grid; grid-template-columns:1.35fr .65fr; gap:18px; margin-top:18px; }
+    .panel { min-width:0; background:#fff; border:1px solid var(--line); border-radius:15px; padding:13px 16px 8px; box-shadow:0 7px 22px rgba(34,54,78,.05); }
+    .panel.full { grid-column:1/-1; }
+    .panel h2 { margin:5px 7px 0; font-size:1.08rem; }
+    .panel-copy { margin:3px 7px 0; color:var(--muted); font-size:.8rem; }
+    .chart { min-height:390px; }
+    .notice { grid-column:1/-1; border-left:5px solid var(--purple); background:#f5f3ff; padding:15px 18px; border-radius:0 12px 12px 0; font-size:.9rem; }
+    .notice strong { color:#5b21b6; }
+    .table-heading { display:flex; align-items:end; justify-content:space-between; gap:12px; margin:28px 2px 9px; }
+    .table-heading h2 { margin:0; font-size:1.4rem; }
+    .table-wrap { max-height:430px; overflow:auto; background:#fff; border:1px solid var(--line); border-radius:14px; }
+    table { border-collapse:collapse; width:100%; min-width:850px; font-size:.84rem; }
+    th { position:sticky; top:0; z-index:1; background:#eaf1f8; text-align:left; font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; }
+    th,td { padding:9px 11px; border-bottom:1px solid var(--line); }
+    tbody tr:hover { background:#f8fbff; }
+    .status-reported { color:#166534; font-weight:700; }
+    .status-missing { color:#92400e; }
+    footer { color:var(--muted); font-size:.82rem; margin-top:20px; }
+    @media (max-width:980px) { .controls { position:relative; grid-template-columns:repeat(3,1fr); } .kpis { grid-template-columns:repeat(2,1fr); } .dashboard-grid { grid-template-columns:1fr; } .panel.full { grid-column:auto; } }
+    @media (max-width:620px) { header { padding-top:30px; } main { padding-left:12px; padding-right:12px; } .controls { grid-template-columns:1fr 1fr; } .controls .school-filter,.actions { grid-column:1/-1; } .kpis,.subject-guide-grid,.measurement-definitions { grid-template-columns:1fr; } .scope-note { display:block; } .chart { min-height:350px; } }
+  </style>
+  {% if plotly_js %}<script>{{ plotly_js | safe }}</script>{% else %}<script src="assets/plotly-cartesian-3.7.0.min.js"></script>{% endif %}
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <div class="eyebrow">Illinois Report Card · Interactive school dashboard</div>
+      <h1>North Palos area learning context</h1>
+      <p>Explore published Grade 4 proficiency, growth, mobility, and chronic absenteeism for North Palos and three nearby elementary districts.</p>
+    </div>
+  </header>
+  <main>
+    <section class="controls" aria-label="Dashboard filters">
+      <label>District<select id="district-filter"></select></label>
+      <label class="school-filter">School<select id="school-filter"></select></label>
+      <label>Grade<select id="grade-filter"></select></label>
+      <label>Subject<select id="subject-filter"><option value="all">All subjects</option><option value="ela">ELA</option><option value="math">Mathematics</option></select></label>
+      <label>From<select id="year-start"></select></label>
+      <label>Through<select id="year-end"></select></label>
+      <div class="actions"><button id="reset-button" type="button">Reset</button><button id="download-button" class="primary" type="button">Download</button></div>
+    </section>
+    <div class="scope-note"><span id="selection-summary" aria-live="polite"></span><span><strong>Roster:</strong> every current school appears, including schools that do not serve Grade 4.</span></div>
+
+    <section id="measurement-guide" class="measurement-guide" aria-labelledby="measurement-heading">
+      <h2 id="measurement-heading">What do ELA and mathematics measure?</h2>
+      <p class="measurement-intro">Both results come from the Illinois Assessment of Readiness (IAR), the state assessment of grade-level Illinois Learning Standards in grades 3–8.</p>
+      <div class="subject-guide-grid">
+        <article class="subject-guide ela"><h3>ELA · English language arts/literacy</h3><p>Measures how students read and understand grade-level texts, use evidence, and communicate through writing. The dashboard shows the school percentage classified as proficient or above proficient.</p></article>
+        <article class="subject-guide math"><h3>Math · Mathematics</h3><p>Measures grade-level mathematical knowledge, reasoning, and application. Students solve problems, explain mathematical thinking, and apply concepts in multi-step and real-world situations.</p></article>
+      </div>
+      <div class="measurement-definitions">
+        <div class="definition"><strong>Proficiency rate</strong><br>The percentage of tested students whose scale scores meet Illinois's proficiency benchmark. This dashboard uses Levels 4+5 for 2022–2024 and Levels 3+4 for 2025. Illinois changed the cut scores, so the break from 2024 must be interpreted cautiously.</div>
+        <div class="definition growth"><strong>Growth percentile</strong><br>Compares a student's scale-score progress with Illinois academic peers who had similar prior scores. Values run from 1 to 99; 50 is expected growth. The dashboard reports the published school mean, not an individual score or percentage.</div>
+      </div>
+      <p class="source-links"><a href="https://www.isbe.net/iar" target="_blank" rel="noopener">Illinois IAR overview ↗</a><a href="https://www.isbe.net/Documents/IAR-Tech-Report-2024-2025.pdf" target="_blank" rel="noopener">2025 performance levels ↗</a><a href="https://www.isbe.net/Documents/Student-Growth-Percentile-2025.pdf" target="_blank" rel="noopener">How Illinois measures growth ↗</a><a href="https://www.isbe.net/ilreportcarddata" target="_blank" rel="noopener">Report Card data library ↗</a></p>
+    </section>
+
+    <section id="kpi-cards" class="kpis" aria-label="Latest selected results"></section>
+
+    <section class="dashboard-grid">
+      <article class="notice"><strong>2025 starts a new proficiency measurement chapter.</strong> Illinois changed IAR performance levels. The 2024-to-2025 step is displayed but should not be read as a like-for-like change. Growth is a separate published metric.</article>
+      <article class="panel full"><h2>Proficiency trend</h2><p class="panel-copy">Solid lines are ELA; dashed lines are mathematics. Missing and suppressed values remain blank.</p><div id="proficiency-chart" class="chart"></div></article>
+      <article class="panel"><h2>Growth</h2><p class="panel-copy">Mean student growth percentile; 50 represents expected growth.</p><div id="growth-chart" class="chart"></div></article>
+      <article class="panel"><h2>Learning context</h2><p class="panel-copy">Solid: mobility. Dotted: schoolwide chronic absenteeism.</p><div id="context-chart" class="chart"></div></article>
+    </section>
+
+    <div class="table-heading"><h2>Filtered records</h2><span id="row-count"></span></div>
+    <div class="table-wrap"><table><thead><tr><th>Year</th><th>School</th><th>RCDTS</th><th>Subject</th><th>Proficiency</th><th>Participation</th><th>Growth</th><th>Mobility</th><th>Chronic absence</th></tr></thead><tbody id="record-table"></tbody></table></div>
+    <footer>Built {{ built_at }} from Illinois Report Card public files. Proficiency is Levels 4+5 for 2022–2024 and the published rate under the new four-level system for 2025. “Not published” is distinct from suppression.</footer>
+  </main>
+  <script>
+    const DATA = {{ dashboard_records | tojson }};
+    const CATALOG = {{ school_catalog | tojson }};
+    const DEFAULT_DISTRICT = {{ default_district | tojson }};
+    const PALETTE = ["#1d4ed8","#d97706","#0f766e","#7c3aed","#be123c","#0369a1","#4d7c0f"];
+    const SCHOOL_ALL = "__all__";
+    const els = {
+      district: document.getElementById("district-filter"), school: document.getElementById("school-filter"), grade: document.getElementById("grade-filter"),
+      subject: document.getElementById("subject-filter"), start: document.getElementById("year-start"),
+      end: document.getElementById("year-end"), cards: document.getElementById("kpi-cards"),
+      table: document.getElementById("record-table"), count: document.getElementById("row-count"),
+      summary: document.getElementById("selection-summary")
+    };
+    const unique = key => [...new Set(DATA.map(row => row[key]))].sort((a,b) => a > b ? 1 : -1);
+    const districts = [...new Set(CATALOG.map(row => row.district_name))].sort();
+    const grades = unique("grade"), years = unique("report_card_year");
+    const schoolNames = [...new Set(CATALOG.map(row => row.school_name))].sort();
+    const COLORS = Object.fromEntries(schoolNames.map((school,index) => [school,PALETTE[index%PALETTE.length]]));
+    const addOptions = (element, values, label) => values.forEach(value => element.add(new Option(label(value), value)));
+    addOptions(els.district, districts, String); els.district.value = DEFAULT_DISTRICT;
+    addOptions(els.grade, grades, value => `Grade ${value}`);
+    addOptions(els.start, years, String); addOptions(els.end, years, String);
+    els.end.value = Math.max(...years); els.start.value = Math.min(...years);
+
+    const pct = value => value == null ? "—" : `${Number(value).toFixed(1)}%`;
+    const number = value => value == null ? "—" : Number(value).toFixed(1);
+    const shortSchool = value => value.replace(" Elem School", "");
+    const availableSchools = () => CATALOG.filter(row => row.district_name === els.district.value);
+    function populateSchools() {
+      els.school.innerHTML=""; els.school.add(new Option("All schools",SCHOOL_ALL));
+      availableSchools().forEach(row => els.school.add(new Option(`${shortSchool(row.school_name)} · ${row.grades_served}`,row.school_name)));
+    }
+    populateSchools();
+    const selectedRows = () => {
+      const start = Number(els.start.value), end = Number(els.end.value);
+      return DATA.filter(row => row.district_name === els.district.value
+        && (els.school.value === SCHOOL_ALL || row.school_name === els.school.value)
+        && Number(row.grade) === Number(els.grade.value)
+        && (els.subject.value === "all" || row.subject === els.subject.value)
+        && row.report_card_year >= start && row.report_card_year <= end);
+    };
+    const plotLayout = (yTitle, range) => ({
+      margin:{l:58,r:18,t:24,b:58}, paper_bgcolor:"rgba(0,0,0,0)", plot_bgcolor:"#fff",
+      font:{family:"Inter,Arial,sans-serif",color:"#172033"}, hoverlabel:{font:{size:13}},
+      xaxis:{title:"Illinois Report Card year",dtick:1,showgrid:false,linecolor:"#cbd5e1"},
+      yaxis:{title:yTitle,range:range,gridcolor:"#e7edf4",zeroline:false},
+      legend:{orientation:"h",y:-.22,x:0}, autosize:true
+    });
+    const config = {displayModeBar:false,responsive:true};
+
+    function renderCards(rows) {
+      const latest = rows.length ? Math.max(...rows.map(row => row.report_card_year)) : null;
+      const current = rows.filter(row => row.report_card_year === latest);
+      els.cards.innerHTML = current.map(row => `<article class="kpi" style="border-top-color:${COLORS[row.school_name]}">
+        <div class="school">${shortSchool(row.school_name)} · ${latest}</div><div class="subject">${row.subject.toUpperCase()}</div>
+        <div class="numbers"><div><div class="value">${pct(row.proficiency_rate)}</div><div class="label">proficient</div></div>
+        <div><div class="value">${number(row.growth_percentile)}</div><div class="label">mean growth percentile</div></div></div></article>`).join("");
+      if (!current.length) {
+        const school=availableSchools().find(row=>row.school_name===els.school.value);
+        els.cards.innerHTML=school ? `<article class="kpi" style="border-top-color:${COLORS[school.school_name]}"><div class="school">${shortSchool(school.school_name)}</div><div class="subject">SERVES ${school.grades_served}</div><p>No Grade 4 assessment record is expected for this school.</p></article>` : "<p>No records match these filters.</p>";
+      }
+    }
+
+    function renderProficiency(rows) {
+      const traces = [];
+      availableSchools().map(row=>row.school_name).filter(school => els.school.value === SCHOOL_ALL || school === els.school.value).forEach(school => {
+        ["ela","math"].filter(subject => els.subject.value === "all" || subject === els.subject.value).forEach(subject => {
+          const values = rows.filter(row => row.school_name === school && row.subject === subject).sort((a,b) => a.report_card_year-b.report_card_year);
+          if (values.length) traces.push({x:values.map(v=>v.report_card_year),y:values.map(v=>v.proficiency_rate),type:"scatter",mode:"lines+markers",connectgaps:false,
+            name:`${shortSchool(school)} · ${subject.toUpperCase()}`,line:{color:COLORS[school],dash:subject==="ela"?"solid":"dash",width:3},marker:{size:8},
+            customdata:values.map(v=>v.proficiency_status),hovertemplate:"%{x}<br>%{y:.1f}% proficient<br>%{customdata}<extra>%{fullData.name}</extra>"});
+        });
+      });
+      const layout = plotLayout("Students proficient (%)",[0,105]);
+      if (!traces.length) layout.annotations=[{x:.5,y:.5,xref:"paper",yref:"paper",text:"This school does not report Grade 4 assessment results.",showarrow:false,font:{color:"#5d6879"}}];
+      if (traces.length && Number(els.end.value) >= 2025 && Number(els.start.value) <= 2024) {
+        layout.shapes=[{type:"line",x0:2024.5,x1:2024.5,y0:0,y1:1,yref:"paper",line:{color:"#6d28d9",dash:"dot",width:2}}];
+        layout.annotations=[{x:2024.54,y:1,xref:"x",yref:"paper",text:"2025 level change",showarrow:false,xanchor:"left",font:{color:"#6d28d9",size:11},bgcolor:"#f5f3ff"}];
+      }
+      Plotly.react("proficiency-chart",traces,layout,config);
+    }
+
+    function renderGrowth(rows) {
+      const latest = rows.length ? Math.max(...rows.map(row => row.report_card_year)) : null;
+      const current = rows.filter(row => row.report_card_year === latest && row.growth_percentile != null);
+      const traces = current.length ? [{type:"bar",x:current.map(row=>`${shortSchool(row.school_name)} · ${row.subject.toUpperCase()}`),y:current.map(row=>row.growth_percentile),
+        marker:{color:current.map(row=>COLORS[row.school_name])},text:current.map(row=>number(row.growth_percentile)),textposition:"outside",hovertemplate:"%{x}<br>Mean SGP %{y:.1f}<extra></extra>"}] : [];
+      const layout=plotLayout("Mean student growth percentile",[0,100]); layout.showlegend=false; layout.xaxis.title="";
+      layout.shapes=[{type:"line",x0:-.5,x1:Math.max(.5,current.length-.5),y0:50,y1:50,line:{color:"#475569",dash:"dash"}}];
+      layout.annotations=current.length ? [{x:0,y:50,xref:"paper",text:"Expected growth = 50",showarrow:false,yshift:12,xanchor:"left"}] : [{x:.5,y:.5,xref:"paper",yref:"paper",text:latest?`Grade 4 growth was not published for ${latest}.`:"This school does not report Grade 4 assessment results.",showarrow:false,font:{color:"#5d6879"}}];
+      Plotly.react("growth-chart",traces,layout,config);
+    }
+
+    function renderContext(rows) {
+      const deduped = [...new Map(rows.map(row => [`${row.school_name}|${row.report_card_year}`,row])).values()];
+      const traces=[];
+      availableSchools().map(row=>row.school_name).filter(school => els.school.value === SCHOOL_ALL || school === els.school.value).forEach(school => {
+        const values=deduped.filter(row=>row.school_name===school).sort((a,b)=>a.report_card_year-b.report_card_year);
+        if (values.length) {
+          traces.push({x:values.map(v=>v.report_card_year),y:values.map(v=>v.mobility_rate),type:"scatter",mode:"lines+markers",name:`${shortSchool(school)} · mobility`,line:{color:COLORS[school],width:3},hovertemplate:"%{x}<br>%{y:.1f}% mobility<extra>%{fullData.name}</extra>"});
+          traces.push({x:values.map(v=>v.report_card_year),y:values.map(v=>v.chronic_absenteeism_rate),type:"scatter",mode:"lines+markers",name:`${shortSchool(school)} · chronic absence`,line:{color:COLORS[school],dash:"dot",width:3},hovertemplate:"%{x}<br>%{y:.1f}% chronically absent<extra>%{fullData.name}</extra>"});
+        }
+      });
+      const layout=plotLayout("Students (%)",null);
+      if (!traces.length) layout.annotations=[{x:.5,y:.5,xref:"paper",yref:"paper",text:"No Grade 4-linked context records for this selection.",showarrow:false,font:{color:"#5d6879"}}];
+      Plotly.react("context-chart",traces,layout,config);
+    }
+
+    function renderTable(rows) {
+      els.table.innerHTML=rows.map(row=>`<tr><td>${row.report_card_year}</td><td>${shortSchool(row.school_name)}</td><td>${row.rcdts_formatted}</td><td>${row.subject.toUpperCase()}</td>
+        <td class="${row.proficiency_status==="reported"?"status-reported":"status-missing"}">${row.proficiency_rate==null?row.proficiency_status.replaceAll("_"," "):pct(row.proficiency_rate)}</td>
+        <td>${row.participation_rate==null?row.participation_status.replaceAll("_"," "):pct(row.participation_rate)}</td>
+        <td>${row.growth_percentile==null?row.growth_status.replaceAll("_"," "):number(row.growth_percentile)}</td><td>${pct(row.mobility_rate)}</td><td>${pct(row.chronic_absenteeism_rate)}</td></tr>`).join("");
+      els.count.textContent=`${rows.length} record${rows.length===1?"":"s"}`;
+    }
+
+    function render() {
+      if (Number(els.start.value)>Number(els.end.value)) els.end.value=els.start.value;
+      const rows=selectedRows(); renderCards(rows); renderProficiency(rows); renderGrowth(rows); renderContext(rows); renderTable(rows);
+      const rosterCount=availableSchools().length;
+      const grade4Count=new Set(DATA.filter(row=>row.district_name===els.district.value).map(row=>row.rcdts)).size;
+      const school=els.school.value===SCHOOL_ALL?`All ${rosterCount} schools`:shortSchool(els.school.value);
+      const subject=els.subject.value==="all"?"ELA and mathematics":els.subject.options[els.subject.selectedIndex].text;
+      els.summary.innerHTML=`<strong>${els.district.value}</strong> · ${school} · ${subject} · ${els.start.value}–${els.end.value} · ${grade4Count} school${grade4Count===1?"":"s"} report Grade 4`;
+    }
+    els.district.addEventListener("change",()=>{populateSchools();render();});
+    [els.school,els.grade,els.subject,els.start,els.end].forEach(element=>element.addEventListener("change",render));
+    document.getElementById("reset-button").addEventListener("click",()=>{els.district.value=DEFAULT_DISTRICT;populateSchools();els.school.value=SCHOOL_ALL;els.grade.value=grades[0];els.subject.value="all";els.start.value=Math.min(...years);els.end.value=Math.max(...years);render();});
+    document.getElementById("download-button").addEventListener("click",()=>{
+      const rows=selectedRows(), columns=["report_card_year","school_name","rcdts_formatted","grade","subject","proficiency_rate","proficiency_status","participation_rate","participation_status","growth_percentile","growth_status","mobility_rate","chronic_absenteeism_rate"];
+      const quote=value=>`"${String(value??"").replaceAll('"','""')}"`; const csv=[columns.join(","),...rows.map(row=>columns.map(column=>quote(row[column])).join(","))].join("\r\n");
+      const link=document.createElement("a");link.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));link.download="north-palos-grade4-filtered.csv";link.click();URL.revokeObjectURL(link.href);
+    });
+    render();
+  </script>
+</body>
+</html>

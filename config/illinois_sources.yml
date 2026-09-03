@@ -1,0 +1,45 @@
+project:
+  title: Illinois Grade 4 Growth Explorer
+  grade: 4
+  years: [2022, 2023, 2024, 2025]
+  primary_growth_metric: published mean student growth percentile
+  warning: Public files contain aggregate results, not student-level matched records.
+
+report_card:
+  2022:
+    filename: 2022-report-card.xlsx
+    url: https://www.isbe.net/_layouts/Download.aspx?SourceUrl=/Documents/2022-Report-Card-Public-Data-Set.xlsx
+    sha256: 6575e1b5bfbb8a133c763d4b93273cc75749b9bfc8289420b2ef226318e08a1d
+    expected_min_bytes: 20000000
+  2023:
+    filename: 2023-report-card.xlsx
+    url: https://www.isbe.net/_layouts/Download.aspx?SourceUrl=/Documents/23-RC-Pub-Data-Set.xlsx
+    sha256: 951536d6f81cdfdebb75e41775d0d80cde37bdd81fe256a6f31e2e571b7088ba
+    expected_min_bytes: 22000000
+  2024:
+    filename: 2024-report-card.xlsx
+    url: https://www.isbe.net/_layouts/Download.aspx?SourceUrl=/Documents/24-RC-Pub-Data-Set.xlsx
+    sha256: bab4981cd42a5355cfa8a62515b8364b981ff5e2397f4521deb0061034befa29
+    expected_min_bytes: 50000000
+  2025:
+    filename: 2025-report-card.xlsx
+    url: https://www.isbe.net/_layouts/Download.aspx?SourceUrl=/Documents/2025-Report-Card-Public-Data-Set.xlsx
+    sha256: 459ac146b52bafe7ce79fd76a95a65daa68d0472cce5205fa777cde19fb58cdf
+    expected_min_bytes: 38000000
+
+growth_reference:
+  2022:
+    filename: 2022-growth-cohort-baseline.xlsx
+    url: https://www.isbe.net/_layouts/Download.aspx?SourceUrl=/Documents/IL-Student-Growth-2019-2022-CohortvBaseline.xlsx
+    sha256: 2e66f4ebc698eb05fa274ed9f7933810c43bf516eb5151ce41b73619fbcde767
+    expected_min_bytes: 2000000
+  2023:
+    filename: 2023-growth-cohort-baseline.xlsx
+    url: https://www.isbe.net/_layouts/Download.aspx?SourceUrl=/Documents/IL-Student-Growth-2023-CohortvsBaseline.xlsx
+    sha256: 168f6984730e29ab158067943c6325890a03a1dc8cdf92bb7ead0a111369daf3
+    expected_min_bytes: 1400000
+  2024:
+    filename: 2024-growth-cohort-baseline.xlsx
+    url: https://www.isbe.net/_layouts/Download.aspx?SourceUrl=/Documents/IL-Student-Growth-2024-CohortvsBaseline.xlsx
+    sha256: 5660c67f134471b2896a8123362aa76063937f1554834c2bdb255f359317a2e9
+    expected_min_bytes: 1400000
